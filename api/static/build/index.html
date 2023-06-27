@@ -1,0 +1,429 @@
+
+<!DOCTYPE html>
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Base de données e-NDP &#8212; Documentation Base de données e-NDP 2.0</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="base-de-donnees-e-ndp">
+<h1>Base de données e-NDP<a class="headerlink" href="#base-de-donnees-e-ndp" title="Lien permanent vers cette rubrique">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<nav class="contents local" id="table-des-matieres">
+<p class="topic-title">Table des matières</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#schema-general" id="id1">Schéma général</a></p></li>
+<li><p><a class="reference internal" href="#remarques-generales" id="id2">Remarques générales</a></p></li>
+<li><p><a class="reference internal" href="#tables-principales" id="id3">Tables principales</a></p></li>
+<li><p><a class="reference internal" href="#tables-de-relations" id="id4">Tables de relations</a></p></li>
+<li><p><a class="reference internal" href="#listes-enumerees" id="id5">Listes énumérées</a></p></li>
+<li><p><a class="reference internal" href="#licence" id="id6">Licence</a></p></li>
+</ul>
+</nav>
+<section id="schema-general">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Schéma général</a><a class="headerlink" href="#schema-general" title="Lien permanent vers cette rubrique">¶</a></h2>
+<a class="reference internal image-reference" href="_images/graph_db_endp.png"><img alt="_images/graph_db_endp.png" class="align-center" src="_images/graph_db_endp.png" style="width: 100%;" /></a>
+</section>
+<section id="remarques-generales">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Remarques générales</a><a class="headerlink" href="#remarques-generales" title="Lien permanent vers cette rubrique">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Le <code class="docutils literal notranslate"><span class="pre">_</span></code> devant les attributs signifie qu’ils sont générés de manière automatique lors d’une injection en base.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>[REQ.] indique que le champ est obligatoire. [OPT.] indique que le champ est optionnel.</p>
+</div>
+</section>
+<section id="tables-principales">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Tables principales</a><a class="headerlink" href="#tables-principales" title="Lien permanent vers cette rubrique">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Person">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Person</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.Person" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractActions</span></code></p>
+<p>Personnes (chanoines &amp; Cie) relevées et identifiées dans les registres de Notre-Dame de Paris.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>PRIMARY_KEY</em>) – Clé primaire autoincrémentée. [REQ.]</p></li>
+<li><p><strong>_id_endp</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – Identifiant forgé dans la base (avec préfixe per_). [REQ.]</p></li>
+<li><p><strong>pref_label</strong> (<em>STRING</em><em>(</em><em>125</em><em>)</em>) – Libellé préférentiel normalisé de la personne. [REQ.]</p></li>
+<li><p><strong>forename</strong> (<em>STRING</em><em>(</em><em>45</em><em>)</em>) – Prénom préférentiel (nomen). [REQ.]</p></li>
+<li><p><strong>forename_alt_labels</strong> (<em>STRING</em><em>(</em><em>100</em><em>)</em>) – Formes alternatives du prénom (nomen). [REQ.]</p></li>
+<li><p><strong>surname</strong> (<em>STRING</em><em>(</em><em>45</em><em>)</em>) – Nom de famille préférentiel (cognomen - patronyme). [REQ.]</p></li>
+<li><p><strong>surname_alt_labels</strong> (<em>STRING</em><em>(</em><em>100</em><em>)</em>) – Formes alternatives du nom de famille (cognomen - patronyme). [REQ.]</p></li>
+<li><p><strong>first_mention_date</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – Année de la première mention de la personne dans les registres (sous la forme YYYY ou ~YYYY si approximatif). [REQ.]</p></li>
+<li><p><strong>last_mention_date</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – Année de la dernière mention de la personne dans les registres (sous la forme YYYY ou ~YYYY si approximatif). [REQ.]</p></li>
+<li><p><strong>death_date</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – Date de décès (YYYY, ou YYYY-MM ou YYYY-MM-DD) [OPT.]</p></li>
+<li><p><strong>is_canon</strong> (<em>BOOLEAN</em>) – chanoine (1) ou non chanoine (0) [REQ.]</p></li>
+<li><p><strong>comment</strong> (<em>TEXT</em>) – Commentaire libre. [OPT.]</p></li>
+<li><p><strong>bibliography</strong> (<em>TEXT</em>) – Bibliographie. [OPT.]</p></li>
+<li><p><strong>_created_at</strong> (<em>DATE</em>) – Date de création de la fiche. [REQ.]</p></li>
+<li><p><strong>_updated_at</strong> (<em>DATE</em>) – Date de mise à jour de la fiche. [REQ.]</p></li>
+<li><p><strong>_last_editor</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – Dernier éditeur de la fiche. [REQ.]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Event">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.Event" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractActions</span></code></p>
+<p>Liste d’événements pouvant survenir dans le parcours d’une personne:</p>
+<dl class="simple">
+<dt>Les types d’événements sont les suivants :</dt><dd><ul class="simple">
+<li><p>Entrée</p></li>
+<li><p>Sortie</p></li>
+<li><p>Achat d’une maison canoniale</p></li>
+<li><p>Choix de la sépulture</p></li>
+</ul>
+</dd>
+</dl>
+<p>Cf. <a class="reference internal" href="#models.EventTypeLabels" title="models.EventTypeLabels"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventTypeLabels</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>PRIMARY_KEY</em>) – Clé primaire autoincrémentée. [REQ.]</p></li>
+<li><p><strong>_id_endp</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – <p>Identifiant forgé dans la base avec le préfixe correspondant :</p>
+<ul>
+<li><p>Entrée                         : evt_entree_,</p></li>
+<li><p>Sortie                         : evt_sortie_,</p></li>
+<li><p>Achat d’une maison canoniale   : evt_achat_maison_,</p></li>
+<li><p>Choix de la sépulture          : evt_choix_sepulture_ [REQ.]</p></li>
+</ul>
+</p></li>
+<li><p><strong>type</strong> (<em>ENUM</em><em>(</em><a class="reference internal" href="#models.EventTypeLabels" title="models.EventTypeLabels"><em>EventTypeLabels</em></a><em>)</em>) – Type d’événement (Cf. <a class="reference internal" href="#models.EventTypeLabels" title="models.EventTypeLabels"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventTypeLabels</span></code></a>).  [REQ.]</p></li>
+<li><p><strong>person_id</strong> (<em>FOREIGN_KEY</em><em>(</em><a class="reference internal" href="#models.Person" title="models.Person"><em>Person</em></a><em>)</em>) – Identifiant de la personne concerné par l’événement. [REQ.]</p></li>
+<li><p><strong>date</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – date de l’événement (YYYY, YYYY-MM, ou YYYY-MM-DD) [OPT.]</p></li>
+<li><p><strong>image_url</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – URL de l’image du registre. [OPT.]</p></li>
+<li><p><strong>place_term_id</strong> (<em>FOREIGN_KEY</em><em>(</em><a class="reference internal" href="#models.PlacesTerm" title="models.PlacesTerm"><em>PlacesTerm</em></a><em>)</em>) – Identifiant du lieu lié à l’événement. [OPT.]</p></li>
+<li><p><strong>person_thesaurus_term_id</strong> (<em>FOREIGN_KEY</em><em>(</em><a class="reference internal" href="#models.ThesaurusTerm" title="models.ThesaurusTerm"><em>ThesaurusTerm</em></a><em>)</em>) – Identifiant du terme du thesaurus pour une personne (statuts, charges &amp; offices, choeur et dignités) lié à l’évenement. [OPT.]</p></li>
+<li><p><strong>predecessor_id</strong> (<em>FOREIGN_KEY</em><em>(</em><a class="reference internal" href="#models.Person" title="models.Person"><em>Person</em></a><em>)</em>) – Identifiant de la personne précédente (pour les permutacio par exemple)  [OPT.]</p></li>
+<li><p><strong>comment</strong> (<em>TEXT</em>) – Commentaire libre. [OPT.]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.ThesaurusTerm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ThesaurusTerm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.ThesaurusTerm" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractGenericThesaurusTerm</span></code></p>
+<p>Thesaurus pour les personnes.</p>
+<dl class="simple">
+<dt>Les topics sont les suivants :</dt><dd><ul class="simple">
+<li><p>Status</p></li>
+<li><p>Dignités</p></li>
+<li><p>Ordres sacrés</p></li>
+<li><p>Charges et offices</p></li>
+<li><p>Chœur</p></li>
+</ul>
+</dd>
+</dl>
+<p>Cf. <a class="reference internal" href="#models.ThesaurusTopicLabels" title="models.ThesaurusTopicLabels"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThesaurusTopicLabels</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>PRIMARY_KEY</em>) – Clé primaire autoincrémentée. [REQ.]</p></li>
+<li><p><strong>_id_endp</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – <p>Identifiant forgé dans la base avec le préfixe correspondant :</p>
+<ul>
+<li><p>Statuts            : term_sts_,</p></li>
+<li><p>Dignités           : term_dgn_,</p></li>
+<li><p>Ordres sacrés      : term_ors_,</p></li>
+<li><p>Charges et offices : term_ceo_,</p></li>
+<li><p>Choeur             : term_cho_ [REQ.]</p></li>
+</ul>
+</p></li>
+<li><p><strong>topic</strong> (<em>ENUM</em><em>(</em><a class="reference internal" href="#models.ThesaurusTopicLabels" title="models.ThesaurusTopicLabels"><em>ThesaurusTopicLabels</em></a><em>)</em>) – Topic du thesaurus [REQ.]</p></li>
+<li><p><strong>term</strong> (<em>STRING</em><em>(</em><em>125</em><em>)</em>) – prefLabel. [REQ.]</p></li>
+<li><p><strong>term_fr</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – prefLabel en français. [OPT.]</p></li>
+<li><p><strong>term_definition</strong> (<em>TEXT</em>) – Définition. [OPT.]</p></li>
+<li><p><strong>term_position</strong> (<em>STRING</em><em>(</em><em>125</em><em>)</em>) – Numéro d’ordre. [OPT.]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.PlacesTerm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PlacesTerm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.PlacesTerm" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractGenericThesaurusTerm</span></code></p>
+<p>Thesaurus pour les lieux.</p>
+<dl class="simple">
+<dt>Les topics sont les suivants :</dt><dd><ul class="simple">
+<li><p>Cloîtres</p></li>
+<li><p>Prévôtés</p></li>
+<li><p>Domaines</p></li>
+<li><p>Chapelles</p></li>
+</ul>
+</dd>
+</dl>
+<p>Cf. <a class="reference internal" href="#models.ThesaurusPlacesTopicsLabels" title="models.ThesaurusPlacesTopicsLabels"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThesaurusPlacesTopicsLabels</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>PRIMARY_KEY</em>) – Clé primaire autoincrémentée. [REQ.]</p></li>
+<li><p><strong>_id_endp</strong> – <p>Identifiant forgé dans la base avec le préfixe correspondant :</p>
+<ul>
+<li><p>Cloîtres         : place_cloitre_,</p></li>
+<li><p>Prévôtés         : place_prevote_,</p></li>
+<li><p>Domaines         : place_domaine_,</p></li>
+<li><p>Chapelles [REQ.] : place_chapelle_</p></li>
+</ul>
+</p></li>
+<li><p><strong>term</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – prefLabel. [REQ.]</p></li>
+<li><p><strong>term_fr</strong> (<em>STRING</em><em>(</em><em>25</em><em>)</em>) – prefLabel en français. [OPT.]</p></li>
+<li><p><strong>term_definition</strong> (<em>TEXT</em>) – Définition. [OPT.]</p></li>
+<li><p><strong>term_position</strong> (<em>STRING</em><em>(</em><em>125</em><em>)</em>) – Numéro d’ordre [OPT.].</p></li>
+<li><p><strong>topic</strong> (<em>ENUM</em><em>(</em><a class="reference internal" href="#models.ThesaurusPlacesTopicsLabels" title="models.ThesaurusPlacesTopicsLabels"><em>ThesaurusPlacesTopicsLabels</em></a><em>)</em>) – Topic du thesaurus de lieux [REQ.]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="tables-de-relations">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Tables de relations</a><a class="headerlink" href="#tables-de-relations" title="Lien permanent vers cette rubrique">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="models.PersonHasKbLinks">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PersonHasKbLinks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.PersonHasKbLinks" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Une personne peut avoir 1 ou plusieurs liens vers des bases de connaissances</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>PRIMARY_KEY</em>) – Clé primaire autoincrémentée. [REQ.]</p></li>
+<li><p><strong>person_id</strong> (<em>FOREIGN_KEY</em><em>(</em><a class="reference internal" href="#models.Person" title="models.Person"><em>Person</em></a><em>)</em>) – Identifiant de la personne à lier. [REQ.]</p></li>
+<li><p><strong>type_kb</strong> (<em>ENUM</em><em>(</em><a class="reference internal" href="#models.KnowledgeBaseLabels" title="models.KnowledgeBaseLabels"><em>KnowledgeBaseLabels</em></a><em>)</em>) – Type de relation familiale. [REQ.]</p></li>
+<li><p><strong>url</strong> (<em>STRING</em><em>(</em><em>200</em><em>)</em>) – Url vers la base de connaissance. [REQ.]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.PersonHasFamilyRelationshipType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PersonHasFamilyRelationshipType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.PersonHasFamilyRelationshipType" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Une personne peut avoir 1 ou plusieurs relations familiales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>PRIMARY_KEY</em>) – Clé primaire autoincrémentée. [REQ.]</p></li>
+<li><p><strong>person_id</strong> (<em>FOREIGN_KEY</em><em>(</em><a class="reference internal" href="#models.Person" title="models.Person"><em>Person</em></a><em>)</em>) – Identifiant de la personne. [REQ.]</p></li>
+<li><p><strong>relative_id</strong> (<em>FOREIGN_KEY</em><em>(</em><a class="reference internal" href="#models.Person" title="models.Person"><em>Person</em></a><em>)</em>) – Identifiant de la personne avec laquelle on associe une relation familiale. [REQ.]</p></li>
+<li><p><strong>relation_type</strong> (<em>ENUM</em><em>(</em><a class="reference internal" href="#models.FamilyRelationshipLabels" title="models.FamilyRelationshipLabels"><em>FamilyRelationshipLabels</em></a><em>)</em>) – Type de relation familiale. [REQ.]</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="listes-enumerees">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Listes énumérées</a><a class="headerlink" href="#listes-enumerees" title="Lien permanent vers cette rubrique">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="models.FamilyRelationshipLabels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FamilyRelationshipLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.FamilyRelationshipLabels" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Liste contrôlée des types de relations familiales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>IS_SON_OF</strong> – fils de</p></li>
+<li><p><strong>IS_DAUGHTER_OF</strong> – fille de</p></li>
+<li><p><strong>IS_SPOUSE</strong> – conjoint(e) de</p></li>
+<li><p><strong>IS_FATHER_OF</strong> – père de</p></li>
+<li><p><strong>IS_MOTHER_OF</strong> – mère de</p></li>
+<li><p><strong>IS_NEPHEW_OF</strong> – neveu de</p></li>
+<li><p><strong>IS_NIECE_OF</strong> – nièce de</p></li>
+<li><p><strong>IS_UNCLE_OF</strong> – oncle de</p></li>
+<li><p><strong>IS_AUNT_OF</strong> – tante de</p></li>
+<li><p><strong>IS_BROTHER_OF</strong> – frère de</p></li>
+<li><p><strong>IS_SISTER_OF</strong> – sœur de</p></li>
+<li><p><strong>IS_FAMILIAR_OF</strong> – familier de</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.KnowledgeBaseLabels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KnowledgeBaseLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.KnowledgeBaseLabels" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Liste contrôlée des bases de connaissances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>WIKIDATA</strong> – Wikidata (<a class="reference external" href="https://www.wikidata.org/">https://www.wikidata.org/</a>)</p></li>
+<li><p><strong>BIBLISSIMA</strong> – Biblissima (<a class="reference external" href="https://portail.biblissima.fr/">https://portail.biblissima.fr/</a>)</p></li>
+<li><p><strong>VIAF</strong> – VIAF (<a class="reference external" href="https://viaf.org/">https://viaf.org/</a>)</p></li>
+<li><p><strong>DATABNF</strong> – DataBnF (<a class="reference external" href="https://data.bnf.fr/">https://data.bnf.fr/</a>)</p></li>
+<li><p><strong>STUDIUM</strong> – Studium Parisiense (<a class="reference external" href="http://studium-parisiense.univ-paris1.fr/">http://studium-parisiense.univ-paris1.fr/</a>)</p></li>
+<li><p><strong>COLLECTA</strong> – Collecta (<a class="reference external" href="http://www.collecta.fr/">http://www.collecta.fr/</a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.EventTypeLabels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EventTypeLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.EventTypeLabels" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Liste contrôlée des types d’événements connus pour une personne.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ENTREE</strong> – Motif d’entrée de charge pour une personne (par exemple, élection, collation, installation) ; spécifications supplémentaires dans un champ commentaire.</p></li>
+<li><p><strong>SORTIE</strong> – Motif de sortie de charge pour une personne (par exemple expulsion, renonciation, permutation, mort) ; spécifications supplémentaires dans un champ commentaire.</p></li>
+<li><p><strong>ACHAT_MAISON</strong> – Achat d’une maison canoniale.</p></li>
+<li><p><strong>CHOIX_SEPULTURE</strong> – Choix de la sépulture.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.ThesaurusTopicLabels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ThesaurusTopicLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.ThesaurusTopicLabels" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Liste contrôlée des topics pour les thesauri qui s’applique aux personnes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>STATUTS</strong> – Statuts</p></li>
+<li><p><strong>DIGNITES</strong> – Dignités</p></li>
+<li><p><strong>ORDRES_SACRES</strong> – Ordres sacrés</p></li>
+<li><p><strong>CHARGES_OFFICES</strong> – Charges et offices</p></li>
+<li><p><strong>CHOEUR</strong> – Choeur</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.ThesaurusPlacesTopicsLabels">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ThesaurusPlacesTopicsLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#models.ThesaurusPlacesTopicsLabels" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Bases : <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Liste contrôlée des topics pour les thesauri qui s’applique aux lieux.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>CLOITRE</strong> – Cloître</p></li>
+<li><p><strong>PREVOTE</strong> – Prévôté</p></li>
+<li><p><strong>DOMAINE</strong> – Domaine</p></li>
+<li><p><strong>CHAPELLE</strong> – Chapelle</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="licence">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Licence</a><a class="headerlink" href="#licence" title="Lien permanent vers cette rubrique">¶</a></h2>
+<p>CC-BY-SA 4.0</p>
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />Le modèle de données e-NDP est mis à disposition selon les termes de la <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Licence Creative Commons Attribution -  Partage dans les Mêmes Conditions 4.0 International</a>.<div class="twocol docutils container">
+<div class="leftside docutils container">
+<a class="reference internal image-reference" href="_images/Logo_enc.png"><img alt="École nationale des chartes" src="_images/Logo_enc.png" style="width: 100px;" /></a>
+</div>
+<div class="rightside docutils container">
+<a class="reference internal image-reference" href="_images/Logo_anr.png"><img alt="Agence nationale de la recherche" src="_images/Logo_anr.png" style="width: 100px;" /></a>
+</div>
+</div>
+<p>Ce travail a bénéficié d’une aide de l’État gérée par l’Agence Nationale de la
+Recherche.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Base de données e-NDP</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, École nationale des chartes.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
