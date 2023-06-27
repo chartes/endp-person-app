@@ -32,3 +32,4 @@ jobs:
           cd ./tests/
           chmod +x ./tests.sh
           ./tests.sh
+        shell: bash
