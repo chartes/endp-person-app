@@ -1,0 +1,129 @@
+# This file contains the metadata of the ressources database.
+# It is used to create the database and to check the "Int64"egrity of the data.
+# The database is created by the script cli.py.
+
+# version_dir: the name of the directory where the last ressources database is stored.
+# Ressources use to populate the database.
+version_dir: "05-06_2023"
+ressources:
+  tables:
+    - name: "persons"
+      path: "persons.csv"
+      separator: ","
+      columns:
+        - name: "id"
+          type: "Int64"
+        - name: "pref_label"
+          type: str
+        - name: "forename"
+          type: str
+        - name: "forename_alt_labels"
+          type: str
+        - name: "surname"
+          type: str
+        - name: "surname_alt_labels"
+          type: str
+        - name: "first_mention_date"
+          type: str
+        - name: "last_mention_date"
+          type: str
+        - name: "death_date"
+          type: str
+        - name: "is_canon"
+          type: bool
+        - name: "comment"
+          type: str
+        - name: "bibliography"
+          type: str
+        - name: "_created_at"
+          type: str
+        - name: "_updated_at"
+          type: str
+        - name: "_last_editor"
+          type: str
+        - name: "_id_endp"
+          type: str
+    - name: "persons_thesaurus_terms"
+      path: "thesauri/persons_thesaurus_terms.csv"
+      separator: ","
+      columns:
+        - name: "topic"
+          type: str
+        - name: "id"
+          type: "Int64"
+        - name: "term"
+          type: str
+        - name: "term_fr"
+          type: str
+        - name: "term_definition"
+          type: str
+        - name: "term_position"
+          type: str
+        - name: "_id_endp"
+          type: str
+    - name: "places_thesaurus_terms"
+      path: "thesauri/places_thesaurus_terms.csv"
+      separator: ","
+      columns:
+        - name: "topic"
+          type: str
+        - name: "id"
+          type: "Int64"
+        - name: "term"
+          type: str
+        - name: "term_fr"
+          type: str
+        - name: "term_definition"
+          type: str
+        - name: "term_position"
+          type: str
+        - name: "_id_endp"
+          type: str
+    - name: "events"
+      path: "events.csv"
+      separator: ","
+      columns:
+         - name: "id"
+           type: "Int64"
+         - name: "type"
+           type: str
+         - name: "person_id"
+           type: "Int64"
+         - name: "date"
+           type: str
+         - name: "image_url"
+           type: str
+         - name: "place_term_id"
+           type: "Int64"
+         - name: "person_thesaurus_term_id"
+           type: "Int64"
+         - name: "predecessor_id"
+           type: "Int64"
+         - name: "comment"
+           type: str
+         - name: "_id_endp"
+           type: str
+    - name: "person_has_family_relationships_type"
+      path: "persons_family_relationships.csv"
+      separator: ","
+      columns:
+        - name: "id"
+          type: "Int64"
+        - name: "person_id"
+          type: "Int64"
+        - name: "relative_id"
+          type: "Int64"
+        - name: "relation_type"
+          type: str
+    - name: "person_has_kb_links"
+      path: "persons_kb_links.csv"
+      separator: ","
+      columns:
+        - name: "id"
+          type: "Int64"
+        - name: "person_id"
+          type: "Int64"
+        - name: "type_kb"
+          type: str
+        - name: "url"
+          type: str

@@ -1,0 +1,228 @@
+id,term,term_fr,term_definition,term_position,_id_endp,topic
+1,Barra; Auditoire,Barre du chapitre; Auditoire,,,place_cloitre_1,Cloître
+2,Biblioteca,Bibliothèque,Bibliothèque des livres du chapitre,,place_cloitre_2,Cloître
+3,Camera compotorum,Chambre des comptes,Chambre des comptes du chapitre dans le bâtiment capitulaire,,place_cloitre_3,Cloître
+4,Capella,Chapelle,,,place_cloitre_4,Cloître
+5,Capicium,Chevet,,,place_cloitre_5,Cloître
+6,Chorus,Chœur,,,place_cloitre_6,Cloître
+7,Claustrum Sancti Dyonisii de Passu,Cloître de Saint-Denis-du-Pas,Petit cloître,,place_cloitre_7,Cloître
+8,Coquina Sancti Augustini,Cuisine de Saint-Augustin,Cuisine qui comprend au 15e siècle un moulin et un four à pain,,place_cloitre_8,Cloître
+9,Cuva,Cuve,Cuve baptismale et mesure à grains dans la nef de la cathédrale,,place_cloitre_9,Cloître
+10,Domus claustralis,Maison claustrale,"Maison dont la propriété est réservée aux chanoines ou, par exception du chapitre, à des laïcs",,place_cloitre_10,Cloître
+11,Domus episcopalis,Hôtel épiscopal,Palais de l'évêque,,place_cloitre_11,Cloître
+12,Fabrica,Fabrique,,,place_cloitre_12,Cloître
+13,Geola,Prison,,,place_cloitre_13,Cloître
+14,Jube,Jubé,,,place_cloitre_14,Cloître
+15,Latrine,Latrines,,,place_cloitre_15,Cloître
+16,Navis,Nef,,,place_cloitre_16,Cloître
+17,Parvisium,Parvis,,,place_cloitre_17,Cloître
+18,Parvum portale ecclesie a parte claustri,Petit portail de l'église,Portail de la Vierge ?,,place_cloitre_18,Cloître
+19,Porta capituli,Porte du chapitre,"Porte d'entrée principale de la salle capitulaire, donnant sur le petit cloître",,place_cloitre_19,Cloître
+20,Porta claustri ad batellos,Porte du cloître 'aux bateaux',,,place_cloitre_20,Cloître
+21,Porta dextre partis,Porte de la partie droite,Portail Sainte-Anne,,place_cloitre_21,Cloître
+22,Porta prope Sanctum Johannem Rotundi,Porte près de Saint-Jean-le-Rond,Porte principale d'entrée au cloître,,place_cloitre_22,Cloître
+23,Porta Sancti Landerici,Porte Saint-Landry,,,place_cloitre_23,Cloître
+24,Porta terralis,Porte du terrail,,,place_cloitre_24,Cloître
+25,Porta vici Marmorsetorum,Porte de la rue des Marmousets,,,place_cloitre_25,Cloître
+26,Portale versus domum episcopi,Portail vers l'hôtel de l'évêque,"Portail sud de l'église cathédrale, ou porte Saint-Etienne",,place_cloitre_26,Cloître
+27,Portus Episcopi,Port l'Evêque,,,place_cloitre_27,Cloître
+28,Portus Nostre Domine,Port Notre-Dame,,,place_cloitre_28,Cloître
+29,Portus Sancti Landerici,Port Saint-Landry,,,place_cloitre_29,Cloître
+30,Pulpitum,Chaire,,,place_cloitre_30,Cloître
+31,Puteus claustri,Puits du cloître,,,place_cloitre_31,Cloître
+32,Revestiarius,Sacristie,,,place_cloitre_32,Cloître
+33,Sanctus Anianus,Saint-Aignan,,,place_cloitre_33,Cloître
+34,Sanctus Christoforus,Saint-Christophe,,,place_cloitre_34,Cloître
+35,Sanctus Dyonisius de Passu,Saint-Denis-du-Pas,,,place_cloitre_35,Cloître
+36,Sanctus Johannis Rotundi,Saint-Jean-le-Rond,,,place_cloitre_36,Cloître
+37,Terrale,Terrail,Promontoire de l'extrêmité orientale de l'île de la Cité,,place_cloitre_37,Cloître
+38,Thesaurum,Trésor,,,place_cloitre_38,Cloître
+39,Turris Guillaume; Magna turris,Tour Guillaume; Grande tour,,,place_cloitre_39,Cloître
+40,Turris Jacqueline,Tour Jacqueline,,,place_cloitre_40,Cloître
+41,Valve majores ecclesie,Grandes portes de l'église,Portail du Jugement,,place_cloitre_41,Cloître
+42,Ymagina Nostre Domine,Statue de Notre-Dame,,,place_cloitre_42,Cloître
+43,Ymagina Sancti Christofori,Statue de saint Christophe,,,place_cloitre_43,Cloître
+44,Prepositus apud Andresiacum,Prévôt à Andrésy,,P_1,place_prevote_1,Prévôté
+45,Prepositus apud Balneolum,Prévôt à Bagneux,,P_2,place_prevote_2,Prévôté
+46,Prepositus apud Castanetum,Prévôt à Châtenay,,P_3,place_prevote_3,Prévôté
+47,Prepositus apud Chivilliacum,Prévôt à Chevilly,,P_4,place_prevote_4,Prévôté
+48,Prepositus apud Corberosam,Prévôt à Corbreuse,,P_5,place_prevote_5,Prévôté
+49,Prepositus apud Cristolium,Prévôt à Créteil,,P_6,place_prevote_6,Prévôté
+50,Prepositus apud Laiacum,Prévôt à L'Haÿ,,P_7,place_prevote_7,Prévôté
+51,Prepositus apud Liricantum,Prévôt à Larchant,,P_8,place_prevote_8,Prévôté
+52,Prepositus apud Mitriacum,Prévôt à Mitry,,P_9,place_prevote_9,Prévôté
+53,Prepositus apud Moriacum,Prévôt à Mory,,P_10,place_prevote_10,Prévôté
+54,Prepositus apud Orliacum,Prévôt à Orly,,P_11,place_prevote_11,Prévôté
+55,Prepositus apud Rosayum,Prévôt à Rozay,Prévôt à Rozay-en-Brie,P_12,place_prevote_12,Prévôté
+56,Prepositus apud Spedonam,Prévôt à Epône,,P_13,place_prevote_13,Prévôté
+57,Prepositus apud Sucyacum,Prévôt à Sucy,Prévôt à Sucy-en-Brie,P_14,place_prevote_14,Prévôté
+58,Prepositus apud Vernotum,Prévôt à Vernou,,P_15,place_prevote_15,Prévôté
+59,Prepositus apud Viriacum,Prévôt à Viry,Prévôt à Viry-en-Vermandois,P_16,place_prevote_16,Prévôté
+60,Prepositus apud Ytevillam,Prévôt à Iteville,,P_17,place_prevote_17,Prévôté
+61,Aelonium,Mons-Ablon,,,place_domaine_1,Domaine
+62,Andresiacum,Andrésy ; Andresi,,,place_domaine_2,Domaine
+63,Andresellum,Andrezel,,,place_domaine_3,Domaine
+64,Aubergenvilla,Aubergenville,,,place_domaine_4,Domaine
+65,Aurenvilla,Avrainville,,,place_domaine_5,Domaine
+66,Balneolis,Bagneux ; Baigneux,,,place_domaine_6,Domaine
+67,Bello Monte,Beaumont-sur-Oise ; Biaumont,,,place_domaine_7,Domaine
+68,Buxiacum,Boissy-Saint-Léger,,,place_domaine_8,Domaine
+69,Bonolium,Bonneuil,,,place_domaine_9,Domaine
+70,Bretigniacum,Brétigny,,,place_domaine_10,Domaine
+71,Campelli,Champeaux,,,place_domaine_11,Domaine
+72,Campiniacum,Champigny,,,place_domaine_12,Domaine
+73,Campiplantum,Champlan ; Champlant,,,place_domaine_13,Domaine
+74,Charentonium,Charenton,,,place_domaine_14,Domaine
+75,Castrum Forte,Châteaufort,,,place_domaine_15,Domaine
+76,Castanetum,Châtenay ; Chastenay,,,place_domaine_16,Domaine
+77,Cativilla,Chaville,,,place_domaine_17,Domaine
+78,Canaberiae / Cheneveriae,Chennevières,,,place_domaine_18,Domaine
+79,Civilliacum,Chevilly ; Chivilly,,,place_domaine_19,Domaine
+80,Caprosia,Chevreuse,,,place_domaine_20,Domaine
+81,Clamartium,Clamart,,,place_domaine_21,Domaine
+82,Combisvilla,Combs-la-Ville ; Cons la ville,,,place_domaine_22,Domaine
+83,Compensum,Compans ; Compens,,,place_domaine_23,Domaine
+84,Confluenti,Conflant-Sainte-Honorine ; Conflans,,,place_domaine_24,Domaine
+85,Corborosa,Corbreuse ; Corbereuse,,,place_domaine_25,Domaine
+86,Cristollium,Créteil ; Creteul,,,place_domaine_26,Domaine
+87,Domnus Medardus,Dampmart ; Dampmart,,,place_domaine_27,Domaine
+88,Diogilum,Deuil,,,place_domaine_28,Domaine
+89,Espierii,Epiais ; Espiers,,,place_domaine_29,Domaine
+90,Spedona,Epône ; Espone,,,place_domaine_30,Domaine
+91,Eve,Eve,,,place_domaine_31,Domaine
+92,Fontanetum,Fontenay,,,place_domaine_32,Domaine
+93,Fouju,Fouju,,,place_domaine_33,Domaine
+94,Fraxinis,Fresnes,,,place_domaine_34,Domaine
+95,Garchiae,Garches,,,place_domaine_35,Domaine
+96,Gentilliacum,Gentilly,,,place_domaine_36,Domaine
+97,Gornaium,Gournay,,,place_domaine_37,Domaine
+98,Gonsenvilla,Goussainville,,,place_domaine_38,Domaine
+99,Erbleium,Herblay ; Herbelay,,,place_domaine_39,Domaine
+100,Steovilla,Itteville ; Yteville,,,place_domaine_40,Domaine
+101,Ivriacum,Ivry,,,place_domaine_41,Domaine
+102,Jehenniacum,Jagny ; Janni,,,place_domaine_42,Domaine
+103,Joiacum,Jouy-le-Moutier,,,place_domaine_43,Domaine
+104,Layacum,L'Hay ; Lay,,,place_domaine_44,Domaine
+105,Capella Domni Galteri,La Chapelle-Gauthier,,,place_domaine_45,Domaine
+106,Firmitas,La Ferté-Alais ; La Ferté Aleps,,,place_domaine_46,Domaine
+107,Cauda,La Queue-en-Brie,,,place_domaine_47,Domaine
+108,Lagniacum,Lagny ; Laigny,,,place_domaine_48,Domaine
+109,Liricantum,Larchant,,,place_domaine_49,Domaine
+110,Lardiacum,Lardy,,,place_domaine_50,Domaine
+111,Maesnilium Auberti,Le Mesnil-Aubry,,,place_domaine_51,Domaine
+112,Mesnilium sancti Dionysii,Le Mesnil-Saint-Denis,,,place_domaine_52,Domaine
+113,Plessiacum,Le PLessis-Pâté,,,place_domaine_53,Domaine
+114,Pressorium,Le Pressoir,,,place_domaine_54,Domaine
+115,Trembleium,Le Tremblay,,,place_domaine_55,Domaine
+116,Limos,Limours ; Limoues,,,place_domaine_56,Domaine
+117,Lusarchiae,Luzarches ; Lursarches,,,place_domaine_57,Domaine
+118,Macholium,Machault ; Machau,,,place_domaine_58,Domaine
+119,Domus,Maisons,,,place_domaine_59,Domaine
+120,Marna,Marnes,,,place_domaine_60,Domaine
+121,Maciacum,Massy ; Machi,,,place_domaine_61,Domaine
+122,Malus Repastus,Maurepas,,,place_domaine_62,Domaine
+123,Maceriae,Mézières,,,place_domaine_63,Domaine
+124,Capella juxta Caprosiam,Milon-la-Chapelle,,,place_domaine_64,Domaine
+125,Mitriacum,Mitry ; Mictri,,,place_domaine_65,Domaine
+126,Moissiacum,Moissy,,,place_domaine_66,Domaine
+127,Montem lethericum,Montlhéry,,,place_domaine_67,Domaine
+128,Mons Morenciacus,Montmorency,,,place_domaine_68,Domaine
+129,Mons Rubeus,Montrouge ; Mont Rouge,,,place_domaine_69,Domaine
+130,Moriacum,Mory,,,place_domaine_70,Domaine
+131,Orliacum,Orly,,,place_domaine_71,Domaine
+132,Ultrabasium,Outrebois ; Oultrebois/Oultreboys,,,place_domaine_72,Domaine
+133,Palatiolum,Palaiseau,,,place_domaine_73,Domaine
+134,Pareium,Perray,,,place_domaine_74,Domaine
+135,Karrae,Quiers ; Kerre,,,place_domaine_75,Domaine
+136,Richeri Villa,Richardville ; Richarville,,,place_domaine_76,Domaine
+137,Roissiacum,Roissy,,,place_domaine_77,Domaine
+138,Rosaium / Rosetum,Rozay ; Rosay,,,place_domaine_78,Domaine
+139,Rodolium,Rueil,,,place_domaine_79,Domaine
+140,Rungiacum,Rungis,,,place_domaine_80,Domaine
+141,sancti Clodoaldi,Saint-Cloud,,,place_domaine_81,Domaine
+142,sanctus Ferreolus,Saint-Fargeau ; Saint Fargeul,,,place_domaine_82,Domaine
+143,Sanctus Medardus,Saint-Mard,,,place_domaine_83,Domaine
+144,Sanctus Medericus,Saint-Merry,,,place_domaine_84,Domaine
+145,Sanctus Michael,Saint-Michel-sur-Orge,,,place_domaine_85,Domaine
+146,Sanctus Veranus,Saint-Vrain,,,place_domaine_86,Domaine
+147,Samesium,Samois,,,place_domaine_87,Domaine
+148,Separa / Sevra,Sèvres,,,place_domaine_88,Domaine
+149,Soisiacum,Soisy,,,place_domaine_89,Domaine
+150,Solliacum,Souilly,,,place_domaine_90,Domaine
+151,Suciacum,Sucy,,,place_domaine_91,Domaine
+152,Torciacum,Torcy,,,place_domaine_92,Domaine
+153,Turnomium,Tournan ; Tornent,,,place_domaine_93,Domaine
+154,Ver,Ver,,,place_domaine_94,Domaine
+155,Vernotum,Vernou,,,place_domaine_95,Domaine
+156,Villaroche,Villaroche,,,place_domaine_96,Domaine
+157,Villajudea,Villejuif,,,place_domaine_97,Domaine
+158,Villa Picta,Villepinte,,,place_domaine_98,Domaine
+159,Villa Pirosa,Villepreux,,,place_domaine_99,Domaine
+160,Monsterolio / Vincennas,Montreuil / Vincennes ; Monstereul,,,place_domaine_100,Domaine
+161,Viriacum in Viromandia,Viry-Noureuil ; Viry en Vermandois,,,place_domaine_101,Domaine
+162,Vitriacum,Vitry,,,place_domaine_102,Domaine
+163,Villedorum / Villa Cereris,Wissous,,,place_domaine_103,Domaine
+164,Capella ad altare beati Leonardi,Chapelle à l'autel de saint Léonard,Ecclesia Parisiensis,Cap_1,place_chapelle_1,Chapelle
+165,Capella sanctorum Georgii et Blasii,Chapelle des saints Georges et Blaise,Ecclesia Parisiensis,Cap_2,place_chapelle_2,Chapelle
+166,Capella sancte Genovefe,Chapelle de sainte Geneviève,Ecclesia Parisiensis,Cap_3,place_chapelle_3,Chapelle
+167,Capella sancti Laurencii,Chapelle de saint Laurent,Ecclesia Parisiensis,Cap_4,place_chapelle_4,Chapelle
+168,Capella sanctorum Juliani pauperis et Marie Egipciace,Chapelle des saints Julien le Pauvre et Marie l'Egyptienne,Ecclesia Parisiensis,Cap_5,place_chapelle_5,Chapelle
+169,Capella beate Katherine,Chapelle de la bienheureuse Catherine,Ecclesia Parisiensis,Cap_6,place_chapelle_6,Chapelle
+170,Capella beati Nicolai,Chapelle du bienheureux Nicolas,Ecclesia Parisiensis,Cap_7,place_chapelle_7,Chapelle
+171,Capella sancti Juliani confessoris seu Juliani Cenomanensis,Chapelle de saint Julien le confesseur ou saint Julien du Mans,Ecclesia Parisiensis,Cap_8,place_chapelle_8,Chapelle
+172,Capellania sanctorum Johannis Evangeliste et Agnetis,Chapelle des saints Jean l'Evangéliste et Agnès,Ecclesia Parisiensis,Cap_9,place_chapelle_9,Chapelle
+173,Capella sancti Eustacii,Chapelle de saint Eustache,Ecclesia Parisiensis,Cap_10,place_chapelle_10,Chapelle
+174,Capella sanctorum Johannis Baptiste et Marie Magdalene,Chapelle des saints Jean Baptiste et Marie Madeleine,Ecclesia Parisiensis,Cap_11,place_chapelle_11,Chapelle
+175,Capella sanctorum Ferreolis et Ferrucionis,Chapelle des saints Ferréol et Ferjeux,Ecclesia Parisiensis,Cap_12,place_chapelle_12,Chapelle
+176,Capella sancti Michaelis,Chapelle de saint Michel,Ecclesia Parisiensis,Cap_13,place_chapelle_13,Chapelle
+177,Capella sanctorum Martini et Anne,Chapelle des saints Martin et Anne,Ecclesia Parisiensis,Cap_14,place_chapelle_14,Chapelle
+178,Capella sancte Fidis,Chapelle de sainte Foy,Ecclesia Parisiensis,Cap_15,place_chapelle_15,Chapelle
+179,Capella sancti Eutropi,Chapelle de saint Eutrope,Ecclesia Parisiensis,Cap_16,place_chapelle_16,Chapelle
+180,Capella decollacionis sancti Johannis Baptiste,Chapelle de la décollation de saint Jean Baptiste,Ecclesia Parisiensis,Cap_17,place_chapelle_17,Chapelle
+181,Capella sancti Ludovici,Chapelle de saint Louis,Ecclesia Parisiensis,Cap_18,place_chapelle_18,Chapelle
+182,Capella sancti Rigoberti,Chapelle de saint Rigobert,Ecclesia Parisiensis,Cap_19,place_chapelle_19,Chapelle
+183,Capella sancti Nicaisii,Chapelle de saint Nicaise,Ecclesia Parisiensis,Cap_20,place_chapelle_20,Chapelle
+184,Capella sancti Stephani protomartyris,Chapelle de saint Etienne Protomartyr,Ecclesia Parisiensis,Cap_21,place_chapelle_21,Chapelle
+185,Capella sanctorum Crepiniani et Crispiniani,Chapelle des saints Crépin et Crépinien,Ecclesia Parisiensis,Cap_22,place_chapelle_22,Chapelle
+186,Capella sancti Jacobi,Chapelle de saint Jacques,Ecclesia Parisiensis,Cap_23,place_chapelle_23,Chapelle
+187,Capella sanctorum Petri et Stephani,Chapelle des saints Pierre et Etienne,Ecclesia Parisiensis,Cap_24,place_chapelle_24,Chapelle
+188,Capella sancti Remigii,Chapelle de saint Rémi,Ecclesia Parisiensis,Cap_25,place_chapelle_25,Chapelle
+189,Capella sancti Geraldi,Chapelle de saint Géraud,Ecclesia Parisiensis,Cap_26,place_chapelle_26,Chapelle
+190,Capella sanctorum Dyonisii et Georgii,Chapelle des saints Denis et Georges,Ecclesia Parisiensis,Cap_27,place_chapelle_27,Chapelle
+191,Capella sancti Petri martyris,Chapelle de saint Pierre Martyr,Ecclesia Parisiensis,Cap_28,place_chapelle_28,Chapelle
+192,Capella beate Marie et sancti Aniani,Chapelle de la bienheureuse Marie et de saint Aignan,Ecclesia Parisiensis,Cap_29,place_chapelle_29,Chapelle
+193,Capella sanctorum Petri et Pauli,Chapelle des saints Pierre et Paul,Ecclesia Parisiensis,Cap_30,place_chapelle_30,Chapelle
+194,Capella sancti Marcialis,Chapelle de saint Martial,Ecclesia Parisiensis,Cap_31,place_chapelle_31,Chapelle
+195,Capella beate Marie Magdalene,Chapelle de la bienheureuse Marie Madeleine,Ecclesia Parisiensis,Cap_32,place_chapelle_32,Chapelle
+196,Capella beati Augustini,Chapelle du bienheureux Augustin,Ecclesia Parisiensis,Cap_33,place_chapelle_33,Chapelle
+197,Capella sancti Thome Cantuariensis,Chapelle de saint Thomas de Canterbury,Ecclesia Parisiensis,Cap_34,place_chapelle_34,Chapelle
+198,Capella sanctorum Michelis et Anthonii,Chapelle des saints Michel et Antoine,Ecclesia Parisiensis,Cap_35,place_chapelle_35,Chapelle
+199,Capella sanctorum Philipi et Jacobi,Chapelle des saints Philippe et Jacques,Ecclesia Parisiensis,Cap_36,place_chapelle_36,Chapelle
+200,Capella sanctorum Bartholomei et Vincencii,Chapelle des saints Barthélémy et Vincent,Ecclesia Parisiensis,Cap_37,place_chapelle_37,Chapelle
+201,Capella sancte Anne,Chapellenie de sainte Anne,Ecclesia Parisiensis,Cap_38,place_chapelle_38,Chapelle
+202,Capella sancti Sebastiani,Chapelle de saint Sébastien,Ecclesia Parisiensis,Cap_39,place_chapelle_39,Chapelle
+203,Capella pigrorum,Chapelle des Paresseux,Ecclesia Parisiensis,Cap_40,place_chapelle_40,Chapelle
+204,Capella ad altare beate Marie de alabastro,"Chapelle à l'autel de la Vierge d'albâtre, fondée par le Besgue de Vilaines",Ecclesia Parisiensis,Cap_41,place_chapelle_41,Chapelle
+205,Capella Garnerii Gueroudi,Chapelle de Garnier Guéroud,Ecclesia Parisiensis,Cap_42,place_chapelle_42,Chapelle
+206,Capella Karoli regis,Chapelle du roi Charles V,Ecclesia Parisiensis,Cap_43,place_chapelle_43,Chapelle
+207,Capella Petri de Ordeimonte,Chapelle de Pierre d'Orgemont,Ecclesia Parisiensis,Cap_44,place_chapelle_44,Chapelle
+208,Capella puerorum chori,Chapelle des enfants de chœur,Ecclesia Parisiensis,Cap_45,place_chapelle_45,Chapelle
+209,Capella sancti Yvonis in vico Sancti Jacobi,,Ecclesia Sancti Benedicti,,place_chapelle_46,Chapelle
+210,Capella sancti Johannis Evangeliste,Chapelle de saint Jean l'Evangéliste,Ecclesia Sancti Benedicti,Cap_51,place_chapelle_47,Chapelle
+211,Capella sancti Andree,Chapelle de saint André,Ecclesia Sancti Mederici,Cap_60,place_chapelle_48,Chapelle
+212,Capella sancte Katherine,Chapelle de sainte Catherine,Ecclesia Sancti Mederici,Cap_61,place_chapelle_49,Chapelle
+213,Capella sancti Nicolai,Chapelle de saint Nicolas,Ecclesia Sancti Sepulcri,Cap_70,place_chapelle_50,Chapelle
+214,Capella sancti Pauli,Chapelle de saint Paul,Ecclesia Sancti Sepulcri,Cap_71,place_chapelle_51,Chapelle
+215,Capella sancti Firmini,Chapelle de saint Firmin,Ecclesia Sancti Sepulcri,Cap_72,place_chapelle_52,Chapelle
+216,Collegium XVIII scolarium,Collège des Dix-huit écoliers,Parisius,,place_chapelle_53,Chapelle
+217,Collegium Lexoviensis,Collège de Lisieux,Parisius,,place_chapelle_54,Chapelle
+218,Collegium de Navarra seu Campania,Collège de Navarre ou de Champagne,Parisius,,place_chapelle_55,Chapelle
+219,Collegium de Monteacuto,Collège de Montaigu,Parisius,,place_chapelle_56,Chapelle
+220,Collegium de Dormaniis,Collège de Dormans,Parisius,,place_chapelle_57,Chapelle
+221,Navis,Nef,Ecclesia Parisiensis,,place_chapelle_58,Chapelle
+222,Turris Guillaume,Tour Guillaume,Ecclesia Parisiensis,,place_chapelle_59,Chapelle
+223,Turris Jacqueline,Tour Jacqueline,Ecclesia Parisiensis,,place_chapelle_60,Chapelle
+224,Parvisium,Parvis,Civitas,,place_chapelle_61,Chapelle
+225,Claustrum,Cloître,Ecclesia Parisiensis,,place_chapelle_62,Chapelle
+226,Puteus,Puits,Claustrum,,place_chapelle_63,Chapelle
+227,Andresiacum,Andrésy,Prepositura; Prebenda;,,place_chapelle_64,Chapelle

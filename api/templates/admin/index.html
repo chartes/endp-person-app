@@ -1,0 +1,38 @@
+{% extends 'admin/master.html' %}
+
+
+
+{% block body %}
+    <h1>Administration de la base de données e-NDP</h1>
+    <div>
+        <p>Bienvenue ! vous êtes sur la plateforme d'administration de la base de données du projet ANR e-NDP: Notre-Dame et son cloître.</p>
+        <p>Quelques rappels sur le projet ...</p>
+    <p><a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />Le modèle de données e-NDP ainsi que les données elle-mêmes sont à disposition selon les termes de la <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Licence Creative Commons Attribution -  Partage dans les Mêmes Conditions 4.0 International</a>..</p>
+        <br>
+    <div class="container">
+  <div class="row d-flex justify-content-between align-items-center">
+    <div class="col-md-2">
+      <img width="100%" src="{{url_for('static', filename='images/an-logo.png')}}" class="img-fluid">
+    </div>
+    <div class="col-md-2">
+      <img  width="100%" src="{{url_for('static', filename='images/enc-logo.png')}}" class="img-fluid">
+    </div>
+    <div class="col-md-2">
+      <img  width="100%" src="{{url_for('static', filename='images/bnf-logo.png')}}" class="img-fluid">
+    </div>
+    <div class="col-md-2">
+      <img  width="100%" src="{{url_for('static', filename='images/Lamop-logo.png')}}" class="img-fluid">
+    </div>
+    <div class="col-md-2">
+      <img   width="100%" src="{{url_for('static', filename='images/mazarine-logo.png')}}" class="img-fluid">
+    </div>
+  </div>
+</div>
+
+    <div>
+
+    </div>
+
+    </div>
+
+{% endblock body %}
