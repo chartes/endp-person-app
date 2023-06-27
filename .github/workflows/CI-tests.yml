@@ -24,11 +24,11 @@ jobs:
           python3 -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with pylint
-      - run: |
+        run: |
           pylint ./*.py
           pylint ./api/*.py
       - name: Test with pytest
-      - run: |
+        run: |
           cd ./tests/
           chmod +x ./tests.sh
           ./tests.sh
