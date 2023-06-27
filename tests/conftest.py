@@ -9,6 +9,8 @@ import os
 from typing import (Any,
                     Generator)
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -21,8 +23,6 @@ from api.models import User
 from api.main import create_app
 from api.database_utils import populate_db_process
 from api.config import BASE_DIR, settings
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def start_application():
