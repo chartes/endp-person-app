@@ -1,5 +1,9 @@
 {% extends admin_base_template %}
 
+{% block head %}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+{% endblock %}
+
 {% block access_control %}
 {% if current_user.is_authenticated %}
 <div class="navbar-text btn-group pull-right">
@@ -17,19 +21,152 @@
 </div>
  {% endif %}
 
+
 {% endblock %}
 
 {% block head_css %}
 {{ super() }}
+    <!-- font awesome 4 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+
+    :root {
+        --font-admin: 'Barlow', Helvetica, Arial, sans-serif !important;
+    }
+
+    /*
+     * Navbar
+     */
+    .navbar {
+        font-family: var(--font-admin);
+        border-radius: 15px;
+    }
+    .navbar-brand {
+        font-size: 23px;
+        color: #022846 !important;
+        font-weight: bold;
+    }
+    #admin-navbar-collapse li a {
+        font-size: 17px !important;
+    }
+
+    .pull-right a {
+        font-weight: bold;
+        font-size: 17px !important;
+    }
+
+    /*
+     * List/Table view
+     */
+
+    .actions-nav a {
+        font-family: var(--font-admin);
+        font-size: 17px !important;
+    }
+
+    table td {
+        font-family: var(--font-admin);
+        font-size: 16px !important;
+    }
+
+    table th {
+        font-family: var(--font-admin);
+        font-size: 17px !important;
+        font-weight: bold;
+    }
+
+    .fa-pencil {
+        color: #1f618d !important;
+        margin-right: 10px;
+        font-size: 25px !important;
+    }
+
+    .fa-trash {
+        color: #c0392b !important;
+        font-size: 25px !important;
+    }
+
+    .fa-pencil:hover {
+        color:  #5dade2  !important;
+    }
+
+    .fa-trash:hover {
+        color:  #d98880  !important;
+    }
+
+
+    /*
+     * Font styles for the admin interface
+     */
+    .heading1 {
+            font-family:var(--font-admin);
+            font-size: 33px;
+            font-weight: bold;
+    }
+    .heading2 {
+            font-family: var(--font-admin);
+            font-size: 26px;
+        }
+    .heading3 {
+            font-family: var(--font-admin);
+            font-size: 20px;
+    }
+    .normal-text{
+            font-family: var(--font-admin);
+            font-size: 18px;
+    }
+    .normal-text-form{
+            font-family: var(--font-admin);
+            font-size: 15px;
+    }
+
+    .sep-index {
+         border:none;
+         height: 20px;
+ 	     width: 90%;
+	     border-bottom: 1px solid #1f1209;
+	     box-shadow: 0 20px 20px -20px #333;
+    }
+
+    /*
+     * Form styles
+     */
+    .control-label {
+        font-family: var(--font-admin);
+        font-weight: bold;
+        font-size: 16px !important;
+    }
+
+
+    </style>
+    <style>
+    /*
+     * only index
+     */
+    .user-connect-home{
+        color: #64b987;
+        font-weight: bold;
+    }
+    .img-partner {
+        width: 400px;
+        height:auto;
+    }
+    @media (max-width: 768px) {
+      .img-partner {
+        width: 100%; /* Taille maximale de l'écran */
+      }
+    }
+    </style>
 <style>
 
     .container {
-        width: 90% !important;
+        width: 95% !important;
     }
 
     </style>
 <style>
-    @media (max-width: 880px) {
+    @media (max-width: 900px) {
         .show-on-large-screen {
             display: none;
         }
@@ -45,3 +182,4 @@
 
 </style>
 {% endblock %}
+

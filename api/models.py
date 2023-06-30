@@ -349,10 +349,10 @@ class AbstractGenericThesaurusTerm(AbstractActions):
     __prefix__ = ""
 
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
-    term = Column(String(125), nullable=False, unique=False)
-    term_fr = Column(String(25), nullable=True, unique=False)
+    term = Column(String(200), nullable=False, unique=False)
+    term_fr = Column(String(200), nullable=True, unique=False)
     term_definition = Column(Text, nullable=True, unique=False)
-    term_position = Column(String(125), nullable=True, unique=False)
+    term_position = Column(String(200), nullable=True, unique=False)
 
     def __repr__(self):
         return f"<{self.topic} : {self.id} | {self.term} ({self.term_fr})>"

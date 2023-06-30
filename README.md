@@ -18,7 +18,7 @@ git clone git@github.com:chartes/endp-api.git
 Puis exécuter les commandes suivantes :
 
 ```bash
-virualenv --python=python3.9 venv
+virualenv --python=python3.8 venv
 source venv/bin/activate
 pip install -r requirements.txt
  ```
@@ -57,10 +57,11 @@ Cependant, pour lancer les tests en local :
 
 ```bash
 cd tests/
-# lancer le contrôle de la qualité du code
+# rendre les scripts exécutables (si nécessaire)
 chmod +x linter.sh
+chmod +x tests.sh
+# lancer le contrôle de la qualité du code
 ./linter.sh
 # lancer les tests unitaires
-chmod +x tests.sh
 ./tests.sh
 ```

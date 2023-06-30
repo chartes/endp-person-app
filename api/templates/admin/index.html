@@ -3,36 +3,21 @@
 
 
 {% block body %}
-    <h1>Administration de la base de données e-NDP</h1>
+    <p class="heading1">Administration de la base de données e-NDP</p>
+    <p class="heading2">Bienvenue {% if current_user.is_authenticated %}<span class="user-connect-home">{{ current_user.username }}</span>{% endif %} !</p>
+    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données du projet ANR e-NDP: Notre-Dame et son cloître.</p>
+    <!--<p class="heading3">Pour en savoir plus sur le projet, consulter le  <a href="https://endp.hypotheses.org/" target="_blank"><i class="fa fa-wordpress" aria-hidden="true"></i>
+ blog e-NDP</a>.</p>-->
+    {% if not current_user.is_authenticated %}
+        <p class="heading3">
+            <span class="glyphicon glyphicon-hand-right"></span> Pour accéder au système, <a href="{{ url_for('admin.login') }}">authentifiez-vous</a>
+        </p>
+    {% endif %}
+    <hr class="sep-index">
+    <br>
+    <p class="normal-text"><a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />Le modèle de données ainsi que les données du projet e-NDP présentes dans cette interface sont à disposition selon les termes de la <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Licence Creative Commons Attribution -  Partage dans les Mêmes Conditions 4.0 International</a>.</p>
+    <br>
+    <img class="img-partner" src="{{url_for('static', filename='images/banner-partners-home.png')}}">
+    </div>
     <div>
-        <p>Bienvenue ! vous êtes sur la plateforme d'administration de la base de données du projet ANR e-NDP: Notre-Dame et son cloître.</p>
-        <p>Quelques rappels sur le projet ...</p>
-    <p><a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />Le modèle de données e-NDP ainsi que les données elle-mêmes sont à disposition selon les termes de la <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Licence Creative Commons Attribution -  Partage dans les Mêmes Conditions 4.0 International</a>..</p>
-        <br>
-    <div class="container">
-  <div class="row d-flex justify-content-between align-items-center">
-    <div class="col-md-2">
-      <img width="100%" src="{{url_for('static', filename='images/an-logo.png')}}" class="img-fluid">
-    </div>
-    <div class="col-md-2">
-      <img  width="100%" src="{{url_for('static', filename='images/enc-logo.png')}}" class="img-fluid">
-    </div>
-    <div class="col-md-2">
-      <img  width="100%" src="{{url_for('static', filename='images/bnf-logo.png')}}" class="img-fluid">
-    </div>
-    <div class="col-md-2">
-      <img  width="100%" src="{{url_for('static', filename='images/Lamop-logo.png')}}" class="img-fluid">
-    </div>
-    <div class="col-md-2">
-      <img   width="100%" src="{{url_for('static', filename='images/mazarine-logo.png')}}" class="img-fluid">
-    </div>
-  </div>
-</div>
-
-    <div>
-
-    </div>
-
-    </div>
-
 {% endblock body %}

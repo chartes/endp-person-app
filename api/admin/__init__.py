@@ -13,6 +13,7 @@ from flask_login import LoginManager
 
 from .views import (PersonView,
                     DataShowView,
+                    DataEventView,
                     ReferentialView,
                     Person,
                     Event,
@@ -71,7 +72,7 @@ def create_admin_interface() -> Flask:
             endpoint='person')
     )
     admin.add_view(
-        DataShowView(Event,
+        DataEventView(Event,
                      session,
                      name='Événements',
                      category="Autres")

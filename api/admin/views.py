@@ -6,9 +6,11 @@ Model views for the admin interface.
 
 import re
 
-from flask import redirect, url_for, flash, jsonify
+from flask import redirect, url_for, flash, jsonify, Markup
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.sqla.filters import BaseSQLAFilter
 from flask_admin import BaseView, expose, AdminIndexView
+
 
 from wtforms import ValidationError, TextAreaField
 from wtforms.widgets import TextArea
@@ -30,6 +32,43 @@ from ..models import (User,
 from ..database import session
 from .forms import LoginForm
 
+
+class SearchFilter(BaseSQLAFilter):
+    def __init__(self, column, name, options=None, data_type=None):
+        super(SearchFilter, self).__init__(column, name, options, data_type)
+        self.column = column
+
+    def apply(self, query, value, alias=None):
+        if value is not None:
+            search_term = f"%{value}%"
+            column_filter = self.column.ilike(search_term)
+            return query.filter(column_filter)
+        return query
+
+    def operation(self):
+        return u'like'
+
+class FilterColumn(BaseSQLAFilter):
+    def __init__(self, column, label=None, options=None, name=None, col=None):
+        super(FilterColumn, self).__init__(column, label, options, name)
+        self.column = column
+        self.col = col
+
+    def apply(self, query, value, alias=None):
+        return query.filter(self.column == value)
+
+    def operation(self):
+        return u'equals'
+
+    def get_options(self, view):
+        model_class = self.column.class_
+        column = getattr(model_class, self.col, None)
+
+        if column:
+            items = view.session.query(column).distinct().order_by(column)
+            return [(item[0], item[0]) for item in items]
+
+        return [item for item in session.query(Person).all()]
 
 def is_valid_date(form, field):
     pattern = re.compile(r"^(?:~?\d{4}(?:-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|1\d|2\d|3[01]))?)?)$")
@@ -73,15 +112,31 @@ class CKTextAreaField(TextAreaField):
 
     # create admin view for Person
 
-
 class DataShowView(ModelView):
     can_edit = False
     can_delete = False
     can_create = False
     can_export = True
 
+    column_display_pk = True
+
     def is_accessible(self):
         return current_user.is_authenticated
+
+class DataEventView(DataShowView):
+    column_list = ['id', 'person', 'type', 'place_term', 'thesaurus_term_person', 'predecessor_id', 'date', 'image_url', 'comment']
+    column_labels = {
+        'person': 'Personne',
+        'type': 'Type',
+        'place_term': 'Lieu',
+        'thesaurus_term_person': 'Terme',
+        'predecessor_id': 'Prédécesseur',
+        'date': 'Date',
+        'image_url': 'Image',
+        'comment': 'Commentaire'
+    }
+    column_sortable_list = ['id', 'person', 'type', 'date']
+    column_searchable_list = ['person.pref_label']
 
 
 class ReferentialView(ModelView):
@@ -89,12 +144,17 @@ class ReferentialView(ModelView):
     can_delete = True
     can_create = True
     can_export = True
+    column_display_pk = True
 
     column_labels = {"term": "Terme",
                      "term_fr": "Terme (fr)",
                      "term_definition": "Définition",
-                     "term_position": "Ordre",
                      "Topic": "Thème"}
+
+    column_searchable_list = ["term", "term_fr"]
+    column_list = ["id", "_id_endp", "topic", "term", "term_fr", "term_definition"]
+
+    column_exclude_list = ['term_position']
 
     def is_accessible(self):
         return current_user.is_authenticated
@@ -111,40 +171,76 @@ class ReferentialView(ModelView):
 
 class PersonView(ModelView):
     can_export = True
-    can_view_details = True
-    # create_template = 'admin/edit.html'
-    # edit_template = 'admin/edit.html'
+    can_view_details = False
+    column_display_pk = True
+    #create_template = 'admin/edit.html'
+    #edit_template = 'admin/edit.html'
     # column_display_pk = False
+    # column_hide_backrefs = False
+
+    def _markup_interpret(self, context, model, name):
+        item = getattr(model, name)
+        if item is None:
+            item = ""
+        return Markup(item)
+
+    def _bold_item_list(self, context, model, name):
+        item = getattr(model, name)
+        return Markup(f"<b>{item}</b>")
+
+    def _color_on_bool(self, context, model, name):
+        item = getattr(model, name)
+        if item:
+            return Markup(f"<span class='glyphicon glyphicon glyphicon-ok' style='color: #2ecc71;'></span>")
+        else:
+            return Markup(f"<span class='glyphicon glyphicon glyphicon-remove' style='color: #BE0A25;'></span>")
+
+    def _dateformat(self, context, model, name):
+        item = getattr(model, name)
+        return item.strftime("%Y-%m-%d %H:%M:%S")
 
     extra_js = ['//cdn.ckeditor.com/4.6.0/basic/ckeditor.js']
-    form_overrides = {
-        'comment': CKTextAreaField,
-        'bibliography': CKTextAreaField,
-    }
 
-    form_choices = {
-        'type_kb': format_enum(KnowledgeBaseLabels),
-        'relation_type': format_enum(FamilyRelationshipLabels)
-    }
-    column_searchable_list = ['pref_label', 'death_date']
+    column_searchable_list = ['pref_label', 'death_date', 'first_mention_date', 'last_mention_date', 'forename_alt_labels', 'surname_alt_labels']
     # column_sortable_list = ['pref_label', 'death_date']
+    #
+    # order of columns in the list view
+    column_list = ["id",
+                   "_id_endp",
+                   "pref_label",
+                   "forename_alt_labels",
+                   "surname_alt_labels",
+                   "death_date",
+                   "first_mention_date",
+                   "last_mention_date",
+                   "is_canon",
+                   "comment",
+                   "bibliography",
+                   "_created_at",
+                   "_updated_at",
+                   "_last_editor"]
     form_columns = ('pref_label', 'forename_alt_labels', 'surname_alt_labels', 'death_date',
                     'first_mention_date', 'last_mention_date', 'is_canon', 'family_links', 'kb_links', 'comment',
                     'bibliography')
-    column_labels = {"pref_label": "Forme normalisée e-NDP",
-                     "forename": "Prénom (nomen, premier prénom seulement)",
-                     "forename_alt_labels": "formes du prénom (nomen)",
-                     "surname": "Nom (cognomen, premier nom seulement)",
-                     "surname_alt_labels": "formes du nom (cognomen)",
-                     "death_date": "Date de décès",
-                     "first_mention_date": "Date de la première mention",
-                     "last_mention_date": "Date de la dernière mention",
+    column_labels = {"_id_endp": "Id e-NDP",
+                     "pref_label": "Personne e-NDP",
+                     "forename_alt_labels": "Prénom (nomen)",
+                     "surname_alt_labels": "Nom (cognomen)",
+                     "death_date": "Décès",
+                     "first_mention_date": "Première mention",
+                     "last_mention_date": "Dernière mention",
                      "is_canon": "Chanoine ?",
                      "comment": "Commentaire",
                      "bibliography": "Bibliographie",
                      "kb_links": "Lien vers un référentiel externe",
                      "events": "Événement",
-                     "family_links": "Relation familiale", }
+                     "family_links": "Relation familiale",
+                     "_created_at": "Création",
+                     "_updated_at": "Révision",
+                     "_last_editor": "Dernier éditeur",
+                     }
+
+    column_exclude_list = ['forename', 'surname']
     column_descriptions = {
         "pref_label": "Il s'agit ici de la forme préférée du nom de la personne, c'est-à-dire la forme normalisée utilisée dans l'ensemble de l'application e-NDP.",
         "forename_alt_labels": "Il s'agit ici des formes alternatives du prénom de la personne, c'est-à-dire les formes non normalisées utilisées dans les sources.",
@@ -195,6 +291,30 @@ class PersonView(ModelView):
         ),
     ]
 
+    column_formatters = {
+        'pref_label': _bold_item_list,
+        'is_canon': _color_on_bool,
+        'comment': _markup_interpret,
+        'bibliography': _markup_interpret,
+        '_created_at': _dateformat,
+        '_updated_at': _dateformat,
+    }
+    form_overrides = {
+        'comment': CKTextAreaField,
+        'bibliography': CKTextAreaField,
+    }
+
+    form_choices = {
+        'type_kb': format_enum(KnowledgeBaseLabels),
+        'relation_type': format_enum(FamilyRelationshipLabels)
+    }
+
+
+
+    column_filters = [FilterColumn(column=Person.pref_label, label='Personne e-NDP', col='pref_label')]
+    #column_filters = [FilterColumn(Person.pref_label, label='', col='pref_label')]
+
+
     # form_args = dict(
     #    forename_alt_labels=dict(validators=[is_separated_by_semicolons]),
     #    surname_alt_labels=dict(validators=[is_separated_by_semicolons]),
@@ -231,6 +351,11 @@ class PersonView(ModelView):
             model._last_editor = current_user.username
             #if is_created:
             #model.id = session.query(Person).order_by(Person.id).all()[-1].id + 1
+
+    #@expose('/')
+    #def index_view(self):
+    #    self._refresh_filters_cache()
+    #    return super(PersonView, self).index_view()
 
 
     # def inaccessible_callback(self, name, **kwargs):
