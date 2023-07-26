@@ -12,7 +12,7 @@ from flask_login import LoginManager
 
 
 from .views import (PersonView,
-                    DataShowView,
+                    GlobalModelView,
                     DataEventView,
                     ReferentialView,
                     Person,
@@ -22,7 +22,6 @@ from .views import (PersonView,
                     ThesaurusTerm,
                     PlacesTerm,
                     DatabaseDocumentationView,
-                    DashboardView,
                     MyAdminView)
 from ..models import User
 from ..config import settings, BASE_DIR
@@ -73,18 +72,18 @@ def create_admin_interface() -> Flask:
     )
     admin.add_view(
         DataEventView(Event,
-                     session,
-                     name='Événements',
-                     category="Autres")
+                      session,
+                      name='Événements',
+                      category="Autres")
     )
     admin.add_view(
-        DataShowView(PersonHasKbLinks,
+        GlobalModelView(PersonHasKbLinks,
                      session,
                      name='Liens vers la base de connaissances',
                      category="Autres")
     )
     admin.add_view(
-        DataShowView(PersonHasFamilyRelationshipType,
+        GlobalModelView(PersonHasFamilyRelationshipType,
                      session,
                      name='Relations familiales',
                      category="Autres")
@@ -100,11 +99,6 @@ def create_admin_interface() -> Flask:
                         session,
                         name='Termes lieux',
                         category="Thesauri")
-    )
-    admin.add_view(
-        DashboardView(name='Tableau de bord',
-                      menu_icon_type='glyph',
-                      menu_icon_value='glyphicon-dashboard')
     )
     admin.add_view(
         DatabaseDocumentationView(

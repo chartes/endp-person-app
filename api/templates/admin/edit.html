@@ -1,11 +1,22 @@
 {% extends 'admin/model/edit.html' %}
 
 
-
-{% block script %}
+{% block head_css %}
     {{ super() }}
-    <script>
-        console.log('tail');
-    </script>
+
+    <style>
+    /* css for quill editor */
+.ql-editor {
+    font-size: 14px !important;
+}
+</style>
+    <link href="{{ url_for('static', filename='deps/quill/quill.snow.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block tail_js %}
+    {{ super() }}
+    <script type="text/javascript" src="{{ url_for('static', filename='deps/quill/quill.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/person.form.quill_config.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/person.form.fields.js') }}"></script>
 {% endblock %}
 
