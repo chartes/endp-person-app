@@ -1,0 +1,42 @@
+.container-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.row-login {
+    display: flex;
+}
+
+.left-column {
+    width: 100%;
+}
+
+.right-column {
+    background: linear-gradient(90deg, rgba(117, 139, 156, 1) 48%, rgba(52, 87, 92, 1) 85%, rgba(24, 38, 70, 1) 100%);
+    width: 100%;
+    padding: 150px 80px 10px 45px;
+    border-radius: 0 1rem 1rem 0;
+}
+
+.img-card-login {
+    border-radius: 1rem 0 0 1rem;
+    max-width: 100%
+}
+
+@media (max-width: 900px) {
+    .show-on-large-screen {
+        display: none;
+    }
+
+    .right-column {
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 1rem !important;
+    }
+}
+
+.field_log {
+    border-radius: 1rem !important;
+}

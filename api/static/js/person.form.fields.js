@@ -42,17 +42,20 @@ $(document).ready(function () {
     function configureSelect2(selectElement) {
         selectElement.select2({
             tags: [''], // Allow custom tags
-            multiple: true, // Allow multiple selections
-            tokenSeparators: [';'], // Use semicolon as the token separator
+            //multiple: true, // Allow multiple selections
+            tokenSeparators: [';'], // Use semicolon as the token separator,
+            separator: ';', // Use semicolon as the separator
         }).on('select2-open', function () {
             // Hide the results container when the select2 dropdown is opened.
             $('.select2-results').css('display', 'none');
-        });
+        })
     }
 
     // Initialize the select2 inputs with correct tokenization and configuration.
     configureSelect2(selectForename);
     configureSelect2(selectSurname);
+
+
 
     // Fetch the alternate labels for the select2 inputs if 'pref_label' is not empty.
     if (pref_label !== '') {

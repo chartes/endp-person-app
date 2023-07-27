@@ -1,0 +1,19 @@
+.user-connect-home {
+    color: #64b987;
+    font-weight: bold;
+}
+
+.img-partner {
+    width: 400px;
+    height: auto;
+}
+
+.license-img {
+    border-width:0;
+}
+
+@media (max-width: 768px) {
+    .img-partner {
+        width: 100%; /* Taille maximale de l'écran */
+    }
+}

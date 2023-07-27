@@ -1,31 +1,32 @@
 {% extends 'admin/master.html' %}
-
+{% block head_css %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{% endblock %}
 {% block body %}
-
-<br>
-<div class="container" style="display: flex; align-items: center; justify-content: center; overflow: hidden;">
-    <div class="row" style="display: flex;">
-        <div class="left-column" style="width: 100%;">
-            <img src="{{url_for('static', filename='images/login_endp_banner.png')}}"
-                alt="login form" class="img-fluid show-on-large-screen" style="border-radius: 1rem 0 0 1rem; max-width: 100%"/>
-        </div>
-        <div class="right-column" style="background:linear-gradient(90deg, rgba(117,139,156,1) 48%, rgba(52,87,92,1) 85%, rgba(24,38,70,1) 100%); width: 100%; padding: 150px 80px 10px 45px; border-radius: 0 1rem 1rem 0;">
-            <form action="" method="post">
-                {{ form.hidden_tag() }}
-                <p class="normal-text-form">
-                    {{ form.username.label }}<br>
-                    {{ form.username(size=32, class_='field_log') }}
-                </p>
-                <p class="normal-text-form">
-                    {{ form.password.label }}<br>
-                    {{ form.password(size=32, class_='field_log') }}
-                </p>
-                <p class="normal-text-form">{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-                <p class="normal-text-form">{{ form.submit(class_='btn btn-outline-secondary') }}</p>
-            </form>
+    <br>
+    <div class="container container-login">
+        <div class="row row-login">
+            <div class="left-column">
+                <img src="{{ url_for('static', filename='images/login_endp_banner.png') }}"
+                     alt="login form" class="img-fluid show-on-large-screen img-card-login"/>
+            </div>
+            <div class="right-column">
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    <p class="normal-text-form">
+                        {{ form.username.label }}<br>
+                        {{ form.username(size=32, class_='field_log') }}
+                    </p>
+                    <p class="normal-text-form">
+                        {{ form.password.label }}<br>
+                        {{ form.password(size=32, class_='field_log') }}
+                    </p>
+                    <p class="normal-text-form">{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+                    <p class="normal-text-form">{{ form.submit(class_='btn btn-outline-secondary') }}</p>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<br>
-
+    <br>
 {% endblock body %}

@@ -1,23 +1,29 @@
 {% extends 'admin/master.html' %}
-
-
-
+{% block head_css %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
 {% block body %}
     <p class="heading1">Administration de la base de données e-NDP</p>
-    <p class="heading2">Bienvenue {% if current_user.is_authenticated %}<span class="user-connect-home">{{ current_user.username }}</span>{% endif %} !</p>
-    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données du projet ANR e-NDP: Notre-Dame et son cloître.</p>
-    <!--<p class="heading3">Pour en savoir plus sur le projet, consulter le  <a href="https://endp.hypotheses.org/" target="_blank"><i class="fa fa-wordpress" aria-hidden="true"></i>
- blog e-NDP</a>.</p>-->
+    <p class="heading2">Bienvenue {% if current_user.is_authenticated %}
+        <span class="user-connect-home">{{ current_user.username }}</span>{% endif %} !</p>
+    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données du projet ANR
+        e-NDP: Notre-Dame et son cloître.</p>
     {% if not current_user.is_authenticated %}
         <p class="heading3">
-            <span class="glyphicon glyphicon-hand-right"></span> Pour accéder au système, <a href="{{ url_for('admin.login') }}">authentifiez-vous</a>
+            <span class="glyphicon glyphicon-hand-right"></span> Pour accéder au système, <a
+                href="{{ url_for('admin.login') }}">authentifiez-vous</a>
         </p>
     {% endif %}
     <hr class="sep-index">
     <br>
-    <p class="normal-text"><a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />Le modèle de données ainsi que les données du projet e-NDP présentes dans cette interface sont à disposition selon les termes de la <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Licence Creative Commons Attribution -  Partage dans les Mêmes Conditions 4.0 International</a>.</p>
+    <p class="normal-text"><a rel="license" class="license-img" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img
+            alt="Licence Creative Commons"
+            src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"/></a><br/>Le modèle de données ainsi que les
+        données du projet e-NDP présentes dans cette interface sont à disposition selon les termes de la <a
+                rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Licence Creative
+            Commons Attribution - Partage dans les Mêmes Conditions 4.0 International</a>.</p>
     <br>
-    <img class="img-partner" src="{{url_for('static', filename='images/banner-partners-home.png')}}">
+    <img class="img-partner" src="{{ url_for('static', filename='images/banner-partners-home.png') }}">
     </div>
-    <div>
 {% endblock body %}

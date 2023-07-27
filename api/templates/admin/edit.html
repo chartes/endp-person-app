@@ -3,13 +3,7 @@
 
 {% block head_css %}
     {{ super() }}
-
-    <style>
-    /* css for quill editor */
-.ql-editor {
-    font-size: 14px !important;
-}
-</style>
+    <link href="{{ url_for('static', filename='css/edit.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='deps/quill/quill.snow.css') }}" rel="stylesheet">
 {% endblock %}
 

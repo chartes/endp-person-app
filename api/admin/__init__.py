@@ -7,13 +7,13 @@ from flask import Flask
 
 from flask_admin import Admin
 from flask_babelex import Babel
-from flask_ckeditor import CKEditor
 from flask_login import LoginManager
 
 
 from .views import (PersonView,
-                    GlobalModelView,
-                    DataEventView,
+                    FamilyRelationshipView,
+                    EventView,
+                    KbLinksView,
                     ReferentialView,
                     Person,
                     Event,
@@ -41,7 +41,6 @@ def create_admin_interface() -> Flask:
 
     # flask extensions #
     Babel(flask_app)
-    CKEditor(flask_app)
     admin = Admin(flask_app,
                   name='e-NDP DB Administration',
                   template_mode='bootstrap3',
@@ -58,53 +57,39 @@ def create_admin_interface() -> Flask:
     flask_app.config['SECRET_KEY'] = str(settings.FLASK_SECRET_KEY)
     flask_app.config['BABEL_DEFAULT_LOCALE'] = str(settings.FLASK_BABEL_DEFAULT_LOCALE)
 
-    # deporter les vues dans routes les importer
-    # les mettre ici dans une liste et itérer pour
-    # les ajouter à la méthode add_view de l'admin
-    admin.add_view(
-        PersonView(
-            Person, session,
-            name='Personnes',
-            menu_icon_type='glyph',
-            menu_icon_value='glyphicon-user',
-            url='person',
-            endpoint='person')
-    )
-    admin.add_view(
-        DataEventView(Event,
-                      session,
-                      name='Événements',
-                      category="Autres")
-    )
-    admin.add_view(
-        GlobalModelView(PersonHasKbLinks,
-                     session,
-                     name='Liens vers la base de connaissances',
-                     category="Autres")
-    )
-    admin.add_view(
-        GlobalModelView(PersonHasFamilyRelationshipType,
-                     session,
-                     name='Relations familiales',
-                     category="Autres")
-    )
-    admin.add_view(
+    # Register views #
+    for view in [
+        PersonView(Person,
+                   session,
+                   name='Personnes',
+                   menu_icon_type='glyph',
+                   menu_icon_value='glyphicon-user',
+                   url='person',
+                   endpoint='person'),
+        EventView(Event,
+                  session,
+                  name='Événements',
+                  category="Autres"),
+        KbLinksView(PersonHasKbLinks,
+                    session,
+                    name='Liens vers la base de connaissances',
+                    category="Autres"),
+        FamilyRelationshipView(PersonHasFamilyRelationshipType,
+                               session,
+                               name='Relations familiales',
+                               category="Autres"),
         ReferentialView(ThesaurusTerm,
                         session,
                         name='Termes personnes',
-                        category="Thesauri")
-    )
-    admin.add_view(
+                        category="Thesauri"),
         ReferentialView(PlacesTerm,
                         session,
                         name='Termes lieux',
-                        category="Thesauri")
-    )
-    admin.add_view(
+                        category="Thesauri"),
         DatabaseDocumentationView(
             name='Documentation de la base de données',
             menu_icon_type='glyph',
             menu_icon_value='glyphicon-book')
-    )
-
+    ]:
+        admin.add_view(view)
     return flask_app

@@ -13,6 +13,11 @@ def _bold_item_list(self, context, model, name):
     return Markup(f"<b>{item}</b>")
 
 
+def _hyperlink_item_list(self, context, model, name):
+    item = getattr(model, name)
+    return Markup(f"<a href='{item}' target='_blank'>{item}</a>")
+
+
 def _color_on_bool(self, context, model, name):
     item = getattr(model, name)
     if item:

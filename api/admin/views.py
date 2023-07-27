@@ -3,28 +3,18 @@ views.py
 
 Model views for the admin interface.
 """
-import itertools
-
 from flask import (redirect,
                    url_for,
                    flash,
                    jsonify,
-                   request, render_template_string)
+                   request)
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import (BaseView,
                          expose,
                          AdminIndexView)
-from flask_admin.form import rules
-from flask_admin.model.form import InlineFormAdmin
-from flask_admin.contrib.sqla.form import InlineModelConverter
-from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_login import (current_user,
                          logout_user,
                          login_user)
-from flask_admin.form.widgets import Select2Widget, Select2TagsWidget
-from flask_admin.form.fields import Select2TagsField
-from wtforms import StringField, Form, SelectField, TextAreaField
-from wtforms.widgets import TextArea
 
 
 from ..models import (User,
@@ -33,40 +23,34 @@ from ..models import (User,
                       PersonHasKbLinks,
                       PersonHasFamilyRelationshipType,
                       PlacesTerm,
-                      ThesaurusTerm,
-                      FamilyRelationshipLabels,
-                      KnowledgeBaseLabels)
-from api.models import _get_enum_values
+                      ThesaurusTerm)
+
 from ..database import session
 from .forms import LoginForm
 from .formaters import (_markup_interpret,
                         _bold_item_list,
                         _color_on_bool,
-                        _dateformat)
+                        _dateformat,
+                        _hyperlink_item_list)
 from .validators import (is_valid_date,
-                         is_separated_by_semicolons)
-from .widgets import CKTextAreaField, QuillTextAreaField
+                         is_valid_kb_links,
+                         is_term_already_exists)
+from .widgets import Select2DynamicWidget
 
 
-KB_URL_MAPPING = {
-    "Wikidata": "www.wikidata.org/entity/",
-    "Biblissima": "www.biblissima.com/ark:/",
-    "VIAF": "www.viaf.org/viaf/",
-    "DataBnF": "www.data.bnf.fr/",
-    "Studium Parisiense": "www.studium.fr/",
-    "Collecta": "www.collecta.fr/",
-}
+EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
 
-# Utils
-def format_enum(enum_class):
-    return [choice for choice in enum_class]
+
+# VIEW BASED ON DB MODELS #
 
 
 class GlobalModelView(ModelView):
+    """Global & Shared parameters for the model views."""
     column_display_pk = True
     can_view_details = True
+
     def is_accessible(self):
-        if self.endpoint == "person":
+        if self.endpoint in EDIT_ENDPOINTS:
             self.can_edit = current_user.is_authenticated
             self.can_delete = current_user.is_authenticated
             self.can_create = current_user.is_authenticated
@@ -78,11 +62,32 @@ class GlobalModelView(ModelView):
             self.can_export = True
         return True
 
-# TODO: create a view for family relationship
-# TODO: create a view for kb links
+
+class FamilyRelationshipView(GlobalModelView):
+    """View for the family relationship model."""
+    column_list = ['id', 'person', 'relative', 'relation_type']
+    column_labels = {'person': 'Personne',
+                     'relative': 'Personne liée',
+                     'relation_type': 'Relation',
+                     'person.pref_label': 'Personne',
+                     'relative.pref_label': 'Personne liée'}
+    column_searchable_list = ['person.pref_label', 'relative.pref_label']
 
 
-class DataEventView(GlobalModelView):
+class KbLinksView(GlobalModelView):
+    """View for the person kb links model."""
+    column_list = ['id', 'person', 'type_kb', 'url']
+    column_labels = {'person': 'Personne',
+                     'type_kb': 'Type',
+                      'url': 'Lien',
+                      'person.pref_label': 'Personne'}
+    column_sortable_list = ['id', 'type_kb']
+    column_searchable_list = ['person.pref_label']
+    column_formatters = {'url': _hyperlink_item_list}
+
+
+class EventView(GlobalModelView):
+    """View for the person events model."""
     column_list = ['id', 'person', 'type', 'place_term', 'thesaurus_term_person', 'predecessor_id', 'date', 'image_url', 'comment']
     column_labels = {
         'person': 'Personne',
@@ -92,98 +97,47 @@ class DataEventView(GlobalModelView):
         'predecessor_id': 'Prédécesseur',
         'date': 'Date',
         'image_url': 'Image',
-        'comment': 'Commentaire'
+        'comment': 'Commentaire',
+        'person.pref_label': 'Personne',
+        'place_term.term': 'Lieu',
+        'thesaurus_term_person.term': 'Terme',
     }
-    column_sortable_list = ['id', 'person', 'type', 'date']
-    column_searchable_list = ['person.pref_label']
+    column_sortable_list = ['id', 'type', 'date', 'image_url']
+    column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url']
+    column_filters = ['type', 'date', 'person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'image_url']
 
-class ReferentialView(ModelView):
-    can_edit = True
-    can_delete = True
-    can_create = True
-    can_export = True
-    column_display_pk = True
 
+class ReferentialView(GlobalModelView):
+    """View for the thesauri model."""
     column_labels = {"term": "Terme",
                      "term_fr": "Terme (fr)",
                      "term_definition": "Définition",
                      "Topic": "Thème"}
-
     column_searchable_list = ["term", "term_fr"]
     column_list = ["id", "_id_endp", "topic", "term", "term_fr", "term_definition"]
-
-    column_exclude_list = ['term_position']
-
-    def is_accessible(self):
-        return current_user.is_authenticated
+    form_excluded_columns = ['term_position', 'events']
 
     def on_model_change(self, form, model, is_created):
-        id = None
+        new_id = None
+
+        def find_term(model_db, term):
+            return session.query(model_db).filter_by(term=term).first()
+
         if is_created:
             if model.__tablename__ == "persons_thesaurus_terms":
-                id = session.query(ThesaurusTerm).order_by(ThesaurusTerm.id).all()[-1].id + 1
+                is_term_already_exists(find_term(ThesaurusTerm, model.term), model.term)
+                new_id = session.query(ThesaurusTerm).order_by(ThesaurusTerm.id).all()[-1].id + 1
             elif model.__tablename__ == "places_thesaurus_terms":
-                id = session.query(PlacesTerm).order_by(PlacesTerm.id).all()[-1].id + 1
-            model.id = id
-
-class Select2DynamicField(SelectField):
-    def __init__(self, label=None, validators=None, coerce=int, choices=None, **kwargs):
-        super(Select2DynamicField, self).__init__(label, validators, coerce, choices, **kwargs)
-        choices = [(label, label) for i, label in enumerate(_get_enum_values(KnowledgeBaseLabels))]
-        coerce = str
-        kwargs['widget'] = Select2Widget()
-        kwargs['render_kw'] = {'onchange': 'fetchCorrectUrlStringFromKbSelect(this)'}
-
-        return super(Select2DynamicField, self).__init__(label, validators, coerce, choices, **kwargs)
+                is_term_already_exists(find_term(PlacesTerm, model.term), model.term)
+                new_id = session.query(PlacesTerm).order_by(PlacesTerm.id).all()[-1].id + 1
+            model.id = new_id
 
 
 class PersonView(GlobalModelView):
-    #can_export = True
-
-    # can_edit = True if is not None else False
-    #can_create = True if current_user.is_authenticated is not None else False
-    #can_delete = True if current_user.is_authenticated is not None else False
-    #column_display_pk = True
+    """View for the person model."""
     edit_template = 'admin/edit.html'
     create_template = 'admin/edit.html'
-    form_args = {
-        'forename_alt_labels': {
-            'label': 'Prénom (Nomen)',
-            'description': "Formes alternatives du prénom. Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme.",
-        },
-        'surname_alt_labels': {
-            'label': 'Nom (Cognomen)',
-            'description': "Formes alternatives du nom. Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme.",
-        },
-    }
-
-
-
-    def get_list_columns(self):
-        return super(PersonView, self).get_list_columns()
-
-    def get_list_form(self):
-        return super(PersonView, self).get_list_form()
-
-
-    def render(self, template, **kwargs):
-        #self.extra_js = [url_for('static', filename='js/person.form.fields.js')]
-        return super(PersonView, self).render(template, **kwargs)
-
-
-
-    column_descriptions = {
-        #"pref_label": "Il s'agit ici de la forme préférée du nom de la personne, c'est-à-dire la forme normalisée utilisée dans l'ensemble de l'application e-NDP.",
-        #"forename_alt_labels": "Il s'agit ici des formes alternatives du prénom de la personne, c'est-à-dire les formes non normalisées utilisées dans les sources.",
-        #"surname_alt_labels": "Il s'agit ici des formes alternatives du nom de la personne, c'est-à-dire les formes non normalisées utilisées dans les sources.",
-        #"death_date": "Il s'agit ici de la date de décès de la personne, si elle est connue. Sous la forme AAAA-MM-JJ, ou AAAA-MM, ou AAAA, ou ~AAAA, ou ~AAAA-MM, ou ~AAAA-MM-JJ (date approximative). Exemple : 1234-56-78, ~1234-56, ~1234, 1234, ~1234-56-78, ~1234-56, ~1234.",
-        #"first_mention_date": "Il s'agit ici de la date de la première mention de la personne dans un registre, si elle est connue. Sous la forme AAAA-MM-JJ, ou AAAA-MM, ou AAAA, ou ~AAAA, ou ~AAAA-MM, ou ~AAAA-MM-JJ (date approximative). Exemple : 1234-56-78, ~1234-56, ~1234, 1234, ~1234-56-78, ~1234-56, ~1234.",
-        #"last_mention_date": "Il s'agit ici de la date de la dernière mention de la personne  dans un registre, si elle est connue. Sous la forme AAAA-MM-JJ, ou AAAA-MM, ou AAAA, ou ~AAAA, ou ~AAAA-MM, ou ~AAAA-MM-JJ (date approximative). Exemple : 1234-56-78, ~1234-56, ~1234, 1234, ~1234-56-78, ~1234-56, ~1234.",
-    }
-
-    # extra_js = ['//cdn.ckeditor.com/4.6.0/basic/ckeditor.js']
-
-    column_searchable_list = ['pref_label', 'death_date', 'first_mention_date', 'last_mention_date', 'forename_alt_labels', 'surname_alt_labels']
+    # Define column that will be displayed in list view
     column_list = ["id",
                    "_id_endp",
                    "pref_label",
@@ -198,12 +152,7 @@ class PersonView(GlobalModelView):
                    "_created_at",
                    "_updated_at",
                    "_last_editor"]
-    form_columns = ('pref_label', 'forename_alt_labels', 'surname_alt_labels', 'death_date',
-                    'first_mention_date', 'last_mention_date', 'is_canon', 'family_links','kb_links', 'comment',
-                    'bibliography')
-
-
-
+    # Overrides column labels
     column_labels = {"_id_endp": "Id e-NDP",
                      "pref_label": "Personne e-NDP",
                      "forename_alt_labels": "Prénom (nomen)",
@@ -221,16 +170,48 @@ class PersonView(GlobalModelView):
                      "_updated_at": "Révision",
                      "_last_editor": "Dernier éditeur",
                      }
-
+    # Define column that will be displayed in edit/create view
+    form_columns = ('pref_label', 'forename_alt_labels', 'surname_alt_labels', 'death_date',
+                    'first_mention_date', 'last_mention_date', 'is_canon',
+                    'family_links', 'kb_links', 'comment',
+                    'bibliography')
+    # Activate search on specific column in list view
+    column_searchable_list = ['pref_label', 'death_date', 'first_mention_date', 'last_mention_date',
+                              'forename_alt_labels', 'surname_alt_labels']
+    column_filters = ['pref_label', 'is_canon', 'death_date', 'first_mention_date',
+                      'last_mention_date', 'forename_alt_labels', 'surname_alt_labels']
+    # Activate sorting & add custom label/description on specific column in edit/create view
+    form_args = {
+        'forename_alt_labels': {
+            'label': 'Prénom (Nomen)',
+            'description': "Formes alternatives du prénom. "
+                           "Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme.",
+        },
+        'surname_alt_labels': {
+            'label': 'Nom (Cognomen)',
+            'description': "Formes alternatives du nom. "
+                           "Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme.",
+        },
+        'death_date': {
+            'validators': [is_valid_date],
+        },
+        'first_mention_date': {
+            'validators': [is_valid_date],
+        },
+        'last_mention_date': {
+            'validators': [is_valid_date],
+        },
+    }
+    # Exclude column from list view
     column_exclude_list = ['forename', 'surname']
-
+    # Exclude column from edit/create view
     form_excluded_columns = ('id', '_id_endp', 'forename', 'surname', '_created_at', '_updated_at', '_last_editor')
-
+    # Define inline model to edit/create view
     inline_models = [
         (PersonHasKbLinks, {
-            'form_columns': ['type_kb', 'url'],
+            'form_columns': ['id', 'type_kb', 'url'],
             'column_labels': {'type_kb': 'Base de connaissance', 'url': 'URL'},
-            'form_overrides': dict(type_kb=Select2DynamicField),
+            'form_overrides': dict(type_kb=Select2DynamicWidget),
             'form_args': dict(url=dict(default='www.wikidata.org/entity/<ID>')),
 
         }),
@@ -250,12 +231,15 @@ class PersonView(GlobalModelView):
                                "thesaurus_term_person": "Désignation",
                                "date": "Date",
                                "image_url": "URL de l'image",
-                               "comment": "Commentaire"}
+                               "comment": "Commentaire"},
+                form_args=dict(
+                    date=dict(validators=[is_valid_date]),
+                ),
             )
 
         ),
     ]
-
+    # Define column formatter (custom display)
     column_formatters = {
         'pref_label': _bold_item_list,
         'is_canon': _color_on_bool,
@@ -264,12 +248,7 @@ class PersonView(GlobalModelView):
         '_created_at': _dateformat,
         '_updated_at': _dateformat,
     }
-    form_overrides = {
-        'comment': QuillTextAreaField,
-        'bibliography': QuillTextAreaField,
-        'pref_label': StringField,
-    }
-
+    # Define form widget arguments
     form_widget_args = {
         'forename_alt_labels': {
             'class': 'input-select-tag-form-1 form-control'
@@ -279,23 +258,21 @@ class PersonView(GlobalModelView):
         },
     }
 
+    def get_list_columns(self):
+        """Return list of columns to display in list view."""
+        return super(PersonView, self).get_list_columns()
 
-    #form_choices = {
-    #    'type_kb': format_enum(KnowledgeBaseLabels),
-    #    'relation_type': format_enum(FamilyRelationshipLabels)
-    #}
+    def get_list_form(self):
+        """Return list of columns to display in list form."""
+        return super(PersonView, self).get_list_form()
 
-    @expose('/map_id/', methods=('GET', 'POST'))
-    def map_id(self):
-        # response from ajax request
-        if request.method == 'POST':
-            # get the id from the request in data
-            id = request.form.get('id')
-            # return the result as json
-            return jsonify({'url': KB_URL_MAPPING[id]})
+    def render(self, template, **kwargs):
+        """Render a template with the given context."""
+        return super(PersonView, self).render(template, **kwargs)
 
     @expose('/get_persons_alt_labels/', methods=('GET', 'POST'))
     def get_alt_labels(self):
+        """Return list of alternative labels for a given person. (Use by Select2DynamicField)"""
         if request.method == 'POST' or request.method == 'GET':
             type_label = request.form.get('type_label')
             person_pref_label = request.form.get('person_pref_label')
@@ -306,29 +283,27 @@ class PersonView(GlobalModelView):
             if type_label == "surname":
                 labels = person.surname_alt_labels
 
-            return jsonify(labels.split(';'))
-
-    #def is_accessible(self):
-    #    self.can_create = current_user.is_authenticated
-    #    self.can_edit = current_user.is_authenticated
-    #    self.can_delete = current_user.is_authenticated
-    #    return True
+            return jsonify(labels.split(','))
 
     def on_model_change(self, form, model, is_created):
+        """Update model before saving it. Custom actions on model change."""
+        # Check if kb_links are valid
+        is_valid_kb_links(model.kb_links)
         if model.__tablename__ == "persons":
             model._last_editor = current_user.username
 
 
-
+# SPECIFIC VIEW FOR ADMINISTRATION #
 
 
 class MyAdminView(AdminIndexView):
+    """Custom view for administration."""
     @expose('/login', methods=('GET', 'POST'))
     def login(self):
+        """Login view."""
         if current_user.is_authenticated:
             return redirect(url_for('admin.index'))
         form = LoginForm()
-        print('ici')
         if form.validate_on_submit():
             user = session.query(User).filter_by(username=form.username.data).first()
             if user and user.check_password(form.password.data):
@@ -342,17 +317,16 @@ class MyAdminView(AdminIndexView):
 
     @expose('/logout', methods=('GET', 'POST'))
     def logout(self):
+        """Logout view."""
         logout_user()
         flash('Vous êtes déconnecté !', 'warning')
         return redirect(url_for('admin.index'))
 
 
 class DatabaseDocumentationView(BaseView):
+    """Custom view for database documentation."""
     @expose('/')
     def index(self):
+        """Renders automatic documentation of database in html view."""
         return self.render('admin/documentation_db.html')
-
-    def is_accessible(self):
-        return current_user.is_authenticated
-
 
