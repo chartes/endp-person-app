@@ -6,6 +6,7 @@ SQLAlchemy models for the database
 """
 import enum
 import datetime
+from time import time
 
 from sqlalchemy import (Column,
                         DateTime,
@@ -21,8 +22,10 @@ from sqlalchemy.orm import (relationship)
 from sqlalchemy import text
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
 
 from .database import BASE, session
+from .config import settings
 
 
 __mapping_prefix__ = {
@@ -59,6 +62,21 @@ class User(UserMixin, BASE):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            settings.FLASK_SECRET_KEY, algorithm='HS256'
+        )
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, settings.FLASK_SECRET_KEY,
+                            algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return session.query(User).get(id)
 
     @staticmethod
     def add_default_user():

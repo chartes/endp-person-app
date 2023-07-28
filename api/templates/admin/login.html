@@ -24,6 +24,7 @@
                     </p>
                     <p class="normal-text-form">{{ form.remember_me() }} {{ form.remember_me.label }}</p>
                     <p class="normal-text-form">{{ form.submit(class_='btn btn-outline-secondary') }}</p>
+                    <p class="normal-text-form">Mot de passe oublié ? <a href="{{ url_for('reset_password_request') }}">Cliquer ici</a></p>
                 </form>
             </div>
         </div>

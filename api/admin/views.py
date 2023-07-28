@@ -24,7 +24,6 @@ from ..models import (User,
                       PersonHasFamilyRelationshipType,
                       PlacesTerm,
                       ThesaurusTerm)
-
 from ..database import session
 from .forms import LoginForm
 from .formaters import (_markup_interpret,
@@ -296,7 +295,7 @@ class PersonView(GlobalModelView):
 # SPECIFIC VIEW FOR ADMINISTRATION #
 
 
-class MyAdminView(AdminIndexView):
+class AdminView(AdminIndexView):
     """Custom view for administration."""
     @expose('/login', methods=('GET', 'POST'))
     def login(self):
@@ -329,4 +328,3 @@ class DatabaseDocumentationView(BaseView):
     def index(self):
         """Renders automatic documentation of database in html view."""
         return self.render('admin/documentation_db.html')
-

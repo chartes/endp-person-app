@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     FLASK_SECRET_KEY: str = str(os.environ.get("FLASK_SECRET_KEY", ""))
     FLASK_BABEL_DEFAULT_LOCALE: str = str(os.environ.get("FLASK_BABEL_DEFAULT_LOCALE", "fr"))
 
+    FLASK_MAIL_SERVER: str = str(os.environ.get("FLASK_MAIL_SERVER", ""))
+    FLASK_MAIL_PORT: int = int(os.environ.get("FLASK_MAIL_PORT", 587))
+    FLASK_MAIL_USE_TLS: bool = bool(os.environ.get("FLASK_MAIL_USE_TLS", True))
+    FLASK_MAIL_USE_SSL: bool = bool(os.environ.get("FLASK_MAIL_USE_SSL", False))
+    FLASK_MAIL_USERNAME: str = str(os.environ.get("FLASK_MAIL_USERNAME", ""))
+    FLASK_MAIL_PASSWORD: str = str(os.environ.get("FLASK_MAIL_PASSWORD", ""))
+
     # ~ Database settings ~
     DB_URI: str = str(os.environ.get("DB_URI", "db/endp.dev.sqlite"))
     METADATA_DATA_INTEGRITY_CHECK_PATH: str = str(os.environ.get("METADATA_DATA_INTEGRITY_CHECK_PATH", "ressources_db/"))

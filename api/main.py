@@ -3,14 +3,16 @@ main.py
 
 Entry point for FastAPI application.
 """
+from typing import Any
+
 from fastapi import FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
 
-from .admin import create_admin_interface
+from .admin import flask_app
 from .routes import api_router
 
 
-def create_app() -> FastAPI:
+def create_app():
     """Create FastAPI application.
         :return: FastAPI application
         :rtype: FastAPI
@@ -27,7 +29,7 @@ def create_app() -> FastAPI:
     # Add routes
     _app.include_router(api_router, prefix="/api")
     # Mount admin interface (flask app) into FastAPI app
-    _app.mount('/', WSGIMiddleware(create_admin_interface()))
+    _app.mount('/', WSGIMiddleware(flask_app))
     return _app
 
 
