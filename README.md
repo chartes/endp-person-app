@@ -1,4 +1,4 @@
-# E-NDP API
+# E-NDP service personne 
 [![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-390/) [![eNDP API CI](https://github.com/chartes/endp-api/actions/workflows/CI-tests.yml/badge.svg?branch=master)](https://github.com/chartes/endp-api/actions/workflows/CI-tests.yml)
 
 [![FastAPI - API](https://img.shields.io/static/v1?label=FastAPI&message=API&color=%232E303E&style=for-the-badge&logo=fastapi&logoColor=%23009485)](https://fastapi.tiangolo.com/)
@@ -6,6 +6,12 @@
 [![Flask - admin](https://img.shields.io/static/v1?label=Flask&message=admin&color=black&style=for-the-badge&logo=flask&logoColor=white)](https://flask-admin.readthedocs.io/en/latest/#)
 [![SQLAlchemy -  orm](https://img.shields.io/badge/SQLAlchemy-_orm-red?style=for-the-badge)](https://www.sqlalchemy.org/)
 
+## Description
+
+Ce dépôt contient le service personnes e-NDP, qui se décline de la manière suivante :
+- la base de données (modèle conceptuel de données et données) pour les personnes;
+- - l'interface d'administration pour la BD des personnes;
+- l'API (+ documentation Swagger) pour interroger la BD des personnes.
 
 ## Installation
 
