@@ -41,6 +41,7 @@ class Settings(BaseSettings):
 
     # ~ Database settings ~
     DB_URI: str = str(os.environ.get("DB_URI", "db/endp.dev.sqlite"))
+    DB_ECHO: bool = bool(os.environ.get("DB_ECHO", False))
     METADATA_DATA_INTEGRITY_CHECK_PATH: str = str(os.environ.get("METADATA_DATA_INTEGRITY_CHECK_PATH", "ressources_db/"))
 
     class Config:

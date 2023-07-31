@@ -29,3 +29,13 @@ def _color_on_bool(self, context, model, name):
 def _dateformat(self, context, model, name):
     item = getattr(model, name)
     return item.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _create_tooltip(comment, place):
+    return f"""<a data-toggle="tooltip" data-placement="{place}" data-html="true" title="<i>{comment}</i>">
+  <i class="fa fa-info-circle"></i>
+</a>"""
+
+
+def _format_label_form_with_tooltip(label, comment, place="bottom"):
+    return Markup(f"{label} {_create_tooltip(comment, place)}")

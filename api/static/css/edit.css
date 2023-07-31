@@ -2,3 +2,11 @@
 .ql-editor {
     font-size: 14px !important;
 }
+/* css for bootstrap tooltip */
+.fa-info-circle {
+    font-size: 20px !important;
+}
+.tooltip-inner {
+    max-width: 300px !important;
+    width: 300px !important;
+}

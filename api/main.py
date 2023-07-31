@@ -7,6 +7,7 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
+from fastapi_pagination import add_pagination
 
 from .admin import flask_app
 from .routes import api_router
@@ -26,6 +27,8 @@ def create_app():
         docs_url="/api/docs",
         redoc_url="/api/redoc",
     )
+    # extensions
+    add_pagination(_app)
     # Add routes
     _app.include_router(api_router, prefix="/api")
     # Mount admin interface (flask app) into FastAPI app

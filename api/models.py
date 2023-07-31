@@ -27,6 +27,9 @@ import jwt
 from .database import BASE, session
 from .config import settings
 
+# Use sphinx autodoc, uncomment this line and comment relative import
+# from sqlalchemy.ext.declarative import declarative_base
+# BASE = declarative_base()
 
 __mapping_prefix__ = {
         "Statut": "term_sts",
@@ -428,6 +431,7 @@ class Event(AbstractActions):
     comment = Column(Text, nullable=True, unique=False)
 
     person = relationship("Person", back_populates="events", foreign_keys="Event.person_id")
+    predecessor = relationship("Person", foreign_keys=[predecessor_id])
     place_term = relationship("PlacesTerm", foreign_keys=[place_term_id])
     thesaurus_term_person = relationship("ThesaurusTerm", foreign_keys=[person_thesaurus_term_id])
 
@@ -468,7 +472,7 @@ class ThesaurusTerm(AbstractGenericThesaurusTerm):
     :type term_fr: STRING(25)
     :param term_definition: Définition. [OPT.]
     :type term_definition: TEXT
-    :param term_position: Numéro d'ordre. [OPT.]
+    :param term_position: Numéro d'ordre. [IMPLEMENT BUT NOT REQUIRED - OPT.]
     :type term_position: STRING(125)
 
     """
@@ -509,7 +513,7 @@ class PlacesTerm(AbstractGenericThesaurusTerm):
     :type term_fr: STRING(25)
     :param term_definition: Définition. [OPT.]
     :type term_definition: TEXT
-    :param term_position: Numéro d'ordre [OPT.].
+    :param term_position: Numéro d'ordre [IMPLEMENT BUT NOT REQUIRED - OPT.].
     :type term_position: STRING(125)
     :param topic: Topic du thesaurus de lieux [REQ.]
     :type topic: ENUM(ThesaurusPlacesTopicsLabels)

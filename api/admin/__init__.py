@@ -10,7 +10,7 @@ from flask_babelex import Babel
 from flask_login import LoginManager
 from flask_mail import Mail
 
-from ..models import User
+from ..crud import get_user
 from ..config import settings, BASE_DIR
 from ..database import session
 from .views import (PersonView,
@@ -58,7 +58,7 @@ mail = Mail(flask_app)
 @login.user_loader
 def load_user(user_id):
     """load the user with the given id"""
-    return session.query(User).get(user_id)
+    return get_user(session, {'id': user_id})
 
 
 # Register views #

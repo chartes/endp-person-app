@@ -4,10 +4,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 {% endblock %}
 {% block body %}
-    <p class="heading1">Administration de la base de données e-NDP</p>
+    <p class="heading1">Administration de la base de données personnes du projet e-NDP</p>
     <p class="heading2">Bienvenue {% if current_user.is_authenticated %}
         <span class="user-connect-home">{{ current_user.username }}</span>{% endif %} !</p>
-    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données du projet ANR
+    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données des personnes du projet ANR
         e-NDP: Notre-Dame et son cloître.</p>
     {% if not current_user.is_authenticated %}
         <p class="heading3">

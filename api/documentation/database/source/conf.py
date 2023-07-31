@@ -20,7 +20,6 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../../'))
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'Base de données e-NDP'
@@ -39,7 +38,7 @@ add_module_names = False
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'rst2pdf.pdfbuilder'
+    #'rst2pdf.pdfbuilder'
 ]
 pdf_documents = [
     ('index',

@@ -9,6 +9,7 @@ dnspython==2.3.0
 email-validator==2.0.0.post2
 exceptiongroup==1.1.1
 fastapi==0.95.1
+fastapi-pagination==0.12.6
 Flask==2.3.2
 Flask-Admin==1.6.1
 flask-babel==3.1.0

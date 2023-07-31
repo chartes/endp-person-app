@@ -22,7 +22,8 @@ engine = create_engine(
     pool_size=20,
     max_overflow=0,
     pool_timeout=300,
-    pool_recycle=3600
+    pool_recycle=3600,
+    echo=bool(settings.DB_ECHO)
 )
 
 session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))

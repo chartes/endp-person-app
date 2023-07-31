@@ -16,26 +16,25 @@ from flask_login import (current_user,
                          logout_user,
                          login_user)
 
-
-from ..models import (User,
+from ..models import (Event,
                       Person,
-                      Event,
                       PersonHasKbLinks,
                       PersonHasFamilyRelationshipType,
                       PlacesTerm,
                       ThesaurusTerm)
 from ..database import session
+from ..crud import (get_person, get_thesaurus_term, get_thesaurus_terms, get_user)
 from .forms import LoginForm
 from .formaters import (_markup_interpret,
                         _bold_item_list,
                         _color_on_bool,
                         _dateformat,
-                        _hyperlink_item_list)
+                        _hyperlink_item_list,
+                        _format_label_form_with_tooltip)
 from .validators import (is_valid_date,
                          is_valid_kb_links,
                          is_term_already_exists)
 from .widgets import Select2DynamicWidget
-
 
 EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
 
@@ -64,7 +63,7 @@ class GlobalModelView(ModelView):
 
 class FamilyRelationshipView(GlobalModelView):
     """View for the family relationship model."""
-    column_list = ['id', 'person', 'relative', 'relation_type']
+    column_list = ['id', 'person', 'relation_type', 'relative']
     column_labels = {'person': 'Personne',
                      'relative': 'Personne liée',
                      'relation_type': 'Relation',
@@ -78,8 +77,8 @@ class KbLinksView(GlobalModelView):
     column_list = ['id', 'person', 'type_kb', 'url']
     column_labels = {'person': 'Personne',
                      'type_kb': 'Type',
-                      'url': 'Lien',
-                      'person.pref_label': 'Personne'}
+                     'url': 'Lien',
+                     'person.pref_label': 'Personne'}
     column_sortable_list = ['id', 'type_kb']
     column_searchable_list = ['person.pref_label']
     column_formatters = {'url': _hyperlink_item_list}
@@ -87,7 +86,8 @@ class KbLinksView(GlobalModelView):
 
 class EventView(GlobalModelView):
     """View for the person events model."""
-    column_list = ['id', 'person', 'type', 'place_term', 'thesaurus_term_person', 'predecessor_id', 'date', 'image_url', 'comment']
+    column_list = ['id', 'person', 'type', 'place_term', 'thesaurus_term_person', 'predecessor_id', 'date', 'image_url',
+                   'comment']
     column_labels = {
         'person': 'Personne',
         'type': 'Type',
@@ -96,7 +96,7 @@ class EventView(GlobalModelView):
         'predecessor_id': 'Prédécesseur',
         'date': 'Date',
         'image_url': 'Image',
-        'comment': 'Commentaire',
+        'comment': 'Note',
         'person.pref_label': 'Personne',
         'place_term.term': 'Lieu',
         'thesaurus_term_person.term': 'Terme',
@@ -108,27 +108,37 @@ class EventView(GlobalModelView):
 
 class ReferentialView(GlobalModelView):
     """View for the thesauri model."""
+    edit_template = 'admin/edit_thesaurus.html'
+    create_template = 'admin/edit_thesaurus.html'
     column_labels = {"term": "Terme",
                      "term_fr": "Terme (fr)",
                      "term_definition": "Définition",
-                     "Topic": "Thème"}
+                     "topic": "Topic"}
     column_searchable_list = ["term", "term_fr"]
     column_list = ["id", "_id_endp", "topic", "term", "term_fr", "term_definition"]
-    form_excluded_columns = ['term_position', 'events']
+    form_excluded_columns = ['events']
+    form_args = {
+        "topic": {
+            "label": _format_label_form_with_tooltip("Topic", "Topic dans le thesaurus")
+        }
+    }
 
     def on_model_change(self, form, model, is_created):
         new_id = None
 
         def find_term(model_db, term):
-            return session.query(model_db).filter_by(term=term).first()
+            return get_thesaurus_term(session, model=model_db, args=dict(term=term))
+
+        def create_new_id(model_db, condition):
+            return get_thesaurus_terms(session, model=model_db, condition=condition)[-1].id + 1
 
         if is_created:
             if model.__tablename__ == "persons_thesaurus_terms":
                 is_term_already_exists(find_term(ThesaurusTerm, model.term), model.term)
-                new_id = session.query(ThesaurusTerm).order_by(ThesaurusTerm.id).all()[-1].id + 1
+                new_id = create_new_id(ThesaurusTerm, condition=ThesaurusTerm.id)
             elif model.__tablename__ == "places_thesaurus_terms":
                 is_term_already_exists(find_term(PlacesTerm, model.term), model.term)
-                new_id = session.query(PlacesTerm).order_by(PlacesTerm.id).all()[-1].id + 1
+                new_id = create_new_id(PlacesTerm, condition=PlacesTerm.id)
             model.id = new_id
 
 
@@ -181,24 +191,59 @@ class PersonView(GlobalModelView):
                       'last_mention_date', 'forename_alt_labels', 'surname_alt_labels']
     # Activate sorting & add custom label/description on specific column in edit/create view
     form_args = {
+        'pref_label': {
+            'label': _format_label_form_with_tooltip("Personne e-NDP",
+                                                     "Libellé préférentiel "
+                                                     "normalisé de la personne."),
+        },
         'forename_alt_labels': {
-            'label': 'Prénom (Nomen)',
-            'description': "Formes alternatives du prénom. "
-                           "Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme.",
+            'label': _format_label_form_with_tooltip("Prénom (Nomen)",
+                                                     "Formes alternatives du prénom. "
+                                                     "Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme."),
+            'description': "Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme."
         },
         'surname_alt_labels': {
-            'label': 'Nom (Cognomen)',
-            'description': "Formes alternatives du nom. "
-                           "Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme.",
+            'label': _format_label_form_with_tooltip("Nom (Cognomen)",
+                                                     "Formes alternatives du nom. "
+                                                     "Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme."),
+            'description': "Appuyer sur '<b>;</b>' ou '<b>tab</b>' pour ajouter une forme."
         },
         'death_date': {
             'validators': [is_valid_date],
+            'label': _format_label_form_with_tooltip("Décès",
+                                                     "Date de décès de la personne. "
+                                                     "Au format <b>AAAA-MM-JJ</b>, "
+                                                     "<b>AAAA-MM</b> ou <b>AAAA</b>. "
+                                                     "Ajouter le signe <b>~</b> devant pour "
+                                                     "indiquer une date approximative."),
+            'description': 'Format requis : <b>AAAA-MM-JJ</b>, <b>AAAA-MM</b> ou <b>AAAA</b>. '
+                           'Ajouter le signe <b>~</b> devant pour indiquer une date approximative.'
         },
         'first_mention_date': {
             'validators': [is_valid_date],
+            'label': _format_label_form_with_tooltip("Première mention",
+                                                     "Date de la première mention dans le registre. "
+                                                     "Au format <b>AAAA-MM-JJ</b>, "
+                                                     "<b>AAAA-MM</b> ou <b>AAAA</b>. "
+                                                     "Ajouter le signe <b>~</b> devant pour "
+                                                     "indiquer une date approximative."),
+            'description': 'Format requis : <b>AAAA-MM-JJ</b>, <b>AAAA-MM</b> ou <b>AAAA</b>. '
+                           'Ajouter le signe <b>~</b> devant pour indiquer une date approximative.'
         },
         'last_mention_date': {
             'validators': [is_valid_date],
+            'label': _format_label_form_with_tooltip("Dernière mention",
+                                                     "Date de la dernière mention dans le registre. "
+                                                     "Au format <b>AAAA-MM-JJ</b>, "
+                                                     "<b>AAAA-MM</b> ou <b>AAAA</b>. "
+                                                     "Ajouter le signe <b>~</b> devant pour "
+                                                     "indiquer une date approximative."),
+            'description': 'Format requis : <b>AAAA-MM-JJ</b>, <b>AAAA-MM</b> ou <b>AAAA</b>. '
+                           'Ajouter le signe <b>~</b> devant pour indiquer une date approximative.'
+        },
+        'is_canon': {
+            'label': _format_label_form_with_tooltip("Chanoine ?",
+                                                     "Cocher si la personne est un chanoine."),
         },
     }
     # Exclude column from list view
@@ -211,7 +256,10 @@ class PersonView(GlobalModelView):
             'form_columns': ['id', 'type_kb', 'url'],
             'column_labels': {'type_kb': 'Base de connaissance', 'url': 'URL'},
             'form_overrides': dict(type_kb=Select2DynamicWidget),
-            'form_args': dict(url=dict(default='www.wikidata.org/entity/<ID>')),
+            'form_args': dict(url=dict(default='www.wikidata.org/entity/<ID>',
+                                       description="URL de la ressource. "
+                                                   "Remplacer &lt;ID&gt; "
+                                                   "par l'identifiant de la ressource.")),
 
         }),
         (
@@ -224,15 +272,21 @@ class PersonView(GlobalModelView):
         ),
         (
             Event, dict(
-                form_columns=["id", "type", "place_term", "thesaurus_term_person", "date", "image_url", "comment"],
+                form_columns=["id", "type", "place_term", "thesaurus_term_person", "predecessor", "date", "image_url", "comment"],
                 column_labels={"type": "Type",
                                "place_term": "Lieu",
                                "thesaurus_term_person": "Désignation",
+                               "predecessor": "Prédécesseur",
                                "date": "Date",
                                "image_url": "URL de l'image",
                                "comment": "Commentaire"},
                 form_args=dict(
-                    date=dict(validators=[is_valid_date]),
+                    date=dict(validators=[is_valid_date], description="Date de l'événement. "
+                                                                      "Au format <b>AAAA-MM-JJ</b>, "
+                                                                      "<b>AAAA-MM</b> ou <b>AAAA</b>. "
+                                                                      "Ajouter le signe <b>~</b> devant "
+                                                                      "pour indiquer une date approximative."),
+                    comment=dict(label="Note"),
                 ),
             )
 
@@ -276,7 +330,7 @@ class PersonView(GlobalModelView):
             type_label = request.form.get('type_label')
             person_pref_label = request.form.get('person_pref_label')
             labels = []
-            person = session.query(Person).filter_by(pref_label=person_pref_label).first()
+            person = get_person(session, dict(pref_label=person_pref_label))
             if type_label == "forename":
                 labels = person.forename_alt_labels
             if type_label == "surname":
@@ -297,6 +351,7 @@ class PersonView(GlobalModelView):
 
 class AdminView(AdminIndexView):
     """Custom view for administration."""
+
     @expose('/login', methods=('GET', 'POST'))
     def login(self):
         """Login view."""
@@ -304,7 +359,7 @@ class AdminView(AdminIndexView):
             return redirect(url_for('admin.index'))
         form = LoginForm()
         if form.validate_on_submit():
-            user = session.query(User).filter_by(username=form.username.data).first()
+            user = get_user(session, dict(username=form.username.data))
             if user and user.check_password(form.password.data):
                 login_user(user, remember=form.remember_me.data)
                 flash(f'Vous êtes connecté en tant que {current_user.username} !', 'success')
@@ -324,6 +379,7 @@ class AdminView(AdminIndexView):
 
 class DatabaseDocumentationView(BaseView):
     """Custom view for database documentation."""
+
     @expose('/')
     def index(self):
         """Renders automatic documentation of database in html view."""

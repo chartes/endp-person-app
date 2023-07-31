@@ -7,7 +7,7 @@ Use for validation and serialization.
 
 from typing import Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, PrivateAttr
 
 
 class EventScheme(BaseModel):
@@ -19,11 +19,19 @@ class EventScheme(BaseModel):
         orm_mode = True
 
 
-class PersonScheme(BaseModel):
+class PersonOut(BaseModel):
     id: int
-    pref_label: str
-    id_endp: str
-    # events: list[EventScheme] = []
+    id_endp: str = Field(..., alias="_id_endp")
+    pref_label: str  # Field("Jean d'Acy", alias="label")
+    forename_alt_labels: str
+    surname_alt_labels: str
+    death_date: Union[str, None]
+    first_mention_date: Union[str, None]
+    last_mention_date: Union[str, None]
+    is_canon: bool
+
+
 
     class Config:
+        allow_population_by_field_name = True
         orm_mode = True
