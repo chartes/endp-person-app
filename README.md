@@ -10,7 +10,7 @@
 
 Ce dépôt contient le service personnes e-NDP, qui se décline de la manière suivante :
 - la base de données (modèle conceptuel de données et données) pour les personnes;
-- - l'interface d'administration pour la BD des personnes;
+- l'interface d'administration pour la BD des personnes;
 - l'API (+ documentation Swagger) pour interroger la BD des personnes.
 
 ## Installation
