@@ -63,11 +63,10 @@ Cependant, pour lancer les tests en local :
 
 ```bash
 cd tests/
-# rendre les scripts exécutables (si nécessaire)
+# 1. lancer le contrôle de la qualité du code
+# rendre le scripts exécutable (si nécessaire)
 chmod +x linter.sh
-chmod +x tests.sh
-# lancer le contrôle de la qualité du code
 ./linter.sh
-# lancer les tests unitaires
-./tests.sh
+# 2. lancer les tests unitaires
+pytest
 ```

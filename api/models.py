@@ -82,7 +82,7 @@ class User(UserMixin, BASE):
         return session.query(User).get(id)
 
     @staticmethod
-    def add_default_user():
+    def add_default_user(in_session):
         """Ajoute un utilisateur par défaut"""
         admin = User()
         admin.username = "admin"
@@ -90,7 +90,8 @@ class User(UserMixin, BASE):
         admin.password_hash = "pbkdf2:sha256:600000$gpxiSgaDAtJwVELW$eb" \
                               "1061add8fc1b27ed8b337ce6b29766c2c9c0f6303" \
                               "92429d57382f5570ac207"
-        session.add(admin)
+        in_session.add(admin)
+        in_session.commit()
 
 
 

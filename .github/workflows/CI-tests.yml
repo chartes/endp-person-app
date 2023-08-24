@@ -26,6 +26,5 @@ jobs:
       - name: Test with pytest
         run: |
           cd ./tests/
-          chmod +x ./tests.sh
-          ./tests.sh
+          pytest
         shell: bash

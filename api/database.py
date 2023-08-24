@@ -26,6 +26,7 @@ engine = create_engine(
     echo=bool(settings.DB_ECHO)
 )
 
+
 session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 BASE = declarative_base()
 
@@ -43,3 +44,4 @@ def get_db() -> scoped_session:
         yield db
     finally:
         db.close()
+

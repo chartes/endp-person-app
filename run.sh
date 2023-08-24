@@ -9,7 +9,7 @@
 #                                                                                 #
 # Usage:                                                                          #
 #   ./run.sh <mode> [-db]                                                         #
-#   <mode> : dev | prod | test [REQ.]                                             #
+#   <mode> : dev | prod [REQ.]                                             #
 #   -db : Recreate and populate database with initial data [OPT.]                 #
 #                                                                                 #
 # Examples:                                                                       #
@@ -22,7 +22,7 @@ ENV="dev"
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   echo "run.sh - API main launch script"
   echo "Usage: ./run.sh <mode> [-db]"
-  echo "  <mode> : dev | prod | test [REQ.]"
+  echo "  <mode> : dev | prod [REQ.]"
   echo "  -db : Recreate and populate database with initial data [OPT.]"
   exit 0
 fi
@@ -40,12 +40,8 @@ case "$1" in
     ENV="prod"
     source .prod.env
     ;;
-  test)
-    ENV="test"
-    source .test.env
-    ;;
   *)
-    echo "Invalid mode. Please specify either 'dev', 'prod', or 'test'."
+    echo "Invalid mode. Please specify either 'dev' or 'prod'."
     exit 1
     ;;
 esac

@@ -17,7 +17,6 @@ from .models import (Person,
                      PersonHasKbLinks,
                      PlacesTerm,
                      PersonHasFamilyRelationshipType)
-from .database import session
 
 DB_MODEL_SWITCHER = {
     "persons": Person,
@@ -36,7 +35,7 @@ def check_path(path: str, err_msg: str):
         sys.exit(1)
 
 
-def populate_db_process():
+def populate_db_process(in_session):
     """Populate the database with the latest version of data."""
     # Check path and data location
     print(BASE_DIR, settings.METADATA_DATA_INTEGRITY_CHECK_PATH)
@@ -61,10 +60,12 @@ def populate_db_process():
             print(f"Checking data integrity for resource: {table_metadata['name']}...")
             df = read_csv_data(table_metadata['path'], table_metadata['separator'], table_metadata['type_df'])
             print(f"Populating the table {table_metadata['name']} from {table_metadata['path']}...")
-            populate_table(table_metadata['model'], df)
+            populate_table(in_session=in_session,
+                           model=table_metadata['model'],
+                           df=df)
             print(f"✔️ Population of the table {table_metadata['name']} completed successfully.")
         except Exception as e:
-            session.rollback()
+            in_session.rollback()
             print(f"❌ Failed to populate the table {table_metadata['name']}.")
             print(f"Error: {e}")
 
@@ -111,9 +112,9 @@ def read_csv_data(file_path, separator, type_df):
         return None
 
 
-def populate_table(model, df):
+def populate_table(in_session, model, df):
     """Populate a database table with data from a DataFrame."""
     items = [model(**row.to_dict()) for _, row in df.iterrows()]
     for item in items:
-        session.add(item)
-        session.commit()
+        in_session.add(item)
+        in_session.commit()

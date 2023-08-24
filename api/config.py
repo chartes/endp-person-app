@@ -3,6 +3,7 @@ config.py
 
 Settings for the application.
 By default, the application will run in debug mode.
+[prod | dev] only. go to tests/ for testing settings.
 """
 import dotenv
 import os

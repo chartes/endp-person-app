@@ -4,7 +4,6 @@ cli.py
 The CLI application for common DB migrations.
 """
 import sys
-import os
 
 import click
 
@@ -24,12 +23,11 @@ def make_cli():
     @click.command("db-create")
     def db_create():
         """Create the local database."""
-        if os.environ.get("ENV") != "test":
-            click.confirm("This operation will only create the database, do you want to continue?", abort=True)
+        click.confirm("This operation will only create the database, do you want to continue?", abort=True)
         try:
             BASE.metadata.create_all(bind=engine)
             # add default users
-            User.add_default_user()
+            User.add_default_user(in_session=session)
             session.commit()
             click.echo("✔️The database has been created.")
         except Exception as e:
@@ -40,13 +38,12 @@ def make_cli():
     @click.command("db-recreate")
     def db_recreate():
         """Recreate the local database [BE CAREFUL IN PRODUCTION!]."""
-        if os.environ.get("ENV") != "test":
-            click.confirm("This operation will recreate all database, do you want to continue?", abort=True)
+        click.confirm("This operation will recreate all database, do you want to continue?", abort=True)
         try:
             BASE.metadata.drop_all(bind=engine)
             BASE.metadata.create_all(bind=engine)
             # add default users
-            User.add_default_user()
+            User.add_default_user(in_session=session)
             session.commit()
             click.echo("✔️The database has been dropped and recreated.")
         except Exception as e:
@@ -57,7 +54,7 @@ def make_cli():
     @click.command("db-populate")
     def db_populate():
         """populate the database with the last version of data."""
-        populate_db_process()
+        populate_db_process(in_session=session)
 
     @click.command("create-user")
     @click.option("--username", "-u", type=str, help="Username of the user.")
