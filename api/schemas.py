@@ -38,7 +38,7 @@ class PersonOut(BaseModel):
     first_mention_date: Union[str, None]
     last_mention_date: Union[str, None]
     is_canon: bool
-    kb_links: List[KbLink] = []
+    #kb_links: List[KbLink] = []
 
     class Config:
         allow_population_by_field_name = True

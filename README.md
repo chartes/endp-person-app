@@ -36,13 +36,13 @@ Les tâches courantes sont réalisées avec le script `run.sh`.
 Pour une première initialisation de la base de données ou pour la recréer et lancer l'application :
 
 ```bash
-   ./run.sh [dev|test] -db
+   ./run.sh dev -db
 ```
 
 Pour lancer l'application seule (ignorer l'argument `-db`) :
 
 ```bash
-   ./run.sh [dev|test]
+   ./run.sh dev
 ```
 
 Pour contrôler le bon fonctionnement de l'application :

@@ -7,18 +7,25 @@ SQLAlchemy models for the database
 import enum
 import datetime
 from time import time
+import uuid
+import base64
+import string
+import random
 
+from sqlalchemy.engine import Engine
 from sqlalchemy import (Column,
+                        Table,
                         DateTime,
                         Boolean,
                         ForeignKey,
                         Integer,
                         String,
+                        UUID,
                         Enum,
                         UniqueConstraint,
                         Text,
                         event)
-from sqlalchemy.orm import (relationship)
+from sqlalchemy.orm import (relationship, backref)
 from sqlalchemy import text
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -30,6 +37,46 @@ from .config import settings
 # Use sphinx autodoc, uncomment this line and comment relative import
 # from sqlalchemy.ext.declarative import declarative_base
 # BASE = declarative_base()
+
+
+def generate_random_uuid(prefix, provider=""):
+    """Génère un UUID aléatoire et le convertit en une chaîne d'octets
+    encodée en Base64 URL-safe et décodée en une chaîne Unicode.
+    """
+    def replace_punctuation_with_random(string_to_modify):
+        punctuation = string.punctuation
+        modified_string = ''
+
+        for char in string_to_modify:
+            if char in punctuation:
+                # Remplacer par un caractère aléatoire majuscule ou minuscule
+                random_char = random.choice(string.ascii_letters)
+                modified_string += random_char
+            else:
+                modified_string += char
+
+        return modified_string
+
+    # Générer un UUID
+    unique_id = uuid.uuid4()
+
+    # Convertir l'UUID en une chaîne d'octets
+    uuid_bytes = unique_id.bytes
+
+    # Encoder les octets en URL-safe Base64
+    urlsafe_base64_encoded = base64.urlsafe_b64encode(uuid_bytes)
+
+    # Décoder la chaîne d'octets Base64 en une chaîne Unicode
+    urlsafe_base64_encoded_string = urlsafe_base64_encoded.decode('utf-8')
+
+    # Remplacer les ponctuations par des caractères aléatoires
+    final_id = replace_punctuation_with_random(urlsafe_base64_encoded_string)
+
+    # ajout du prefixe
+    final_id = prefix + "_" + final_id if len(provider) == 0 else prefix + "_" + provider + "_" + final_id
+
+    return final_id
+
 
 __mapping_prefix__ = {
         "Statut": "term_sts",
@@ -102,6 +149,14 @@ class AbstractActions(BASE):
     @classmethod
     def before_insert_create_id_ref(cls, mapper, connection, target):
         """Génère l'ID forgé de référentiel avant l'insertion"""
+        try:
+            # pour les tables thesaurus
+            prefix = __mapping_prefix__[target.topic]
+        except AttributeError:
+            # pour les tables par défaut
+            prefix = cls.__prefix__
+        target._id_endp = generate_random_uuid(prefix=prefix, provider="endp")
+        """
         # retourne le bon prefixe pour forgé l'id_reference
         # prefix = None
         try:
@@ -126,6 +181,7 @@ class AbstractActions(BASE):
             target._id_endp = f"{prefix}_{count + 1}"
 
         #connection.close()
+        """
 
     @classmethod
     def before_insert_get_form_first(cls, mapper, connection, target, separator=";"):
@@ -140,6 +196,7 @@ def before_insert(mapper, connection, target):
     """Méthodes appelées avant l'insertion dans la base de données"""
     target.before_insert_create_id_ref(mapper, connection, target)
     target.before_insert_get_form_first(mapper, connection, target)
+
 
 # ~~~~~~~~~~~~~~~~~~~ > Enum classes < ~~~~~~~~~~~~~~~~~~~
 
@@ -199,6 +256,7 @@ class EventTypeLabels(enum.Enum):
 
     def __str__(self):
         return self.value
+
 
 class FamilyRelationshipLabels(enum.Enum):
     """Liste contrôlée des types de relations familiales.
@@ -347,9 +405,39 @@ class Person(AbstractActions):
     comment = Column(Text, nullable=True, unique=False)
     bibliography = Column(Text, nullable=True, unique=False)
 
-    events       = relationship("Event", back_populates="person", foreign_keys="Event.person_id", cascade="all, delete-orphan")
-    kb_links     = relationship("PersonHasKbLinks", back_populates="person", foreign_keys="PersonHasKbLinks.person_id")
-    family_links = relationship("PersonHasFamilyRelationshipType", back_populates="person", foreign_keys="PersonHasFamilyRelationshipType.person_id")
+    events       = relationship("Event",
+                                foreign_keys="Event.person_id",
+                                cascade="all, delete-orphan",
+                                lazy="dynamic",
+                                back_populates="person")
+    _events_predecessors = relationship("Event",
+                                        foreign_keys="Event.predecessor_id",)
+
+    kb_links     = relationship("PersonHasKbLinks",
+                                foreign_keys="PersonHasKbLinks.person_id",
+                                cascade="all, delete, delete-orphan",
+                                #lazy="dynamic",
+                                back_populates="person")
+
+    family_links = relationship("PersonHasFamilyRelationshipType",
+                                back_populates="person",
+                                cascade="all, delete, delete-orphan",
+                                foreign_keys="PersonHasFamilyRelationshipType.person_id")
+    family_links_relative = relationship("PersonHasFamilyRelationshipType",
+                                            back_populates="relative",
+                                            foreign_keys="PersonHasFamilyRelationshipType.relative_id",
+                                         cascade="all, delete, delete-orphan")
+    #family_links = relationship("PersonHasFamilyRelationshipType",
+    #                            foreign_keys="PersonHasFamilyRelationshipType.person_id",
+    #                            cascade="all, delete, delete-orphan",
+                                #lazy="dynamic",
+    #                            back_populates="person")
+
+    #_family_relative_links = relationship("PersonHasFamilyRelationshipType",
+    #                              foreign_keys="PersonHasFamilyRelationshipType.relative_id",
+    #                              cascade="all, delete, delete-orphan",
+    #                              #lazy="dynamic",
+    #                              back_populates="person")
 
     _created_at  = Column(DateTime, default=datetime.datetime.now())
     _updated_at  = Column(DateTime, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
@@ -426,15 +514,23 @@ class Event(AbstractActions):
     person_id = Column(Integer, ForeignKey("persons.id"), nullable=False, unique=False)
     date = Column(String(25), nullable=True, unique=False)
     image_url = Column(String(25), nullable=True, unique=False)
-    place_term_id = Column(Integer, ForeignKey("places_thesaurus_terms.id"), nullable=True, unique=False)
-    person_thesaurus_term_id = Column(Integer, ForeignKey("persons_thesaurus_terms.id"), nullable=True, unique=False)
-    predecessor_id = Column(Integer, ForeignKey("persons.id"), nullable=True, unique=False)
+    place_term_id = Column(Integer, ForeignKey("places_thesaurus_terms.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, unique=False)
+    person_thesaurus_term_id = Column(Integer, ForeignKey("persons_thesaurus_terms.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, unique=False)
+    predecessor_id = Column(Integer, ForeignKey("persons.id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True, unique=False)
     comment = Column(Text, nullable=True, unique=False)
 
-    person = relationship("Person", back_populates="events", foreign_keys="Event.person_id")
-    predecessor = relationship("Person", foreign_keys=[predecessor_id])
-    place_term = relationship("PlacesTerm", foreign_keys=[place_term_id])
-    thesaurus_term_person = relationship("ThesaurusTerm", foreign_keys=[person_thesaurus_term_id])
+    person = relationship("Person",
+                          foreign_keys="Event.person_id",
+                          back_populates="events")
+    predecessor = relationship("Person",
+                               foreign_keys=[predecessor_id],
+                               back_populates="_events_predecessors")
+
+    place_term = relationship("PlacesTerm",
+                              backref=backref('events', cascade="all, delete"),)
+
+    thesaurus_term_person = relationship("ThesaurusTerm",
+                                         backref=backref('events', cascade="all, delete"),)
 
     def __repr__(self):
         return f"<Event: {self._id_endp} | {self.type} | {self.person_id} | {self.date} | {self.place_term_id} | {self.person_thesaurus_term_id} | {self.predecessor_id} | {self.comment}>"
@@ -483,10 +579,8 @@ class ThesaurusTerm(AbstractGenericThesaurusTerm):
     # Clé de regroupement
     topic = Column(Enum(*_get_enum_values(ThesaurusTopicLabels)), nullable=False, unique=False)
 
-    # when term is delete remove all events with this term
-    events = relationship("Event", back_populates="thesaurus_term_person", cascade="all, delete-orphan", foreign_keys="Event.person_thesaurus_term_id")
-
 # > Referential Classes about places
+
 
 class PlacesTerm(AbstractGenericThesaurusTerm):
     """Thesaurus pour les lieux.
@@ -525,11 +619,10 @@ class PlacesTerm(AbstractGenericThesaurusTerm):
     # Clé de regroupement
     topic = Column(Enum(*_get_enum_values(ThesaurusPlacesTopicsLabels)), nullable=False, unique=False)
 
-    # when term is delete remove all events with this term
-    events = relationship("Event", back_populates="place_term", cascade="all, delete-orphan", foreign_keys="Event.place_term_id")
 # ~~~~~~~~~~~~~~~~~~~ > Association tables < ~~~~~~~~~~~~~~~~~~~
 
-class PersonHasFamilyRelationshipType(BASE):
+
+class PersonHasFamilyRelationshipType(AbstractActions):
     """Une personne peut avoir 1 ou plusieurs relations familiales.
 
     :param id: Clé primaire autoincrémentée. [REQ.]
@@ -542,17 +635,20 @@ class PersonHasFamilyRelationshipType(BASE):
     :type relation_type: ENUM(FamilyRelationshipLabels)
     """
     __tablename__ = "person_has_family_relationships_type"
+    __prefix__ = "family_relationship"
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
     __table_args__ = (UniqueConstraint('person_id', 'relative_id', name="_person_has_family_relationships_type"),)
-    person_id = Column(Integer, ForeignKey("persons.id"), nullable=False, unique=False)
-    relative_id = Column(Integer, ForeignKey("persons.id"), nullable=False, unique=False)
+
+    person_id = Column(Integer, ForeignKey("persons.id", ondelete="CASCADE"), nullable=False, unique=False)
+    relative_id = Column(Integer, ForeignKey("persons.id", ondelete="CASCADE"), nullable=False, unique=False)
+
     relation_type = Column(Enum(*_get_enum_values(FamilyRelationshipLabels)), nullable=False, unique=False)
 
-    person = relationship("Person", foreign_keys=[person_id])
-    relative = relationship("Person", foreign_keys=[relative_id])
+    person = relationship("Person", foreign_keys=[person_id], uselist=False)
+    relative = relationship("Person", foreign_keys=[relative_id], uselist=False)
 
 
-class PersonHasKbLinks(BASE):
+class PersonHasKbLinks(AbstractActions):
     """Une personne peut avoir 1 ou plusieurs liens vers des bases de connaissances
 
     :param id: Clé primaire autoincrémentée. [REQ.]
@@ -565,7 +661,7 @@ class PersonHasKbLinks(BASE):
     :type url: STRING(200)
     """
     __tablename__ = "person_has_kb_links"
-    __prefix__ = "per_kb"
+    __prefix__ = "person_kb"
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
     person_id = Column(Integer, ForeignKey("persons.id", ondelete="CASCADE"), nullable=False, unique=False)
     type_kb = Column(Enum(*_get_enum_values(KnowledgeBaseLabels)), nullable=False, unique=False)

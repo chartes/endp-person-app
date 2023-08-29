@@ -33,7 +33,9 @@ from .formaters import (_markup_interpret,
                         _format_label_form_with_tooltip)
 from .validators import (is_valid_date,
                          is_valid_kb_links,
-                         is_term_already_exists)
+                         is_term_already_exists,
+                         is_family_link_circular,
+                         is_family_link_valid)
 from .widgets import Select2DynamicWidget
 
 EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
@@ -63,32 +65,46 @@ class GlobalModelView(ModelView):
 
 class FamilyRelationshipView(GlobalModelView):
     """View for the family relationship model."""
-    column_list = ['id', 'person', 'relation_type', 'relative']
-    column_labels = {'person': 'Personne',
+    column_list = ['id', 'person', 'relation_type', 'relative', '_id_endp']
+    column_labels = {'id': 'ID',
+                     '_id_endp': 'ID e-NDP',
+                     'person': 'Personne',
                      'relative': 'Personne liée',
                      'relation_type': 'Relation',
                      'person.pref_label': 'Personne',
                      'relative.pref_label': 'Personne liée'}
-    column_searchable_list = ['person.pref_label', 'relative.pref_label']
+    column_searchable_list = ['person.pref_label', 'relative.pref_label', '_id_endp']
 
 
 class KbLinksView(GlobalModelView):
     """View for the person kb links model."""
-    column_list = ['id', 'person', 'type_kb', 'url']
-    column_labels = {'person': 'Personne',
+    column_list = ['id', 'person', 'type_kb', 'url', '_id_endp']
+    column_labels = {'id': 'ID',
+                     '_id_endp': 'ID e-NDP',
+                     'person': 'Personne',
                      'type_kb': 'Type',
                      'url': 'Lien',
                      'person.pref_label': 'Personne'}
     column_sortable_list = ['id', 'type_kb']
-    column_searchable_list = ['person.pref_label']
+    column_searchable_list = ['person.pref_label', '_id_endp']
     column_formatters = {'url': _hyperlink_item_list}
 
 
 class EventView(GlobalModelView):
     """View for the person events model."""
-    column_list = ['id', 'person', 'type', 'place_term', 'thesaurus_term_person', 'predecessor_id', 'date', 'image_url',
-                   'comment']
+    column_list = ['id',
+                   'person',
+                   'type',
+                   'place_term',
+                   'thesaurus_term_person',
+                   'predecessor_id',
+                   'date',
+                   'image_url',
+                   'comment',
+                   '_id_endp']
     column_labels = {
+        'id': 'ID',
+        '_id_endp': 'ID e-NDP',
         'person': 'Personne',
         'type': 'Type',
         'place_term': 'Lieu',
@@ -102,7 +118,7 @@ class EventView(GlobalModelView):
         'thesaurus_term_person.term': 'Terme',
     }
     column_sortable_list = ['id', 'type', 'date', 'image_url']
-    column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url']
+    column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url', '_id_endp']
     column_filters = ['type', 'date', 'person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'image_url']
 
 
@@ -113,9 +129,11 @@ class ReferentialView(GlobalModelView):
     column_labels = {"term": "Terme",
                      "term_fr": "Terme (fr)",
                      "term_definition": "Définition",
-                     "topic": "Topic"}
+                     "topic": "Topic",
+                     "id": "ID",
+                     "_id_endp": "ID e-NDP"}
     column_searchable_list = ["term", "term_fr"]
-    column_list = ["id", "_id_endp", "topic", "term", "term_fr", "term_definition"]
+    column_list = ["id", "topic", "term", "term_fr", "term_definition", "_id_endp"]
     form_excluded_columns = ['events']
     form_args = {
         "topic": {
@@ -148,7 +166,6 @@ class PersonView(GlobalModelView):
     create_template = 'admin/edit.html'
     # Define column that will be displayed in list view
     column_list = ["id",
-                   "_id_endp",
                    "pref_label",
                    "forename_alt_labels",
                    "surname_alt_labels",
@@ -158,11 +175,13 @@ class PersonView(GlobalModelView):
                    "is_canon",
                    "comment",
                    "bibliography",
+                   "_id_endp",
                    "_created_at",
                    "_updated_at",
                    "_last_editor"]
     # Overrides column labels
-    column_labels = {"_id_endp": "Id e-NDP",
+    column_labels = {"id": "ID",
+                     "_id_endp": "ID e-NDP",
                      "pref_label": "Personne e-NDP",
                      "forename_alt_labels": "Prénom (nomen)",
                      "surname_alt_labels": "Nom (cognomen)",
@@ -186,7 +205,7 @@ class PersonView(GlobalModelView):
                     'bibliography')
     # Activate search on specific column in list view
     column_searchable_list = ['pref_label', 'death_date', 'first_mention_date', 'last_mention_date',
-                              'forename_alt_labels', 'surname_alt_labels']
+                              'forename_alt_labels', 'surname_alt_labels', '_id_endp']
     column_filters = ['pref_label', 'is_canon', 'death_date', 'first_mention_date',
                       'last_mention_date', 'forename_alt_labels', 'surname_alt_labels']
     # Activate sorting & add custom label/description on specific column in edit/create view
@@ -342,6 +361,9 @@ class PersonView(GlobalModelView):
         """Update model before saving it. Custom actions on model change."""
         # Check if kb_links are valid
         is_valid_kb_links(model.kb_links)
+        is_family_link_valid(model.family_links)
+
+        is_family_link_circular(model.family_links)
         if model.__tablename__ == "persons":
             model._last_editor = current_user.username
 

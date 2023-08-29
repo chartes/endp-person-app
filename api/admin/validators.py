@@ -31,3 +31,19 @@ def is_term_already_exists(result_db, test_term):
     if result_db is not None:
         raise ValidationError(f"Le terme '{test_term}' est déjà enregistré dans le thesaurus. "
                               f"Voir {result_db.term} ({result_db._id_endp}).")
+
+
+def is_family_link_circular(result_db):
+    """validate that the family link is not circular"""
+    for result in result_db:
+        if result.relative.id == result.person.id:
+            raise ValidationError(f"Vous ne pouvez pas créer un lien familial entre une personne et elle-même. "
+                                  f"Circularité: {result.person.pref_label} {result.relation_type} {result.relative.pref_label}.")
+
+
+def is_family_link_valid(result_db):
+    """validate that the family relationship between 1 and 1"""
+    check = Counter([(res.person.id, res.relative.id, res.person.pref_label, res.relative.pref_label) for res in result_db])
+    for k, v in check.items():
+        if v > 1:
+            raise ValidationError(f"Vous ne pouvez pas créer plusieurs liens familiaux entre la personne {k[2]} et la personne {k[3]}.")
