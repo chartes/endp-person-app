@@ -46,7 +46,7 @@ def test_create_user():
 
 def test_read_an_existing_person():
     """read an existing person"""
-    person = local_session.query(Person).first()
+    person = local_session.query(Person.id==1).first()
     assert person is not None
     assert person.pref_label == "Jean d’Acy"
     assert person.is_canon is False
