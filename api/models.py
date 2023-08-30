@@ -12,21 +12,20 @@ import base64
 import string
 import random
 
-from sqlalchemy.engine import Engine
+
 from sqlalchemy import (Column,
-                        Table,
                         DateTime,
                         Boolean,
                         ForeignKey,
                         Integer,
                         String,
-                        UUID,
                         Enum,
                         UniqueConstraint,
+                        CheckConstraint,
                         Text,
                         event)
 from sqlalchemy.orm import (relationship, backref)
-from sqlalchemy import text
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -70,7 +69,10 @@ def generate_random_uuid(prefix, provider=""):
     urlsafe_base64_encoded_string = urlsafe_base64_encoded.decode('utf-8')
 
     # Remplacer les ponctuations par des caractères aléatoires
-    final_id = replace_punctuation_with_random(urlsafe_base64_encoded_string)
+    # on cut uuid à 8 (mais possibilité d'augmenter ou réduire)
+    # cela représente ≈ 10.376.800.670.380.293 combinaisons d'identifiants possibles
+    # pour la table personne par exemple
+    final_id = replace_punctuation_with_random(urlsafe_base64_encoded_string)[:8]
 
     # ajout du prefixe
     final_id = prefix + "_" + final_id if len(provider) == 0 else prefix + "_" + provider + "_" + final_id
@@ -132,11 +134,9 @@ class User(UserMixin, BASE):
     def add_default_user(in_session):
         """Ajoute un utilisateur par défaut"""
         admin = User()
-        admin.username = "admin"
-        admin.email = "admin.endp@chartes.psl.eu"
-        admin.password_hash = "pbkdf2:sha256:600000$gpxiSgaDAtJwVELW$eb" \
-                              "1061add8fc1b27ed8b337ce6b29766c2c9c0f6303" \
-                              "92429d57382f5570ac207"
+        admin.username = settings.FLASK_ADMIN_NAME
+        admin.email = settings.FLASK_ADMIN_MAIL
+        admin.password_hash = settings.FLASK_ADMIN_ADMIN_PASSWORD
         in_session.add(admin)
         in_session.commit()
 
@@ -149,13 +149,21 @@ class AbstractActions(BASE):
     @classmethod
     def before_insert_create_id_ref(cls, mapper, connection, target):
         """Génère l'ID forgé de référentiel avant l'insertion"""
+        is_exist = False
+        new_id = None
         try:
             # pour les tables thesaurus
             prefix = __mapping_prefix__[target.topic]
         except AttributeError:
             # pour les tables par défaut
             prefix = cls.__prefix__
-        target._id_endp = generate_random_uuid(prefix=prefix, provider="endp")
+        # test if new id already exist
+        while not is_exist:
+            new_id = generate_random_uuid(prefix=prefix, provider="endp")
+            is_exist = session.query(cls).filter(cls._id_endp == new_id).first() is None
+            if not is_exist:
+                print(f"ID already exist: {new_id} in {cls.__tablename__}, retrying...")
+        target._id_endp = new_id
         """
         # retourne le bon prefixe pour forgé l'id_reference
         # prefix = None
@@ -408,6 +416,7 @@ class Person(AbstractActions):
     events       = relationship("Event",
                                 foreign_keys="Event.person_id",
                                 cascade="all, delete-orphan",
+                                order_by="Event.date.asc()",
                                 lazy="dynamic",
                                 back_populates="person")
     _events_predecessors = relationship("Event",
@@ -442,6 +451,7 @@ class Person(AbstractActions):
     _created_at  = Column(DateTime, default=datetime.datetime.now())
     _updated_at  = Column(DateTime, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
     _last_editor = Column(String(25), nullable=True, unique=False)
+
 
     def __repr__(self):
         return f"<Personne : {self.id} | {self.pref_label} (mort : {self.death_date})>"
@@ -637,7 +647,10 @@ class PersonHasFamilyRelationshipType(AbstractActions):
     __tablename__ = "person_has_family_relationships_type"
     __prefix__ = "family_relationship"
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
-    __table_args__ = (UniqueConstraint('person_id', 'relative_id', name="_person_has_family_relationships_type"),)
+    __table_args__ = (
+        UniqueConstraint('person_id', 'relative_id', name="_person_has_family_relationships_type"),
+        CheckConstraint('person_id != relative_id', name="_no_circular_relationship"),
+    )
 
     person_id = Column(Integer, ForeignKey("persons.id", ondelete="CASCADE"), nullable=False, unique=False)
     relative_id = Column(Integer, ForeignKey("persons.id", ondelete="CASCADE"), nullable=False, unique=False)

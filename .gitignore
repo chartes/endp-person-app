@@ -167,6 +167,7 @@ cython_debug/
 
 # Specifics to the project
 .prod.env
+infos.txt
 
 # DB artifacts
 *.sqlite

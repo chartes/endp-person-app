@@ -1,6 +1,8 @@
 """
 Tests for SQL CRUD operations on DB model.
 """
+import pytest
+from sqlalchemy.exc import IntegrityError
 
 from tests.conftest import local_session
 from api.models import (User,
@@ -393,15 +395,157 @@ def test_persistent_endp_id():
     assert person is None
 
 
-def test_family_relationship():
-    pass
+def test_family_relationships():
+    person_1 = local_session.query(Person).filter(Person.id == 93).first()
+    person_2 = local_session.query(Person).filter(Person.id == 94).first()
+    person_3 = local_session.query(Person).filter(Person.id == 99).first()
+    person_related_1 = local_session.query(Person).filter(Person.id == 95).first()
+    person_related_2 = local_session.query(Person).filter(Person.id == 96).first()
+    assert person_1 is not None
+    assert person_2 is not None
+    new_family_relationship_1 = PersonHasFamilyRelationshipType(
+        person_id=person_1.id,
+        relative_id=person_related_1.id,
+        relation_type="fils de")
+    new_family_relationship_2 = PersonHasFamilyRelationshipType(
+        person_id=person_2.id,
+        relative_id=person_related_1.id,
+        relation_type="mère de")
+    local_session.add(new_family_relationship_1)
+    local_session.add(new_family_relationship_2)
+    local_session.commit()
+    family_relationship_1 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_1.id
+    )
+    family_relationship_2 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_2.id
+    )
+    assert family_relationship_1 is not None
+    assert family_relationship_2 is not None
+    # remove related person
+    local_session.delete(person_related_1)
+    local_session.commit()
+    family_relationships_related = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        relative_id=person_related_1.id
+    ).all()
+    assert family_relationships_related == []
+    # check if persons are not deleted
+    person_1 = local_session.query(Person).filter(Person.id == 93).first()
+    person_2 = local_session.query(Person).filter(Person.id == 94).first()
+    assert person_1 is not None
+    assert person_2 is not None
+    # remove person 1
+    local_session.delete(person_1)
+    local_session.commit()
+    family_relationships_per_1 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_1.id
+    ).all()
+    assert family_relationships_per_1 == []
+    # add relationship with person 3
+    new_family_relationship_3 = PersonHasFamilyRelationshipType(
+        person_id=person_3.id,
+        relative_id=person_related_2.id,
+        relation_type="fils de")
+    local_session.add(new_family_relationship_3)
+    local_session.commit()
+    # test if relationship is added
+    family_relationship_3 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_3.id,
+        relative_id=person_related_2.id,
+    ).first()
+    assert family_relationship_3 is not None
+    # update relationship
+    family_relationship_3.relation_type = "fille de"
+    local_session.commit()
+    family_relationship_3 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_3.id,
+        relative_id=person_related_2.id,
+    ).first()
+    assert family_relationship_3 is not None
+    assert family_relationship_3.relation_type == "fille de"
 
 
 def test_insert_model_constraint():
+    person_1 = local_session.query(Person).filter(Person.id == 123).first()
+    person_2_related = local_session.query(Person).filter(Person.id == 128).first()
     # check ";" separator in labels for person
-    # check ISO date
-    # check circular reference with family relationship
-    pass
+    assert len(person_1.forename_alt_labels.split(';')) == 2
+    # - update person 1
+    person_1.forename_alt_labels = "test;TEST;test1"
+    local_session.commit()
+    person_1 = local_session.query(Person).filter(Person.id == 123).first()
+    assert len(person_1.forename_alt_labels.split(';')) == 3
+    # check unique reference integrity (jean d'acy fils de marie d'acy, jean d'acy père de marie d'acy)
+    new_family_relationship_1 = PersonHasFamilyRelationshipType(
+        person_id=person_1.id,
+        relative_id=person_2_related.id,
+        relation_type="fils de")
+    new_family_relationship_2 = PersonHasFamilyRelationshipType(
+        person_id=person_1.id,
+        relative_id=person_2_related.id,
+        relation_type="père de")
+    with pytest.raises(IntegrityError):
+        local_session.add(new_family_relationship_1)
+        local_session.add(new_family_relationship_2)
+        local_session.commit()
+
+    local_session.rollback()
+    # check if family relationship is not added
+    family_relationship_1 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_1.id,
+        relative_id=person_2_related.id,
+        relation_type="fils de"
+    ).first()
+    family_relationship_2 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_1.id,
+        relative_id=person_2_related.id,
+        relation_type="père de"
+    ).first()
+    assert family_relationship_1 is None
+    assert family_relationship_2 is None
+    # check double in family relationship (jean d'acy fils de marie d'acy, jean d'acy fils de marie d'acy)
+    new_family_relationship_1 = PersonHasFamilyRelationshipType(
+        person_id=person_1.id,
+        relative_id=person_2_related.id,
+        relation_type="fils de")
+    new_family_relationship_2 = PersonHasFamilyRelationshipType(
+        person_id=person_1.id,
+        relative_id=person_2_related.id,
+        relation_type="fils de")
+    with pytest.raises(IntegrityError):
+        local_session.add(new_family_relationship_1)
+        local_session.add(new_family_relationship_2)
+        local_session.commit()
+    local_session.rollback()
+    # check if family relationships are not added
+    family_relationship_1 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_1.id,
+        relative_id=person_2_related.id,
+        relation_type="fils de"
+    ).first()
+    family_relationship_2 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_1.id,
+        relative_id=person_2_related.id,
+        relation_type="fils de"
+    ).first()
+    assert family_relationship_1 is None
+    assert family_relationship_2 is None
+    # check circular reference with family relationship (jean d'acy fils de jean d'acy)
+    new_family_relationship_1 = PersonHasFamilyRelationshipType(
+        person_id=person_1.id,
+        relative_id=person_1.id,
+        relation_type="fils de")
+    with pytest.raises(IntegrityError):
+        local_session.add(new_family_relationship_1)
+        local_session.commit()
+    local_session.rollback()
+    # check if family relationship is not added
+    family_relationship_1 = local_session.query(PersonHasFamilyRelationshipType).filter_by(
+        person_id=person_1.id,
+        relative_id=person_1.id,
+        relation_type="fils de"
+    ).first()
+    assert family_relationship_1 is None
 
 
 

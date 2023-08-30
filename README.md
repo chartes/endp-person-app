@@ -50,6 +50,12 @@ Pour contrôler le bon fonctionnement de l'application :
 - la documentation de l'API se trouve à l'adresse : http://localhost:8000/api/docs
 - l'interface d'administration se trouve à l'adresse : http://localhost:8000/admin/
 
+Identifiants par défaut pour l'authentification à l'interface d'administration 
+pour le développement et les tests :
+
+- username : `admin`
+- password : `admin`
+
 ## Ajouter un utilisateur 
 
 ```bash

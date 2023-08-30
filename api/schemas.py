@@ -10,6 +10,9 @@ from typing import Union, List
 from pydantic import BaseModel, Field, PrivateAttr
 
 
+class Message(BaseModel):
+    message: str
+
 class EventScheme(BaseModel):
     id: int
     type: str

@@ -65,7 +65,7 @@ class GlobalModelView(ModelView):
 
 class FamilyRelationshipView(GlobalModelView):
     """View for the family relationship model."""
-    column_list = ['id', 'person', 'relation_type', 'relative', '_id_endp']
+    column_list = ['id', '_id_endp', 'person', 'relation_type', 'relative']
     column_labels = {'id': 'ID',
                      '_id_endp': 'ID e-NDP',
                      'person': 'Personne',
@@ -78,7 +78,7 @@ class FamilyRelationshipView(GlobalModelView):
 
 class KbLinksView(GlobalModelView):
     """View for the person kb links model."""
-    column_list = ['id', 'person', 'type_kb', 'url', '_id_endp']
+    column_list = ['id', '_id_endp', 'person', 'type_kb', 'url']
     column_labels = {'id': 'ID',
                      '_id_endp': 'ID e-NDP',
                      'person': 'Personne',
@@ -93,6 +93,7 @@ class KbLinksView(GlobalModelView):
 class EventView(GlobalModelView):
     """View for the person events model."""
     column_list = ['id',
+                   '_id_endp',
                    'person',
                    'type',
                    'place_term',
@@ -100,8 +101,7 @@ class EventView(GlobalModelView):
                    'predecessor_id',
                    'date',
                    'image_url',
-                   'comment',
-                   '_id_endp']
+                   'comment']
     column_labels = {
         'id': 'ID',
         '_id_endp': 'ID e-NDP',
@@ -133,8 +133,8 @@ class ReferentialView(GlobalModelView):
                      "id": "ID",
                      "_id_endp": "ID e-NDP"}
     column_searchable_list = ["term", "term_fr"]
-    column_list = ["id", "topic", "term", "term_fr", "term_definition", "_id_endp"]
-    form_excluded_columns = ['events']
+    column_list = ["id", '_id_endp', "topic", "term", "term_fr", "term_definition"]
+    form_excluded_columns = ['events', 'term_position']
     form_args = {
         "topic": {
             "label": _format_label_form_with_tooltip("Topic", "Topic dans le thesaurus")
@@ -166,6 +166,7 @@ class PersonView(GlobalModelView):
     create_template = 'admin/edit.html'
     # Define column that will be displayed in list view
     column_list = ["id",
+                   '_id_endp',
                    "pref_label",
                    "forename_alt_labels",
                    "surname_alt_labels",
@@ -175,7 +176,6 @@ class PersonView(GlobalModelView):
                    "is_canon",
                    "comment",
                    "bibliography",
-                   "_id_endp",
                    "_created_at",
                    "_updated_at",
                    "_last_editor"]

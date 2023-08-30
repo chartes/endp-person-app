@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     FLASK_MAIL_USERNAME: str = str(os.environ.get("FLASK_MAIL_USERNAME", ""))
     FLASK_MAIL_PASSWORD: str = str(os.environ.get("FLASK_MAIL_PASSWORD", ""))
 
+    FLASK_ADMIN_NAME = str(os.environ.get("FLASK_ADMIN_NAME", "admin"))
+    FLASK_ADMIN_MAIL = str(os.environ.get("FLASK_ADMIN_MAIL", ""))
+    FLASK_ADMIN_ADMIN_PASSWORD = str(os.environ.get("FLASK_ADMIN_ADMIN_PASSWORD", ""))
+
     # ~ Database settings ~
     DB_URI: str = str(os.environ.get("DB_URI", "db/endp.dev.sqlite"))
     DB_ECHO: bool = bool(os.environ.get("DB_ECHO", False))
