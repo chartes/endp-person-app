@@ -1,8 +1,8 @@
 """
 Tests for SQL CRUD operations on DB model.
 """
-#import pytest
-#from sqlalchemy.exc import IntegrityError
+import pytest
+from sqlalchemy.exc import IntegrityError
 
 from tests.conftest import local_session
 from api.models import (User,
@@ -19,6 +19,7 @@ from api.models import (User,
 def test_read_user():
     """read an existing user"""
     with local_session as session:
+        print(session.query(User).all())
         user = session.query(User).first()
         assert user is not None
         assert user.username == "admin"
@@ -50,6 +51,7 @@ def test_create_user():
 def test_read_an_existing_person():
     """read an existing person"""
     with local_session as session:
+        print(session.query(Person).all())
         person = session.query(Person).first()
         assert person is not None
         assert person.pref_label == "Jean d’Acy"
@@ -468,7 +470,7 @@ def test_family_relationships():
     assert family_relationship_3 is not None
     assert family_relationship_3.relation_type == "fille de"
 
-"""
+
 def test_insert_model_constraint():
     person_1 = local_session.query(Person).filter(Person.id == 123).first()
     person_2_related = local_session.query(Person).filter(Person.id == 128).first()
@@ -550,7 +552,6 @@ def test_insert_model_constraint():
         relation_type="fils de"
     ).first()
     assert family_relationship_1 is None
-"""
 
 
 
