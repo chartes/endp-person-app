@@ -19,6 +19,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - run: |
+          wget https://sqlite.org/2022/sqlite-autoconf-3380500.tar.gz
+          tar -xvf sqlite-autoconf-3380500.tar.gz
+          ./configure
+          make
+          sudo make install
+          export PATH="/usr/local/bin:$PATH"
+        working-directory: sqlite-autoconf-3380500
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -30,3 +38,5 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+        env:
+          LD_LIBRARY_PATH: /usr/local/lib
