@@ -18,14 +18,14 @@ jobs:
 
       # build SQLite from source, because I need 3.35<=
       - run: |
-          wget https://sqlite.org/2022/sqlite-autoconf-3380500.tar.gz
-          tar -xvf sqlite-autoconf-3380500.tar.gz
+          wget https://sqlite.org/2023/sqlite-autoconf-3430000.tar.gz
+          tar -xvf sqlite-autoconf-3430000.tar.gz
       - run: |
           ./configure
           make
           sudo make install
           export PATH="/usr/local/lib:$PATH"
-        working-directory: sqlite-autoconf-3380500
+        working-directory: sqlite-autoconf-3430000
 
       # run pytest
       - uses: actions/setup-python@v2
