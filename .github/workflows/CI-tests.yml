@@ -1,37 +1,30 @@
-name: eNDP API CI tests
+name: eNDP API CI
 
-on: [push]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
-
-  # test with pytest
-  test:
-    name: pytest
+  build:
     runs-on: ubuntu-latest
-
-    # used to ensure testing directories are used, not user directories
-    env:
-      DEVELOPMENT: '1'
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.8']
 
     steps:
       - uses: actions/checkout@v2
-
-      # build SQLite from source, because I need 3.35<=
-      - run: |
-          wget https://sqlite.org/2023/sqlite-autoconf-3430000.tar.gz
-          tar -xvf sqlite-autoconf-3430000.tar.gz
-      - run: |
-          ./configure
-          make
-          sudo make install
-          export PATH="/usr/local/lib:$PATH"
-        working-directory: sqlite-autoconf-3430000
-
-      # run pytest
-      - uses: actions/setup-python@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-      - run: pip install -r requirements.txt pytest
-      - run: pytest
-        env:
-          LD_LIBRARY_PATH: /usr/local/lib
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Test with pytest
+        run: |
+          cd ./tests/
+          pytest
+        shell: bash
