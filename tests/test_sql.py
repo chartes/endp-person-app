@@ -18,42 +18,46 @@ from api.models import (User,
 
 def test_read_user():
     """read an existing user"""
-    user = local_session.query(User).first()
-    assert user is not None
-    assert user.username == "admin"
+    with local_session as session:
+        user = session.query(User).first()
+        assert user is not None
+        assert user.username == "admin"
 
 
 def test_read_unknown_user():
     """read an unknown user"""
-    user = local_session.query(User).filter(User.username == "user1").first()
-    assert user is None
+    with local_session as session:
+        user = session.query(User).filter(User.username == "user1").first()
+        assert user is None
 
 
 def test_create_user():
     """create a new user"""
-    user = User()
-    user.username = "user1"
-    user.email = "user1@chartes.com"
-    user.set_password("user1")
-    local_session.add(user)
-    local_session.commit()
-    user = local_session.query(User).filter(User.username == "user1").first()
-    assert user is not None
-    assert user.username == "user1"
+    with local_session as session:
+        user = User()
+        user.username = "user1"
+        user.email = "user1@chartes.com"
+        user.set_password("user1")
+        session.add(user)
+        session.commit()
+        user = session.query(User).filter(User.username == "user1").first()
+        assert user is not None
+        assert user.username == "user1"
 
 # -- PERSON --
 
 
 def test_read_an_existing_person():
     """read an existing person"""
-    person = local_session.query(Person).filter(Person.id == 1).first()
-    assert person is not None
-    assert person.pref_label == "Jean d’Acy"
-    assert person.is_canon is False
-    person = local_session.query(Person).filter(Person.pref_label == "Jean d’Acy").first()
-    assert person is not None
-    assert person.pref_label == "Jean d’Acy"
-    assert person.is_canon is False
+    with local_session as session:
+        person = session.query(Person).first()
+        assert person is not None
+        assert person.pref_label == "Jean d’Acy"
+        assert person.is_canon is False
+        person = session.query(Person).filter(Person.pref_label == "Jean d’Acy").first()
+        assert person is not None
+        assert person.pref_label == "Jean d’Acy"
+        assert person.is_canon is False
 
 
 def test_read_an_unknown_person():
