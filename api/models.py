@@ -649,7 +649,7 @@ class PersonHasFamilyRelationshipType(AbstractActions):
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
     __table_args__ = (
         UniqueConstraint('person_id', 'relative_id', name="_person_has_family_relationships_type"),
-        # CheckConstraint('person_id != relative_id', name="_no_circular_relationship"),
+        CheckConstraint('person_id != relative_id', name="_no_circular_relationship"),
     )
 
     person_id = Column(Integer, ForeignKey("persons.id", ondelete="CASCADE"), nullable=False, unique=False)

@@ -24,7 +24,6 @@ engine = create_engine(
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-BASE.metadata.drop_all(bind=engine)
 BASE.metadata.create_all(bind=engine)
 
 
@@ -45,6 +44,5 @@ local_session = TestingSessionLocal()
 User.add_default_user(in_session=local_session)
 # 2) add data
 populate_db_process(in_session=local_session)
-local_session.commit()
 
 client = TestClient(app)
