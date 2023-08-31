@@ -158,12 +158,15 @@ class AbstractActions(BASE):
             # pour les tables par défaut
             prefix = cls.__prefix__
         # test if new id already exist
+        """
         while not is_exist:
             new_id = generate_random_uuid(prefix=prefix, provider="endp")
             is_exist = session.query(cls).filter(cls._id_endp == new_id).first() is None
             if not is_exist:
                 print(f"ID already exist: {new_id} in {cls.__tablename__}, retrying...")
         target._id_endp = new_id
+        """
+        target._id_endp = generate_random_uuid(prefix=prefix, provider="endp")
         """
         # retourne le bon prefixe pour forgé l'id_reference
         # prefix = None
