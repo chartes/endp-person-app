@@ -3,15 +3,18 @@ main.py
 
 Entry point for FastAPI application.
 """
-from typing import Any
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
+from whoosh import index
 
 from .admin import flask_app
 from .routes import api_router
+from .config import (settings,
+                     BASE_DIR)
 
 DESCRIPTION = """
 ## Person API documentation and specification for e-NDP ANR project

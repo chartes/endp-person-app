@@ -174,3 +174,5 @@ infos.txt
 *.sqlite3
 
 .DS_Store
+index_dir/
+index_endp/

@@ -49,6 +49,9 @@ class Settings(BaseSettings):
     DB_ECHO: bool = bool(os.environ.get("DB_ECHO", False))
     METADATA_DATA_INTEGRITY_CHECK_PATH: str = str(os.environ.get("METADATA_DATA_INTEGRITY_CHECK_PATH", "ressources_db/"))
 
+    # ~Index settings ~
+    WHOOSH_INDEX_DIR: str = str(os.environ.get("WHOOSH_INDEX_DIR", "index_endp"))
+
     class Config:
         env_file = env_file
         env_file_encoding = "utf-8"

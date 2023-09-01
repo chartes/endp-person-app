@@ -2,7 +2,6 @@
 This main module contains the admin interface generation
 with flask-admin to manage the database.
 """
-
 from flask import Flask
 
 from flask_admin import Admin

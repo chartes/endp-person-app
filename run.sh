@@ -54,6 +54,8 @@ if [[ "$2" == "-db" ]]; then
   python3 manage.py db-recreate
   echo "Populate database..."
   python3 manage.py db-populate
+  echo "Recreate and populate whoosh index..."
+  python3 manage.py index-create
 fi
 
 

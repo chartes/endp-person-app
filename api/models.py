@@ -30,8 +30,9 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 
+from .config import (settings, BASE_DIR)
 from .database import BASE, session
-from .config import settings
+from .index_conf import ix
 
 # Use sphinx autodoc, uncomment this line and comment relative import
 # from sqlalchemy.ext.declarative import declarative_base
@@ -141,7 +142,6 @@ class User(UserMixin, BASE):
         in_session.commit()
 
 
-
 class AbstractActions(BASE):
     __abstract__ = True
     _id_endp = Column(String(25), nullable=False, unique=True)
@@ -169,32 +169,6 @@ class AbstractActions(BASE):
                 except Exception:
                     is_exist = False
             target._id_endp = new_id
-        """
-        # retourne le bon prefixe pour forgé l'id_reference
-        # prefix = None
-        try:
-            prefix = __mapping_prefix__[target.topic]
-        except AttributeError:
-            prefix = cls.__prefix__
-        # Récupérer l'id_reference du dernier enregistrement
-        try:
-            new_id = session.query(cls).filter(cls.topic == target.topic).order_by(cls.id).all()[-1]._id_endp
-            new_id = int(new_id.split("_")[-1]) + 1
-            # Générer l'ID de référentiel basé sur le nombre de lignes existantes
-            target._id_endp = f"{prefix}_{new_id}"
-        #print(f"test: {[t for t in test]}")
-        except:
-            count = connection.scalar(text(f"SELECT _id_endp FROM {cls.__tablename__} ORDER BY id DESC LIMIT 1"))
-            if count is None:
-                # Récupérer le nombre de lignes existantes
-                count = connection.scalar(text(f"SELECT COUNT(*) FROM {cls.__tablename__}"))
-            else:
-                count = int(count.split("_")[-1])
-                # Générer l'ID de référentiel basé sur le nombre de lignes existantes
-            target._id_endp = f"{prefix}_{count + 1}"
-
-        #connection.close()
-        """
 
     @classmethod
     def before_insert_get_form_first(cls, mapper, connection, target, separator=";"):
@@ -203,7 +177,43 @@ class AbstractActions(BASE):
             target.forename = target.forename_alt_labels.split(separator)[0]
             target.surname = target.surname_alt_labels.split(separator)[0]
 
+    @classmethod
+    def update_person_fts_index_after_update(cls, mapper, connection, target):
+        if cls.__tablename__ == "persons":
+            writer = ix.writer()
+            writer.update_document(
+                id=str(target.id).encode('utf-8').decode('utf-8'),
+                id_endp=str(target._id_endp).encode('utf-8').decode('utf-8'),
+                pref_label=str(target.pref_label).encode('utf-8').decode('utf-8'),
+                forename_alt_labels=str(target.forename_alt_labels).encode('utf-8').decode('utf-8'),
+                surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
+            )
+            writer.commit()
+            # print(f"Updating Person {target.id} in index")
 
+    @classmethod
+    def insert_person_fts_index_after_insert(cls, mapper, connection, target):
+        if cls.__tablename__ == "persons":
+            writer = ix.writer()
+            writer.add_document(
+            id=str(target.id).encode('utf-8').decode('utf-8'),
+            id_endp=str(target._id_endp).encode('utf-8').decode('utf-8'),
+            pref_label=str(target.pref_label).encode('utf-8').decode('utf-8'),
+            forename_alt_labels=str(target.forename_alt_labels).encode('utf-8').decode('utf-8'),
+            surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
+        )
+            writer.commit()
+            # print(f"Adding Person {target.id} to index")
+    @classmethod
+    def delete_person_fts_index_after_delete(cls, mapper, connection, target):
+        if cls.__tablename__ == "persons":
+            writer = ix.writer()
+            writer.delete_by_term('id', str(target.id))
+            writer.commit()
+            # print(f"Deleting Person {target.id} from index")
+
+
+# Attach event listeners to AbstractActions class for insert/update/delete events
 @event.listens_for(AbstractActions, "before_insert", propagate=True)
 def before_insert(mapper, connection, target):
     """Méthodes appelées avant l'insertion dans la base de données"""
@@ -211,7 +221,23 @@ def before_insert(mapper, connection, target):
     target.before_insert_get_form_first(mapper, connection, target)
 
 
+@event.listens_for(AbstractActions, "after_insert", propagate=True)
+def after_insert(mapper, connection, target):
+    """Méthodes appelées après l'insertion dans la base de données"""
+    target.insert_person_fts_index_after_insert(mapper, connection, target)
+
+@event.listens_for(AbstractActions, "after_update", propagate=True)
+def after_update(mapper, connection, target):
+   """Méthodes appelées après l'insertion dans la base de données"""
+   target.update_person_fts_index_after_update(mapper, connection, target)
+
+@event.listens_for(AbstractActions, "after_delete", propagate=True)
+def after_delete(mapper, connection, target):
+    """Méthodes appelées après la suppression dans la base de données"""
+    target.delete_person_fts_index_after_delete(mapper, connection, target)
+
 # ~~~~~~~~~~~~~~~~~~~ > Enum classes < ~~~~~~~~~~~~~~~~~~~
+
 
 
 class KnowledgeBaseLabels(enum.Enum):
@@ -404,7 +430,7 @@ class Person(AbstractActions):
     """
     __tablename__ = "persons"
     __prefix__ = "person"
-
+    info = {'use_fts5': True}
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False, unique=True)
     pref_label = Column(String(125), nullable=False, unique=False)
     forename = Column(String(45), nullable=False, unique=False)
@@ -460,6 +486,9 @@ class Person(AbstractActions):
 
     def __repr__(self):
         return f"<Personne : {self.id} | {self.pref_label} (mort : {self.death_date})>"
+
+
+
 
 
 ###########################################################

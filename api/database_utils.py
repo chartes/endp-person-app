@@ -1,7 +1,8 @@
 """
 database_utils.py
 
-A set of functions to populate the database with the latest version of data.
+A set of functions to populate and operate migrations
+in the database with the latest version of data.
 """
 
 import os
@@ -99,7 +100,7 @@ def get_table_metadata(table, dir_data):
             'model': DB_MODEL_SWITCHER[table['name']]
         }
         return table_metadata
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -108,13 +109,18 @@ def read_csv_data(file_path, separator, type_df):
     try:
         df = pd.read_csv(file_path, sep=separator, encoding='utf-8', dtype=type_df)
         return df
-    except Exception as e:
+    except Exception:
         return None
 
 
 def populate_table(in_session, model, df):
     """Populate a database table with data from a DataFrame."""
-    items = [model(**row.to_dict()) for _, row in df.iterrows()]
+    items = [
+        model(**row.to_dict()) for _, row in df.applymap(
+            lambda x: x.strip()
+            if isinstance(x, str)
+            else x).iterrows()
+    ]
     for item in items:
         in_session.add(item)
         in_session.commit()

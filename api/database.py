@@ -10,10 +10,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (sessionmaker,
                             scoped_session)
+from whoosh import index
 
 from .config import BASE_DIR, settings
 
 SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, settings.DB_URI)}"
+WHOOSH_INDEX_DIR = os.path.join(BASE_DIR, settings.WHOOSH_INDEX_DIR)
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URI,
@@ -30,7 +32,6 @@ engine = create_engine(
 session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 BASE = declarative_base()
 
-
 # Dependency for FastAPI endpoints
 # to get a database connection.
 def get_db() -> scoped_session:
@@ -44,4 +45,3 @@ def get_db() -> scoped_session:
         yield db
     finally:
         db.close()
-

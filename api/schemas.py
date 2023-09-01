@@ -6,9 +6,16 @@ Use for validation and serialization.
 """
 
 from typing import Union, List
+from enum import Enum
 
 from pydantic import BaseModel, Field, PrivateAttr
 
+# -- parameters schema --
+TYPE_SEARCH = Enum("TYPE_SEARCH", dict(
+    exact="exact",
+    fuzzy="fuzzy",
+    very_fuzzy="very_fuzzy"
+))
 
 class Message(BaseModel):
     message: str
@@ -46,3 +53,9 @@ class PersonOut(BaseModel):
     class Config:
         allow_population_by_field_name = True
         orm_mode = True
+
+
+class PersonSearchOut(BaseModel):
+    query: str
+    total: int
+    results: List[PersonOut]

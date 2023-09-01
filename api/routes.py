@@ -3,11 +3,8 @@ routes.py
 
 Api endpoints.
 """
-from typing import List
 from fastapi import (APIRouter,
-                     Depends,
-                     HTTPException,
-                     Query)
+                     Depends)
 from fastapi.responses import JSONResponse
 from fastapi_pagination import (Page, paginate)
 from fastapi_pagination.utils import disable_installed_extensions_check
@@ -16,10 +13,13 @@ disable_installed_extensions_check()
 from sqlalchemy.orm import Session
 
 from .database import get_db
-from .crud import get_person, get_persons, get_event_by_person_id
-from .schemas import PersonOut, EventScheme, Message
+from .index_conf import ix
+from .crud import get_person, get_persons
+from .schemas import PersonOut, Message, PersonSearchOut, TYPE_SEARCH
+from .index_fts.search_utils import search_index
 
 api_router = APIRouter()
+
 
 
 
@@ -27,6 +27,27 @@ api_router = APIRouter()
                 summary="Tester la disponibilité du service")
 async def read_root():
     return {"message": "Bienvenue sur l'API e-NDP pour les personnes."}
+
+
+@api_router.get('/search',
+                response_model=PersonSearchOut,)
+async def search(query: str, type: TYPE_SEARCH, db: Session = Depends(get_db)):
+    search_results = search_index(
+        ix=ix,
+        query_user=query,
+        search_type=type.value,
+        fieldnames=["pref_label", "forename_alt_labels", "surname_alt_labels"]
+    )
+    results = search_results
+    search_results = [
+        get_person(db,
+                   result) for result in results
+    ]
+    return {
+        "query": query,
+        "total": len(search_results),
+        "results": search_results
+    }
 
 
 @api_router.get("/persons/",
