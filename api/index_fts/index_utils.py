@@ -7,7 +7,7 @@ from shutil import rmtree
 
 from whoosh import index
 
-from api.models import Person
+
 from api.index_fts.schemas import PersonIdxSchema
 
 SCHEMAS = [PersonIdxSchema]
@@ -28,8 +28,8 @@ def create_index(index_dir):
     return index_
 
 
-def populate_index(session, index_):
-    persons = session.query(Person).all()
+def populate_index(session, index_, model):
+    persons = session.query(model).all()
     writer = index_.writer()
     for person in persons:
         writer.add_document(

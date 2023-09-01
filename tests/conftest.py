@@ -10,15 +10,14 @@ from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 
 from api.database import (BASE, get_db)
-from api.index_conf import ix
 from api.main import (app)
-from api.models import User
+from api.models import User, Person
 from api.database_utils import populate_db_process
 from api.config import BASE_DIR
 from api.index_fts.index_utils import (create_index,
                                        populate_index)
 
-WHOOSH_INDEX_DIR = os.path.join(BASE_DIR, "index_endp")
+WHOOSH_INDEX_DIR = os.path.join(BASE_DIR, "index_endp_test")
 SQLALCHEMY_DATABASE_TEST_URL = "sqlite://"
 
 engine = create_engine(
@@ -44,15 +43,16 @@ def override_get_db():
 
 app.dependency_overrides[get_db] = override_get_db
 
+
 local_session = TestingSessionLocal()
 # populate database from last migration
-# 1) add default user
+# create index
+ix = create_index(index_dir=WHOOSH_INDEX_DIR)
+# add default user
 User.add_default_user(in_session=local_session)
-# 2) add data
+# add data
 populate_db_process(in_session=local_session)
-# 3) create index
-create_index(index_dir=WHOOSH_INDEX_DIR)
-# 4) populate index
-populate_index(session=local_session, index_=ix)
+# populate index
+populate_index(session=local_session, index_=ix, model=Person)
 
 client = TestClient(app)

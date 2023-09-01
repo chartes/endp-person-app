@@ -1,6 +1,7 @@
 import os
 from api.config import (BASE_DIR,
                         settings)
+from api.index_fts.index_utils import create_index
 
 from whoosh import index
 

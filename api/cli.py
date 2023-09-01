@@ -8,7 +8,7 @@ import os
 
 import click
 
-from .models import User
+from .models import User, Person
 from .database import (session,
                        engine,
                        BASE)
@@ -71,7 +71,7 @@ def make_cli():
             click.echo(f"Error: {e}")
             sys.exit(1)
         try:
-            populate_index(session, index_)
+            populate_index(session, index_, Person)
             click.echo("✔️The index has been populated.")
         except Exception as e:
             click.echo("❌The index has not been populated.")
