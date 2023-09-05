@@ -2,30 +2,21 @@
 
 Whoosh index utils for creating and clearing indexes.
 """
-import os
 from shutil import rmtree
 
 from whoosh import index
 
 
-from api.index_fts.schemas import PersonIdxSchema
-
-SCHEMAS = [PersonIdxSchema]
-
-
-def clear_index(index_dir):
-    if os.path.exists(index_dir):
-        rmtree(index_dir)
+def create_store(store, path) -> None:
+    if index.exists_in(path):
+        rmtree(path)
+    print(f"Creating store/index in {path}")
+    store.destroy()
+    store.create()
 
 
-def create_index(index_dir):
-    clear_index(index_dir)
-    index_ = None
-    if not os.path.exists(index_dir):
-        os.mkdir(index_dir)
-    for schema in SCHEMAS:
-        index_ = index.create_in(index_dir, schema)
-    return index_
+def create_index(store, schema) -> index:
+    store.create_index(schema)
 
 
 def populate_index(session, index_, model):

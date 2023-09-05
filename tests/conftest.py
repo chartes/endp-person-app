@@ -13,11 +13,17 @@ from api.database import (BASE, get_db)
 from api.main import (app)
 from api.models import User, Person
 from api.database_utils import populate_db_process
-from api.config import BASE_DIR
+from api.config import BASE_DIR, settings
 from api.index_fts.index_utils import (create_index,
+                                       create_store,
                                        populate_index)
+from api.index_conf import st
+from api.index_fts.schemas import PersonIdxSchema
 
-WHOOSH_INDEX_DIR = os.path.join(BASE_DIR, "index_endp_test")
+# set up ENV var for testing
+os.environ["ENV"] = "test"
+
+WHOOSH_INDEX_DIR = os.path.join(BASE_DIR, settings.WHOOSH_INDEX_DIR)
 SQLALCHEMY_DATABASE_TEST_URL = "sqlite://"
 
 engine = create_engine(
@@ -46,13 +52,13 @@ app.dependency_overrides[get_db] = override_get_db
 
 local_session = TestingSessionLocal()
 # populate database from last migration
-# create index
-ix = create_index(index_dir=WHOOSH_INDEX_DIR)
+create_store(st, WHOOSH_INDEX_DIR)
+create_index(st, PersonIdxSchema)
 # add default user
 User.add_default_user(in_session=local_session)
 # add data
 populate_db_process(in_session=local_session)
 # populate index
-populate_index(session=local_session, index_=ix, model=Person)
+# populate_index(session=local_session, index_=ix, model=Person)
 
 client = TestClient(app)

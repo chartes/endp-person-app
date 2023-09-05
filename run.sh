@@ -50,12 +50,13 @@ export ENV=$ENV
 
 # Vérification de l'argument pour la base de données
 if [[ "$2" == "-db" ]]; then
-  echo "Recreate database..."
-  python3 manage.py db-recreate
-  echo "Populate database..."
-  python3 manage.py db-populate
-  echo "Recreate and populate whoosh index..."
+  echo "> Prepare whoosh index dir..."
   python3 manage.py index-create
+  echo "> Recreate database process:"
+  python3 manage.py db-recreate
+  echo "> Populate database process:"
+  python3 manage.py db-populate
+  # whoosh index auto populate via sqlalchemy events
 fi
 
 

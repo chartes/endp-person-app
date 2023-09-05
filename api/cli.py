@@ -14,9 +14,11 @@ from .database import (session,
                        BASE)
 from .database_utils import populate_db_process
 from .index_fts.index_utils import (create_index,
-                                    populate_index)
-from .config import (settings, BASE_DIR)
-
+                                    populate_index,
+                                    create_store,)
+from .index_fts.schemas import PersonIdxSchema
+from .index_conf import (st,
+                         WHOOSH_INDEX_DIR)
 
 def make_cli():
     """Create the CLI application for e-NDP development."""
@@ -57,21 +59,36 @@ def make_cli():
     @click.command("db-populate")
     def db_populate():
         """populate the database with the last version of data."""
-        populate_db_process(in_session=session)
+        click.confirm("This operation will populate the database, do you want to continue?", abort=True)
+        try:
+            populate_db_process(in_session=session)
+            click.echo("✔️The database has been populated.")
+        except Exception as e:
+            click.echo("❌The database has not been populated.")
+            click.echo(f"Error: {e}")
+            sys.exit(1)
 
     @click.command("index-create")
     def index_create():
         """Create the index for full-text search. (Whoosh)"""
-        click.echo("Creating and populate the index for full-text search...")
+        click.echo("Creating the index dir to manage full-text search...")
         try:
-            index_ = create_index(os.path.join(BASE_DIR, settings.WHOOSH_INDEX_DIR))
-            click.echo("✔️The index has been created.")
+            create_store(st, WHOOSH_INDEX_DIR)
+            create_index(st, PersonIdxSchema)
+            click.echo("✔️The index has been created and ready to populate.")
         except Exception as e:
             click.echo("❌The index has not been created.")
             click.echo(f"Error: {e}")
             sys.exit(1)
+
+    @click.command("index-populate")
+    def index_populate():
+        """Populate index with db data.
+        Normally, don't use this command, because using triggers and events
+        with db-populate."""
         try:
-            populate_index(session, index_, Person)
+            ix = st.open_index()
+            populate_index(session, ix, Person)
             click.echo("✔️The index has been populated.")
         except Exception as e:
             click.echo("❌The index has not been populated.")
@@ -103,5 +120,6 @@ def make_cli():
     cli.add_command(db_populate)
     cli.add_command(create_user)
     cli.add_command(index_create)
+    cli.add_command(index_populate)
 
     return cli

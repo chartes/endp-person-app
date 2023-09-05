@@ -13,10 +13,10 @@ disable_installed_extensions_check()
 from sqlalchemy.orm import Session
 
 from .database import get_db
-from .index_conf import ix
 from .crud import get_person, get_persons
 from .schemas import PersonOut, Message, PersonSearchOut, TYPE_SEARCH
 from .index_fts.search_utils import search_index
+from .index_conf import st
 
 api_router = APIRouter()
 
@@ -32,6 +32,7 @@ async def read_root():
 @api_router.get('/search',
                 response_model=PersonSearchOut,)
 async def search(query: str, type: TYPE_SEARCH, db: Session = Depends(get_db)):
+    ix = st.open_index()
     search_results = search_index(
         ix=ix,
         query_user=query,
@@ -43,6 +44,7 @@ async def search(query: str, type: TYPE_SEARCH, db: Session = Depends(get_db)):
         get_person(db,
                    result) for result in results
     ]
+    ix.close()
     return {
         "query": query,
         "total": len(search_results),

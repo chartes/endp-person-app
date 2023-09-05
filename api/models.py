@@ -11,6 +11,7 @@ import uuid
 import base64
 import string
 import random
+from functools import wraps
 
 
 from sqlalchemy import (Column,
@@ -32,11 +33,29 @@ import jwt
 
 from .config import (settings, BASE_DIR)
 from .database import BASE, session
-from .index_conf import ix
+from .index_conf import st
 
 # Use sphinx autodoc, uncomment this line and comment relative import
 # from sqlalchemy.ext.declarative import declarative_base
 # BASE = declarative_base()
+
+
+def handle_index(method):
+    """
+    Decorator to handle the index during sqlalchemy events.
+    """
+    @wraps(method)
+    def wrapper(cls, mapper, connection, target):
+        """
+        Wrapper to handle the index.
+        """
+        try:
+            ix = st.open_index()
+            method(cls, mapper, connection, target, ix)
+            ix.close()
+        except Exception:
+            pass
+    return wrapper
 
 
 def generate_random_uuid(prefix, provider=""):
@@ -178,7 +197,8 @@ class AbstractActions(BASE):
             target.surname = target.surname_alt_labels.split(separator)[0]
 
     @classmethod
-    def update_person_fts_index_after_update(cls, mapper, connection, target):
+    @handle_index
+    def update_person_fts_index_after_update(cls, mapper, connection, target, ix):
         if cls.__tablename__ == "persons":
             writer = ix.writer()
             writer.update_document(
@@ -189,10 +209,11 @@ class AbstractActions(BASE):
                 surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
             )
             writer.commit()
-            # print(f"Updating Person {target.id} in index")
+            print(f"Updating Person {target.id} in index")
 
     @classmethod
-    def insert_person_fts_index_after_insert(cls, mapper, connection, target):
+    @handle_index
+    def insert_person_fts_index_after_insert(cls, mapper, connection, target, ix):
         if cls.__tablename__ == "persons":
             writer = ix.writer()
             writer.add_document(
@@ -203,14 +224,15 @@ class AbstractActions(BASE):
             surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
         )
             writer.commit()
-            # print(f"Adding Person {target.id} to index")
+            print(f"Adding Person {target.id} to index")
     @classmethod
-    def delete_person_fts_index_after_delete(cls, mapper, connection, target):
+    @handle_index
+    def delete_person_fts_index_after_delete(cls, mapper, connection, target, ix):
         if cls.__tablename__ == "persons":
             writer = ix.writer()
             writer.delete_by_term('id', str(target.id))
             writer.commit()
-            # print(f"Deleting Person {target.id} from index")
+            print(f"Deleting Person {target.id} from index")
 
 
 # Attach event listeners to AbstractActions class for insert/update/delete events
@@ -226,10 +248,12 @@ def after_insert(mapper, connection, target):
     """Méthodes appelées après l'insertion dans la base de données"""
     target.insert_person_fts_index_after_insert(mapper, connection, target)
 
+
 @event.listens_for(AbstractActions, "after_update", propagate=True)
 def after_update(mapper, connection, target):
    """Méthodes appelées après l'insertion dans la base de données"""
    target.update_person_fts_index_after_update(mapper, connection, target)
+
 
 @event.listens_for(AbstractActions, "after_delete", propagate=True)
 def after_delete(mapper, connection, target):
