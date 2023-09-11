@@ -56,6 +56,11 @@ def create_app():
             "identifier": "MIT",
             "url": "https://opensource.org/licenses/MIT",
         },
+        swagger_ui_parameters={"defaultModelsExpandDepth": -1},
+        openapi_tags=[
+        {"name": "default"},
+        {"name": "persons", "description": "Endpoints for retrieve information on persons."},
+    ]
     )
     origins = [
         "*",

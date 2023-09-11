@@ -10,7 +10,7 @@ from whoosh import index
 def create_store(store, path) -> None:
     if index.exists_in(path):
         rmtree(path)
-    print(f"Creating store/index in {path}")
+    # print(f"Creating store/index in {path}")
     store.destroy()
     store.create()
 

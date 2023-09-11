@@ -209,7 +209,7 @@ class AbstractActions(BASE):
                 surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
             )
             writer.commit()
-            print(f"Updating Person {target.id} in index")
+            # print(f"Updating Person {target.id} in index")
 
     @classmethod
     @handle_index
@@ -224,7 +224,8 @@ class AbstractActions(BASE):
             surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
         )
             writer.commit()
-            print(f"Adding Person {target.id} to index")
+            # print(f"Adding Person {target.id} to index")
+
     @classmethod
     @handle_index
     def delete_person_fts_index_after_delete(cls, mapper, connection, target, ix):
@@ -232,7 +233,7 @@ class AbstractActions(BASE):
             writer = ix.writer()
             writer.delete_by_term('id', str(target.id))
             writer.commit()
-            print(f"Deleting Person {target.id} from index")
+            # print(f"Deleting Person {target.id} from index")
 
 
 # Attach event listeners to AbstractActions class for insert/update/delete events
@@ -251,7 +252,8 @@ def after_insert(mapper, connection, target):
 
 @event.listens_for(AbstractActions, "after_update", propagate=True)
 def after_update(mapper, connection, target):
-   """Méthodes appelées après l'insertion dans la base de données"""
+   """Méthodes appelées après
+   l'insertion dans la base de données"""
    target.update_person_fts_index_after_update(mapper, connection, target)
 
 
