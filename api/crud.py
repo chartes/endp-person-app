@@ -6,7 +6,8 @@ Reusable functions to interact with the data in the database.
 """
 
 from typing import (Union,
-                    Type)
+                    List,
+                    Optional)
 
 from sqlalchemy import Row
 from sqlalchemy.orm import Session
@@ -31,7 +32,7 @@ def get_person(db: Session, args: dict) \
 
 
 def get_persons(db: Session) \
-        -> Union[list[Type[Person]], None]:
+        -> Union[list[Person], list]:
     """Get all the persons from the database."""
     return db.query(Person).all()
 
@@ -49,7 +50,7 @@ def get_thesaurus_term(db: Session, model: str, args: dict) \
 
 
 def get_thesaurus_terms(db: Session, model: str, condition: str = 'topic') \
-        -> list[Row[_TP]]:
+        -> List[Row[_TP]]:
     """Get all the terms from the thesaurus order with a condition."""
     model_classes = {
         "places": PlacesTerm,
