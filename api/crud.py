@@ -6,8 +6,7 @@ Reusable functions to interact with the data in the database.
 """
 
 from typing import (Union,
-                    List,
-                    Optional)
+                    List)
 
 from sqlalchemy import Row
 from sqlalchemy.orm import Session
@@ -32,7 +31,7 @@ def get_person(db: Session, args: dict) \
 
 
 def get_persons(db: Session) \
-        -> Union[list[Person], list]:
+        -> list:
     """Get all the persons from the database."""
     return db.query(Person).all()
 
