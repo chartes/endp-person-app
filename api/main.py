@@ -3,39 +3,15 @@ main.py
 
 Entry point for FastAPI application.
 """
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
-from whoosh import index
 
 from .admin import flask_app
 from .routes import api_router
-from .config import (settings,
-                     BASE_DIR)
 
-DESCRIPTION = """
-## Person API documentation and specification for e-NDP ANR project
-
-For more details on this project, please visit project blog: [e-NDP ANR project](https://endp.hypotheses.org/).
-
-This API focuses on data concerning the people encountered in the chapter registers of Notre-Dame de Paris, which includes data relating to:
-
-- to the **people** themselves (canons and others);
-- **Events** related to these persons;
-- the **family relationships** between these people;
-- the **thesaurus** to describe these people (statutes, dignities, holy orders, charges and offices, choir) 
-and the places associated with the people (cloister, courthouse, domain, chapel)
-
-These data are administered from the e-NDP people database and data are available at the end of the [CC BY-SA 4.0 license](http://creativecommons.org/licenses/by-sa/4.0/).
-        
-<img alt="partenaires e-NDP" src="../static/images/banner-partners-home.png" width="300px">
-<img alt="anr logo" src="../static/images/ANR-logo-C.jpg" width="120px">
-
-----
-"""
+from .api_meta import METADATA
 
 
 def create_app():
@@ -45,22 +21,15 @@ def create_app():
         """
     # TODO: add to settings
     _app = FastAPI(
-        title="e-NDP API",
-        description=DESCRIPTION,
-        version="0.1.0",
-        openapi_url="/api/openapi.json",
-        docs_url="/api/docs",
-        redoc_url="/api/redoc",
-        license_info={
-            "name": "MIT",
-            "identifier": "MIT",
-            "url": "https://opensource.org/licenses/MIT",
-        },
-        swagger_ui_parameters={"defaultModelsExpandDepth": -1},
-        openapi_tags=[
-        {"name": "default"},
-        {"name": "persons", "description": "Endpoints for retrieve information on persons."},
-    ]
+        title=METADATA["title"],
+        description=METADATA["description"],
+        version=METADATA["version"],
+        openapi_url=METADATA["openapi_url"],
+        docs_url=METADATA["docs_url"],
+        redoc_url=METADATA["redoc_url"],
+        license_info=METADATA["license_info"],
+        swagger_ui_parameters=METADATA["swagger_ui_parameters"],
+        openapi_tags=METADATA["openapi_tags"],
     )
     origins = [
         "*",

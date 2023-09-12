@@ -8,9 +8,10 @@ Use for validation and serialization.
 from typing import Union, List
 from enum import Enum
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field
 
 # -- parameters schema enums --
+
 TYPE_SEARCH = Enum("TYPE_SEARCH", dict(
     exact="exact",
     fuzzy="fuzzy",
@@ -22,88 +23,85 @@ TYPE_THESAURUS = Enum("TYPE_THESAURUS", dict(
     persons_terms="persons_terms"
 ))
 
-# TODO : 1) refactoriser les schemas pour les rendre plus génériques
-#        2) enlever les exemples des champs préféré les types
-#        3) vérifier les types des champs
-#        4) ajouter les champs manquants
-#        5) tester les specs openapi
-
-# -- Generic schemas --
+# -- Meta schemas --
 
 
-class Message(BaseModel):
-    """Schema for error messages."""
-    message: str
-
-class PersonMeta(BaseModel):
-    id_endp: str = Field(..., alias="_id_endp", example="person_endp_54r5rj8U")
-    pref_label: str = Field(alias="pref_label", example="Jean d'Acy")
-
-class MinimalMetaEvent(BaseModel):
-    pass
-
-
-class ThesaurusOut(BaseModel):
-    id_endp: str = Field(..., alias="_id_endp")
-    topic: str
-    term: str = Field(..., alias="term_la")
-    term_fr: Union[str, None] = Field(..., alias="term_fr")
-    term_definition: Union[str, None] = Field(..., alias="definition")
+class BaseMeta(BaseModel):
+    """An abstract base class for meta schemas."""
+    id_endp: str = Field(alias="_id_endp")
 
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
 
-# -- Output schemas --
+
+class PersonMeta(BaseMeta):
+    """Schema with minimal information on a person."""
+    pref_label: str = Field(alias="pref_label")
 
 
-class KbMeta(BaseModel):
-    id_endp: str = Field(..., alias="_id_endp")
+class ThesaurusMeta(BaseMeta):
+    """Schema with minimal information on a thesaurus term."""
+    topic: str = Field(alias="topic")
+    term: str = Field(alias="term_la")
+    term_fr: Union[str, None] = Field(alias="term_fr")
+    term_definition: Union[str, None] = Field(alias="definition")
+
+
+class EventMeta(BaseMeta):
+    """Schema with minimal information on an event that concerns a person."""
+    date: Union[str, None] = Field(alias="date")
+    image_url: Union[str, None] = Field(alias="image_url")
+    place_term: Union[ThesaurusMeta, None] = Field(alias="place_term")
+    thesaurus_term_person: Union[ThesaurusMeta, None] = Field(alias="thesaurus_term_person")
+    predecessor: Union[PersonMeta, None] = Field(alias="predecessor")
+
+
+class FamilyRelationshipsMeta(BaseMeta):
+    """Schema with minimal information on a family relationship that concerns a person."""
+    relation_type: str = Field(alias="relation_type")
+    relative: Union[PersonMeta, None] = Field(alias="relative")
+
+
+class KbMeta(BaseMeta):
+    """Schema with minimal information on a Knowledge Base link on person."""
     type_kb: str = Field(..., alias="type")
     url: str = Field(..., alias="url")
 
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
 
-
-class EventMeta(BaseModel):
-    id_endp: str = Field(..., alias="_id_endp")
-
-    date: Union[str, None] = Field(..., alias="date")
-    image_url: Union[str, None] = Field(..., alias="image_url")
-    place_term: Union[ThesaurusOut, None] = Field(..., alias="place_term")
-    thesaurus_term_person: Union[ThesaurusOut, None] = Field(..., alias="thesaurus_term_person")
-    predecessor: Union[PersonMeta, None] = Field(..., alias="predecessor")
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-
-
+# -- Out response schemas --
 
 class PersonOut(PersonMeta):
-    """Schema for person results."""
-    forename_alt_labels: str = Field(alias="forename_alt_labels", example="Johannes ; Jehan")
-    surname_alt_labels: str = Field(alias="surname_alt_labels", example="Acciaco de")
-    death_date: Union[str, None] = Field(alias="death_date", example="null")
-    first_mention_date: Union[str, None] = Field(alias="first_mention_date", example="1356")
-    last_mention_date: Union[str, None] = Field(alias="last_mention_date", example="1360")
-    is_canon: bool = Field(alias="is_canon", example=True)
+    """Schema with detailed information on a person."""
+    forename_alt_labels: str = Field(alias="forename_alt_labels")
+    surname_alt_labels: str = Field(alias="surname_alt_labels")
+    death_date: Union[str, None] = Field(alias="death_date")
+    first_mention_date: Union[str, None] = Field(alias="first_mention_date")
+    last_mention_date: Union[str, None] = Field(alias="last_mention_date")
+    is_canon: bool = Field(alias="is_canon")
     kb_links: List[KbMeta] = Field(alias="related_to")
-
-    class Config:
-        allow_population_by_field_name = True
-        orm_mode = True
 
 
 class PersonEventsOut(PersonMeta):
+    """Schema with detailed information on a person and events that concern them."""
     events: List[EventMeta] = Field(alias="events")
+
+
+class PersonFamilyRelationshipsOut(PersonMeta):
+    """Schema with detailed information on a person and family relationships that concern them."""
+    relatives: List[FamilyRelationshipsMeta] = Field(alias="relatives")
+
+# -- Specialized out schemas --
 
 
 class PersonSearchOut(BaseModel):
     """Schema for person search results."""
-    query: str = Field(alias="query", example="jean d'acy")
-    total: int = Field(alias="total", example=1)
-    type_query: str = Field(alias="type_query", example="exact")
-    results: List[PersonOut]
+    query: str = Field(alias="query")
+    total: int = Field(alias="total")
+    type_query: str = Field(alias="type_query")
+    results: Union[List[PersonOut], None] = Field(alias="results")
+
+
+class Message(BaseModel):
+    """Schema for generic messages."""
+    message: str = Field(alias="message")

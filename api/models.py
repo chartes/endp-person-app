@@ -13,7 +13,6 @@ import string
 import random
 from functools import wraps
 
-
 from sqlalchemy import (Column,
                         DateTime,
                         Boolean,
@@ -25,15 +24,19 @@ from sqlalchemy import (Column,
                         CheckConstraint,
                         Text,
                         event)
-from sqlalchemy.orm import (relationship, backref)
+from sqlalchemy.orm import (relationship,
+                            backref)
 
 from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import (generate_password_hash,
+                               check_password_hash)
 import jwt
 
-from .config import (settings, BASE_DIR)
-from .database import BASE, session
+from .config import settings
+from .database import (BASE,
+                       session)
 from .index_conf import st
+
 
 # Use sphinx autodoc, uncomment this line and comment relative import
 # from sqlalchemy.ext.declarative import declarative_base
@@ -44,6 +47,7 @@ def handle_index(method):
     """
     Decorator to handle the index during sqlalchemy events.
     """
+
     @wraps(method)
     def wrapper(cls, mapper, connection, target):
         """
@@ -55,20 +59,23 @@ def handle_index(method):
             ix.close()
         except Exception:
             pass
+
     return wrapper
 
 
-def generate_random_uuid(prefix, provider=""):
-    """Génère un UUID aléatoire et le convertit en une chaîne d'octets
-    encodée en Base64 URL-safe et décodée en une chaîne Unicode.
+def generate_random_uuid(prefix: str, provider: str = "") -> str:
+    """Generates a random UUID and converts it to a URL-safe Base64 encoded
+    bytes string and decoded to a Unicode string.
     """
-    def replace_punctuation_with_random(string_to_modify):
+
+    def replace_punctuation_with_random(string_to_modify: str) -> str:
+        """Replace punctuation characters with random characters."""
         punctuation = string.punctuation
         modified_string = ''
 
         for char in string_to_modify:
             if char in punctuation:
-                # Remplacer par un caractère aléatoire majuscule ou minuscule
+                # Replace with a random uppercase or lowercase character
                 random_char = random.choice(string.ascii_letters)
                 modified_string += random_char
             else:
@@ -76,50 +83,44 @@ def generate_random_uuid(prefix, provider=""):
 
         return modified_string
 
-    # Générer un UUID
+    # Generate a UUID
     unique_id = uuid.uuid4()
-
-    # Convertir l'UUID en une chaîne d'octets
+    # Convert UUID to bytes
     uuid_bytes = unique_id.bytes
-
-    # Encoder les octets en URL-safe Base64
+    # Encode the UUID bytes into a bytes string using Base64
     urlsafe_base64_encoded = base64.urlsafe_b64encode(uuid_bytes)
-
-    # Décoder la chaîne d'octets Base64 en une chaîne Unicode
+    # Decode the Base64 bytes string into a Unicode string
     urlsafe_base64_encoded_string = urlsafe_base64_encoded.decode('utf-8')
-
-    # Remplacer les ponctuations par des caractères aléatoires
-    # on cut uuid à 8 (mais possibilité d'augmenter ou réduire)
-    # cela représente ≈ 10.376.800.670.380.293 combinaisons d'identifiants possibles
-    # pour la table personne par exemple
+    # replace punctuation with random characters
+    # cut uuid to 8 (but possibility to increase or decrease)
+    # this represents ≈ 10,376,800,670,380,293 possible identifier combinations
     final_id = replace_punctuation_with_random(urlsafe_base64_encoded_string)[:8]
-
-    # ajout du prefixe
+    # add prefix and provider if exists
     final_id = prefix + "_" + final_id if len(provider) == 0 else prefix + "_" + provider + "_" + final_id
-
     return final_id
 
 
 __mapping_prefix__ = {
-        "Statut": "term_sts",
-        "Dignité": "term_dgn",
-        "Ordre sacré": "term_ors",
-        "Charge et office": "term_ceo",
-        "Chœur": "term_cho",
-        "Cloître": "place_cloitre",
-        "Prévôté": "place_prevote",
-        "Domaine": "place_domaine",
-        "Chapelle": "place_chapelle",
-        "Entrée": "evt_entree",
-        "Sortie": "evt_sortie",
-        "Achat d'une maison canoniale": "evt_achat_maison",
-        "Choix de la sépulture": "evt_choix_sepulture",
-    }
+    "Statut": "term_sts",
+    "Dignité": "term_dgn",
+    "Ordre sacré": "term_ors",
+    "Charge et office": "term_ceo",
+    "Chœur": "term_cho",
+    "Cloître": "place_cloitre",
+    "Prévôté": "place_prevote",
+    "Domaine": "place_domaine",
+    "Chapelle": "place_chapelle",
+    "Entrée": "evt_entree",
+    "Sortie": "evt_sortie",
+    "Achat d'une maison canoniale": "evt_achat_maison",
+    "Choix de la sépulture": "evt_choix_sepulture",
+}
 
 __split_name_on_tables__ = ["persons"]
 
 
 class User(UserMixin, BASE):
+    """User model"""
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(64), index=True, unique=True)
@@ -130,12 +131,15 @@ class User(UserMixin, BASE):
         return '<User {}>'.format(self.username)
 
     def set_password(self, password):
+        """Set a password hashed"""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        """Check if password is correct"""
         return check_password_hash(self.password_hash, password)
 
     def get_reset_password_token(self, expires_in=600):
+        """Generate a token for reset password"""
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
             settings.FLASK_SECRET_KEY, algorithm='HS256'
@@ -143,16 +147,18 @@ class User(UserMixin, BASE):
 
     @staticmethod
     def verify_reset_password_token(token):
+        """Verify if token is valid"""
         try:
-            id = jwt.decode(token, settings.FLASK_SECRET_KEY,
-                            algorithms=['HS256'])['reset_password']
-        except:
+            id_tok = jwt.decode(token,
+                                settings.FLASK_SECRET_KEY,
+                                algorithms=['HS256'])['reset_password']
+        except jwt.exceptions.InvalidTokenError:
             return
-        return session.query(User).get(id)
+        return session.query(User).get(id_tok)
 
     @staticmethod
     def add_default_user(in_session):
-        """Ajoute un utilisateur par défaut"""
+        """Add default user to database"""
         admin = User()
         admin.username = settings.FLASK_ADMIN_NAME
         admin.email = settings.FLASK_ADMIN_MAIL
@@ -167,16 +173,16 @@ class AbstractActions(BASE):
 
     @classmethod
     def before_insert_create_id_ref(cls, mapper, connection, target):
-        """Génère l'ID forgé de référentiel avant l'insertion"""
+        """Generate a forge and random id for the new entry in reference table before insert"""
         is_exist = True
         new_id = None
         try:
-            # pour les tables thesaurus
+            # thesaurus tables specific
             prefix = __mapping_prefix__[target.topic]
         except AttributeError:
-            # pour les tables par défaut
+            # other tables
             prefix = cls.__prefix__
-        # test if new id already exist
+        # test if new id already exist (not really necessary but just in case)
         if cls.__tablename__:
             while is_exist:
                 new_id = generate_random_uuid(prefix=prefix, provider="endp")
@@ -191,7 +197,7 @@ class AbstractActions(BASE):
 
     @classmethod
     def before_insert_get_form_first(cls, mapper, connection, target, separator=";"):
-        """Récupère la première chaîne de caractère d'une liste (séparateur par défaut: ";") avant l'insertion"""
+        """Get the first string of a list (separator by default: ";") before insertion."""
         if cls.__tablename__ in __split_name_on_tables__:
             target.forename = target.forename_alt_labels.split(separator)[0]
             target.surname = target.surname_alt_labels.split(separator)[0]
@@ -199,6 +205,7 @@ class AbstractActions(BASE):
     @classmethod
     @handle_index
     def update_person_fts_index_after_update(cls, mapper, connection, target, ix):
+        """Update the index after update a person"""
         if cls.__tablename__ == "persons":
             writer = ix.writer()
             writer.update_document(
@@ -214,21 +221,23 @@ class AbstractActions(BASE):
     @classmethod
     @handle_index
     def insert_person_fts_index_after_insert(cls, mapper, connection, target, ix):
+        """Insert a reference in the index"""
         if cls.__tablename__ == "persons":
             writer = ix.writer()
             writer.add_document(
-            id=str(target.id).encode('utf-8').decode('utf-8'),
-            id_endp=str(target._id_endp).encode('utf-8').decode('utf-8'),
-            pref_label=str(target.pref_label).encode('utf-8').decode('utf-8'),
-            forename_alt_labels=str(target.forename_alt_labels).encode('utf-8').decode('utf-8'),
-            surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
-        )
+                id=str(target.id).encode('utf-8').decode('utf-8'),
+                id_endp=str(target._id_endp).encode('utf-8').decode('utf-8'),
+                pref_label=str(target.pref_label).encode('utf-8').decode('utf-8'),
+                forename_alt_labels=str(target.forename_alt_labels).encode('utf-8').decode('utf-8'),
+                surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
+            )
             writer.commit()
             # print(f"Adding Person {target.id} to index")
 
     @classmethod
     @handle_index
     def delete_person_fts_index_after_delete(cls, mapper, connection, target, ix):
+        """Delete a reference from the index"""
         if cls.__tablename__ == "persons":
             writer = ix.writer()
             writer.delete_by_term('id', str(target.id))
@@ -239,31 +248,30 @@ class AbstractActions(BASE):
 # Attach event listeners to AbstractActions class for insert/update/delete events
 @event.listens_for(AbstractActions, "before_insert", propagate=True)
 def before_insert(mapper, connection, target):
-    """Méthodes appelées avant l'insertion dans la base de données"""
+    """Methods called before insertion in database"""
     target.before_insert_create_id_ref(mapper, connection, target)
     target.before_insert_get_form_first(mapper, connection, target)
 
 
 @event.listens_for(AbstractActions, "after_insert", propagate=True)
 def after_insert(mapper, connection, target):
-    """Méthodes appelées après l'insertion dans la base de données"""
+    """Methods called after insertion in database"""
     target.insert_person_fts_index_after_insert(mapper, connection, target)
 
 
 @event.listens_for(AbstractActions, "after_update", propagate=True)
 def after_update(mapper, connection, target):
-   """Méthodes appelées après
-   l'insertion dans la base de données"""
-   target.update_person_fts_index_after_update(mapper, connection, target)
+    """Methods called after update in database"""
+    target.update_person_fts_index_after_update(mapper, connection, target)
 
 
 @event.listens_for(AbstractActions, "after_delete", propagate=True)
 def after_delete(mapper, connection, target):
-    """Méthodes appelées après la suppression dans la base de données"""
+    """Methods called after deletion in database"""
     target.delete_person_fts_index_after_delete(mapper, connection, target)
 
-# ~~~~~~~~~~~~~~~~~~~ > Enum classes < ~~~~~~~~~~~~~~~~~~~
 
+# ~~~~~~~~~~~~~~~~~~~ > Enum classes < ~~~~~~~~~~~~~~~~~~~
 
 
 class KnowledgeBaseLabels(enum.Enum):
@@ -276,13 +284,13 @@ class KnowledgeBaseLabels(enum.Enum):
     :param STUDIUM: Studium Parisiense (http://studium-parisiense.univ-paris1.fr/)
     :param COLLECTA: Collecta (http://www.collecta.fr/)
     """
-    __order__     = "WIKIDATA BIBLISSIMA VIAF DATABNF STUDIUM COLLECTA"
-    WIKIDATA      = "Wikidata"
-    BIBLISSIMA    = "Biblissima"
-    VIAF          = "VIAF"
-    DATABNF       = "DataBnF"
-    STUDIUM       = "Studium Parisiense"
-    COLLECTA      = "Collecta"
+    __order__ = "WIKIDATA BIBLISSIMA VIAF DATABNF STUDIUM COLLECTA"
+    WIKIDATA = "Wikidata"
+    BIBLISSIMA = "Biblissima"
+    VIAF = "VIAF"
+    DATABNF = "DataBnF"
+    STUDIUM = "Studium Parisiense"
+    COLLECTA = "Collecta"
 
     def __str__(self):
         return self.value
@@ -299,22 +307,22 @@ class EventTypeLabels(enum.Enum):
     :param ACHAT_MAISON:  Achat d'une maison canoniale.
     :param CHOIX_SEPULTURE: Choix de la sépulture.
     """
-    __order__       = "ENTREE SORTIE ACHAT_MAISON CHOIX_SEPULTURE"
+    __order__ = "ENTREE SORTIE ACHAT_MAISON CHOIX_SEPULTURE"
     # motif d'entrée :
-    ENTREE          = "Entrée"  # Désignation = toutes les entrées de charges pour le chapitre (chanoines et autres) - saisie comp. dans un champ commentaire libre.
+    ENTREE = "Entrée"  # Désignation = toutes les entrées de charges pour le chapitre (chanoines et autres) - saisie comp. dans un champ commentaire libre.
     # election = "Élection"                      # Élection à une charge par le chapitre.
     # collation = "Collation"                    # Octroi du bénéfice et/ou de la prébende et/ou de la charge.
     # installation = "Installation"              # Prise de poste pour un chanoine.
     # designation = "Désignation"                # Désignation/Engagement à une charge ou une chapelle (Cf. persons_perform_religious_services_in)
 
     # motif de sortie de charge :
-    SORTIE          = "Sortie"
+    SORTIE = "Sortie"
     # expulsion = "expulsion"                 # expulsion, licenciement
     # resignacio = "Resignacio, Renunciacio"  # renonciation
     # permutacio = "Permutacio"               # permutation
     # mort = "Mort"                           # mort
-    ACHAT_MAISON    = "Achat d'une maison canoniale"    # Achat d'une maison canoniale.
-    CHOIX_SEPULTURE = "Choix de la sépulture"        # ...
+    ACHAT_MAISON = "Achat d'une maison canoniale"  # Achat d'une maison canoniale.
+    CHOIX_SEPULTURE = "Choix de la sépulture"  # ...
 
     def __repr__(self):
         return self.value
@@ -340,18 +348,18 @@ class FamilyRelationshipLabels(enum.Enum):
     :param IS_FAMILIAR_OF: familier de
 
     """
-    __order__      = "IS_SON_OF IS_DAUGHTER_OF IS_SPOUSE IS_FATHER_OF IS_MOTHER_OF IS_NEPHEW_OF IS_NIECE_OF IS_UNCLE_OF IS_AUNT_OF IS_BROTHER_OF IS_SISTER_OF IS_FAMILIAR_OF"
-    IS_SON_OF      = "fils de"
+    __order__ = "IS_SON_OF IS_DAUGHTER_OF IS_SPOUSE IS_FATHER_OF IS_MOTHER_OF IS_NEPHEW_OF IS_NIECE_OF IS_UNCLE_OF IS_AUNT_OF IS_BROTHER_OF IS_SISTER_OF IS_FAMILIAR_OF"
+    IS_SON_OF = "fils de"
     IS_DAUGHTER_OF = "fille de"
-    IS_SPOUSE      = "conjoint(e) de"
-    IS_FATHER_OF   = "père de"
-    IS_MOTHER_OF   = "mère de"
-    IS_NEPHEW_OF   = "neveu de"
-    IS_NIECE_OF    = "nièce de"
-    IS_UNCLE_OF    = "oncle de"
-    IS_AUNT_OF     = "tante de"
-    IS_BROTHER_OF  = "frère de"
-    IS_SISTER_OF   = "sœur de"
+    IS_SPOUSE = "conjoint(e) de"
+    IS_FATHER_OF = "père de"
+    IS_MOTHER_OF = "mère de"
+    IS_NEPHEW_OF = "neveu de"
+    IS_NIECE_OF = "nièce de"
+    IS_UNCLE_OF = "oncle de"
+    IS_AUNT_OF = "tante de"
+    IS_BROTHER_OF = "frère de"
+    IS_SISTER_OF = "sœur de"
     IS_FAMILIAR_OF = "familier de"
 
     def __repr__(self):
@@ -370,12 +378,12 @@ class ThesaurusTopicLabels(enum.Enum):
     :param CHARGES_OFFICES: Charges et offices
     :param CHOEUR: Choeur
     """
-    __order__       = "STATUT DIGNITE ORDRE_SACRE CHARGE_OFFICE CHOEUR"
-    STATUT         = "Statut"
-    DIGNITE        = "Dignité"
-    ORDRE_SACRE   = "Ordre sacré"
+    __order__ = "STATUT DIGNITE ORDRE_SACRE CHARGE_OFFICE CHOEUR"
+    STATUT = "Statut"
+    DIGNITE = "Dignité"
+    ORDRE_SACRE = "Ordre sacré"
     CHARGE_OFFICE = "Charge et office"
-    CHOEUR          = "Chœur"
+    CHOEUR = "Chœur"
 
     def __repr__(self):
         return self.value
@@ -392,11 +400,11 @@ class ThesaurusPlacesTopicsLabels(enum.Enum):
     :param DOMAINE: Domaine
     :param CHAPELLE: Chapelle
     """
-    __order__       = "CLOITRE PREVOTE DOMAINE CHAPELLE"
-    CLOITRE         = "Cloître"
-    PREVOTE         = "Prévôté"
-    DOMAINE         = "Domaine"
-    CHAPELLE        = "Chapelle"
+    __order__ = "CLOITRE PREVOTE DOMAINE CHAPELLE"
+    CLOITRE = "Cloître"
+    PREVOTE = "Prévôté"
+    DOMAINE = "Domaine"
+    CHAPELLE = "Chapelle"
 
     def __repr__(self):
         return self.value
@@ -407,10 +415,6 @@ class ThesaurusPlacesTopicsLabels(enum.Enum):
 
 def _get_enum_values(enum_class):
     return (item.value for item in enum_class)
-
-
-#THESAURUS_TOPIC_LABELS = (topic.value for topic in ThesaurusTopicLabels)
-#THESAURUS_PLACES_TOPIC_LABELS = (topic.value for topic in ThesaurusPlacesTopicsLabels)
 
 
 ###########################################################
@@ -470,51 +474,33 @@ class Person(AbstractActions):
     comment = Column(Text, nullable=True, unique=False)
     bibliography = Column(Text, nullable=True, unique=False)
 
-    events       = relationship("Event",
-                                foreign_keys="Event.person_id",
-                                cascade="all, delete-orphan",
-                                order_by="Event.date.asc()",
-                                lazy="dynamic",
-                                back_populates="person")
+    events = relationship("Event",
+                          foreign_keys="Event.person_id",
+                          cascade="all, delete-orphan",
+                          order_by="Event.date.asc()",
+                          lazy="dynamic",
+                          back_populates="person")
     _events_predecessors = relationship("Event",
-                                        foreign_keys="Event.predecessor_id",)
-
-    kb_links     = relationship("PersonHasKbLinks",
-                                foreign_keys="PersonHasKbLinks.person_id",
-                                cascade="all, delete, delete-orphan",
-                                #lazy="dynamic",
-                                back_populates="person")
-
+                                        foreign_keys="Event.predecessor_id", )
+    kb_links = relationship("PersonHasKbLinks",
+                            foreign_keys="PersonHasKbLinks.person_id",
+                            cascade="all, delete, delete-orphan",
+                            # lazy="dynamic",
+                            back_populates="person")
     family_links = relationship("PersonHasFamilyRelationshipType",
                                 back_populates="person",
                                 cascade="all, delete, delete-orphan",
                                 foreign_keys="PersonHasFamilyRelationshipType.person_id")
     family_links_relative = relationship("PersonHasFamilyRelationshipType",
-                                            back_populates="relative",
-                                            foreign_keys="PersonHasFamilyRelationshipType.relative_id",
+                                         back_populates="relative",
+                                         foreign_keys="PersonHasFamilyRelationshipType.relative_id",
                                          cascade="all, delete, delete-orphan")
-    #family_links = relationship("PersonHasFamilyRelationshipType",
-    #                            foreign_keys="PersonHasFamilyRelationshipType.person_id",
-    #                            cascade="all, delete, delete-orphan",
-                                #lazy="dynamic",
-    #                            back_populates="person")
-
-    #_family_relative_links = relationship("PersonHasFamilyRelationshipType",
-    #                              foreign_keys="PersonHasFamilyRelationshipType.relative_id",
-    #                              cascade="all, delete, delete-orphan",
-    #                              #lazy="dynamic",
-    #                              back_populates="person")
-
-    _created_at  = Column(DateTime, default=datetime.datetime.now())
-    _updated_at  = Column(DateTime, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
+    _created_at = Column(DateTime, default=datetime.datetime.now())
+    _updated_at = Column(DateTime, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
     _last_editor = Column(String(25), nullable=True, unique=False)
-
 
     def __repr__(self):
         return f"<Personne : {self.id} | {self.pref_label} (mort : {self.death_date})>"
-
-
-
 
 
 ###########################################################
@@ -584,9 +570,13 @@ class Event(AbstractActions):
     person_id = Column(Integer, ForeignKey("persons.id"), nullable=False, unique=False)
     date = Column(String(25), nullable=True, unique=False)
     image_url = Column(String(25), nullable=True, unique=False)
-    place_term_id = Column(Integer, ForeignKey("places_thesaurus_terms.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, unique=False)
-    person_thesaurus_term_id = Column(Integer, ForeignKey("persons_thesaurus_terms.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=True, unique=False)
-    predecessor_id = Column(Integer, ForeignKey("persons.id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True, unique=False)
+    place_term_id = Column(Integer, ForeignKey("places_thesaurus_terms.id", onupdate="CASCADE", ondelete="CASCADE"),
+                           nullable=True, unique=False)
+    person_thesaurus_term_id = Column(Integer,
+                                      ForeignKey("persons_thesaurus_terms.id", onupdate="CASCADE", ondelete="CASCADE"),
+                                      nullable=True, unique=False)
+    predecessor_id = Column(Integer, ForeignKey("persons.id", onupdate="CASCADE", ondelete="SET NULL"), nullable=True,
+                            unique=False)
     comment = Column(Text, nullable=True, unique=False)
 
     person = relationship("Person",
@@ -597,13 +587,14 @@ class Event(AbstractActions):
                                back_populates="_events_predecessors")
 
     place_term = relationship("PlacesTerm",
-                              backref=backref('events', cascade="all, delete"),)
+                              backref=backref('events', cascade="all, delete"), )
 
     thesaurus_term_person = relationship("ThesaurusTerm",
-                                         backref=backref('events', cascade="all, delete"),)
+                                         backref=backref('events', cascade="all, delete"), )
 
     def __repr__(self):
         return f"<Event: {self._id_endp} | {self.type} | {self.person_id} | {self.date} | {self.place_term_id} | {self.person_thesaurus_term_id} | {self.predecessor_id} | {self.comment}>"
+
 
 # > Referential Classes about people
 
@@ -649,6 +640,7 @@ class ThesaurusTerm(AbstractGenericThesaurusTerm):
     # Clé de regroupement
     topic = Column(Enum(*_get_enum_values(ThesaurusTopicLabels)), nullable=False, unique=False)
 
+
 # > Referential Classes about places
 
 
@@ -688,6 +680,7 @@ class PlacesTerm(AbstractGenericThesaurusTerm):
     __display_name__ = "Thesaurus de lieux"
     # Clé de regroupement
     topic = Column(Enum(*_get_enum_values(ThesaurusPlacesTopicsLabels)), nullable=False, unique=False)
+
 
 # ~~~~~~~~~~~~~~~~~~~ > Association tables < ~~~~~~~~~~~~~~~~~~~
 

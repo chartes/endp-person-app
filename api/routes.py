@@ -12,20 +12,22 @@ disable_installed_extensions_check()
 
 from sqlalchemy.orm import Session
 from .database import get_db
-from .crud import get_person, get_persons, get_thesaurus_terms, get_thesaurus_term, get_events
-from .schemas import PersonOut, Message, PersonSearchOut, ThesaurusOut, PersonEventsOut, TYPE_SEARCH, TYPE_THESAURUS, PersonMeta
+from .crud import get_person, get_persons, get_thesaurus_terms, get_thesaurus_term, get_events, get_family_relatives
+from .schemas import PersonOut, Message, PersonSearchOut, ThesaurusMeta, PersonEventsOut, PersonFamilyRelationshipsOut, TYPE_SEARCH, TYPE_THESAURUS
 from .index_fts.search_utils import search_index
 from .index_conf import st
+from .api_meta import METADATA
 
 api_router = APIRouter()
 
-# TODO : refaire la doc + vérifier les exceptions + ecrire les tests
+METADATA_ROUTES = METADATA["routes"]
+
 
 # -- protected routes --
 @api_router.get("/meta/persons/person/{_endp_id}",
                 include_in_schema=False,
                 responses={404: {"model": Message}},
-                summary="Get a meta and db administration information utils on person for developers.")
+                summary=METADATA_ROUTES["get_meta_person"]["summary"])
 async def get_meta_person(person_id: str, db: Session = Depends(get_db)):
     person = get_person(db, {"_id_endp": person_id})
     if person is None:
@@ -38,10 +40,11 @@ async def get_meta_person(person_id: str, db: Session = Depends(get_db)):
         "person_show_db_path": f"/admin/person/details/?id={person.id}&url=/admin/person/"
     }
 
+
 @api_router.get("/",
                 responses={500: {"model": Message}, 200: {"model": Message}},
-                summary="Check if the service is available.")
-async def read_root():
+                summary=METADATA_ROUTES["read_root"]["summary"])
+def read_root():
     # try if the server is up
     try:
         return JSONResponse(status_code=200,
@@ -58,7 +61,7 @@ async def read_root():
                 response_model=PersonSearchOut,
                 tags=["persons"],
                 responses={500: {"model": Message}},
-                summary="Full-text search on persons.")
+                summary=METADATA_ROUTES["search"]["summary"])
 async def search(query: str, type_query: TYPE_SEARCH, db: Session = Depends(get_db)):
     try:
         ix = st.open_index()
@@ -89,7 +92,7 @@ async def search(query: str, type_query: TYPE_SEARCH, db: Session = Depends(get_
                 response_model=Page[PersonOut],
                 responses={500: {"model": Message}},
                 tags=["persons"],
-                summary="Retrieve all available persons.")
+                summary=METADATA_ROUTES["read_persons"]["summary"])
 async def read_persons(db: Session = Depends(get_db)):
     try:
         return paginate(get_persons(db))
@@ -103,7 +106,7 @@ async def read_persons(db: Session = Depends(get_db)):
                 response_model=PersonOut,
                 responses={404: {"model": Message}, 500: {"model": Message}},
                 tags=["persons"],
-                summary="Retrieve a person with its endp id.")
+                summary=METADATA_ROUTES["read_person"]["summary"])
 async def read_person(db: Session = Depends(get_db), _id_endp: str = ""):
     try:
         person = get_person(db, {"_id_endp": _id_endp})
@@ -116,9 +119,13 @@ async def read_person(db: Session = Depends(get_db), _id_endp: str = ""):
                                                 f"{e}"})
 
 # ~ PERSONS RELATIONS ENDPOINTS (EVENTS / FAMILY RELATIONSHIPS) ~
+
+
 @api_router.get("/persons/person/{_id_endp}/events",
                 response_model=PersonEventsOut,
-                tags=["persons relations"])
+                responses={404: {"model": Message}, 500: {"model": Message}},
+                tags=["persons relations"],
+                summary=METADATA_ROUTES["read_person_events"]["summary"])
 async def read_person_events(db: Session = Depends(get_db), _id_endp: str = ""):
     try:
         events = get_events(db, {"_id_endp": _id_endp})
@@ -130,18 +137,32 @@ async def read_person_events(db: Session = Depends(get_db), _id_endp: str = ""):
                             content={"message": "It seems the server have trouble: "
                                                 f"{e}"})
 
+
 @api_router.get("/persons/person/{_id_endp}/family_relationships",
-                tags=["persons relations"])
+                response_model=PersonFamilyRelationshipsOut,
+                responses={404: {"model": Message}, 500: {"model": Message}},
+                tags=["persons relations"],
+                summary=METADATA_ROUTES["read_person_family_relationships"]["summary"]
+                )
 async def read_person_family_relationships(db: Session = Depends(get_db), _id_endp: str = ""):
-    pass
+    try:
+        relatives = get_family_relatives(db, {"_id_endp": _id_endp})
+        if relatives is None:
+            return JSONResponse(status_code=404, content={"message": f"Family relationships related to person with id '{_id_endp}' not found."})
+        return relatives
+    except Exception as e:
+        return JSONResponse(status_code=500,
+                            content={"message": "It seems the server have trouble: "
+                                                f"{e}"})
 
 
 # ~ PERSONS THESAURI ENDPOINTS ~
 
 @api_router.get("/persons/thesauri/terms",
-                response_model=Page[ThesaurusOut],
+                response_model=Page[ThesaurusMeta],
                 responses={500: {"model": Message}},
-                tags=["persons thesauri"])
+                tags=["persons thesauri"],
+                summary=METADATA_ROUTES["read_person_thesauri_terms"]["summary"])
 async def read_person_thesauri_terms(thesaurus_type: TYPE_THESAURUS, db: Session = Depends(get_db)):
     thesaurus_terms = get_thesaurus_terms(db=db, model=thesaurus_type.value)
     if thesaurus_terms is not None:
@@ -152,9 +173,10 @@ async def read_person_thesauri_terms(thesaurus_type: TYPE_THESAURUS, db: Session
 
 
 @api_router.get("/persons/thesauri/term/{_id_endp}",
-                response_model=ThesaurusOut,
+                response_model=ThesaurusMeta,
                 responses={404: {"model": Message}, 500: {"model": Message}},
-                tags=["persons thesauri"])
+                tags=["persons thesauri"],
+                summary=METADATA_ROUTES["read_person_thesaurus_term"]["summary"])
 async def read_person_thesaurus_term(thesaurus_type: TYPE_THESAURUS, _id_endp: str = "", db: Session = Depends(get_db)):
     thesaurus_term = get_thesaurus_term(db=db, model=thesaurus_type.value, args={"_id_endp": _id_endp})
     if thesaurus_term is not None:

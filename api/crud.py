@@ -39,13 +39,11 @@ def get_persons(db: Session) \
 def get_thesaurus_term(db: Session, model: str, args: dict) \
         -> Union[ThesaurusTerm, PlacesTerm, None]:
     """Get a term from the thesaurus filter by the endp id."""
-    if model == "places":
-        model_class = PlacesTerm
-    elif model == "persons_terms":
-        model_class = ThesaurusTerm
-    else:
-        return None
-    return db.query(model_class).filter_by(**args).first()
+    model_classes = {
+        "places": PlacesTerm,
+        "persons_terms": ThesaurusTerm
+    }
+    return db.query(model_classes[model]).filter_by(**args).first()
 
 
 def get_thesaurus_terms(db: Session, model: str, condition: str = 'topic') \
@@ -78,3 +76,20 @@ def get_events(db: Session,  args: dict) \
                 } if event.predecessor else None,
             } for event in person.events]}
 
+
+def get_family_relatives(db: Session, args: dict) \
+        -> Union[dict, None]:
+    """Get all the family relationships from a person."""
+    person = db.query(Person).filter_by(**args).first()
+    if person is None:
+        return None
+    return {'_id_endp': person._id_endp,
+            'pref_label': person.pref_label,
+            'relatives': [{
+                '_id_endp': relative._id_endp,
+                'relation_type': relative.relation_type,
+                'relative': {
+                    '_id_endp': relative.relative._id_endp,
+                    'pref_label': relative.relative.pref_label
+                } if relative.relative else None,
+            } for relative in person.family_links]}
