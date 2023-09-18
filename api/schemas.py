@@ -100,7 +100,7 @@ class PersonSearchOut(BaseModel):
     query: str = Field(alias="query")
     total: int = Field(alias="total")
     type_query: str = Field(alias="type_query")
-    results: Union[list[PersonOut], None] = Field(alias="results")
+    results: Union[List[PersonOut], None] = Field(alias="results")
 
 
 class Message(BaseModel):
