@@ -6,14 +6,27 @@ Api endpoints.
 from fastapi import (APIRouter,
                      Depends)
 from fastapi.responses import JSONResponse
-from fastapi_pagination import (Page, paginate)
+from fastapi_pagination import (Page,
+                                paginate)
 from fastapi_pagination.utils import disable_installed_extensions_check
 disable_installed_extensions_check()
 
 from sqlalchemy.orm import Session
 from .database import get_db
-from .crud import get_person, get_persons, get_thesaurus_terms, get_thesaurus_term, get_events, get_family_relatives
-from .schemas import PersonOut, Message, PersonSearchOut, ThesaurusMeta, PersonEventsOut, PersonFamilyRelationshipsOut, TYPE_SEARCH, TYPE_THESAURUS
+from .crud import (get_person,
+                   get_persons,
+                   get_thesaurus_terms,
+                   get_thesaurus_term,
+                   get_events,
+                   get_family_relatives)
+from .schemas import (PersonOut,
+                      Message,
+                      PersonSearchOut, 
+                      ThesaurusMeta,
+                      PersonEventsOut,
+                      PersonFamilyRelationshipsOut,
+                      TYPE_SEARCH,
+                      TYPE_THESAURUS)
 from .index_fts.search_utils import search_index
 from .index_conf import st
 from .api_meta import METADATA
@@ -72,10 +85,13 @@ async def search(query: str, type_query: TYPE_SEARCH, db: Session = Depends(get_
             fieldnames=["pref_label", "forename_alt_labels", "surname_alt_labels"]
         )
         results = search_results
+        # print(results)
         search_results = [
             get_person(db,
-                       result) for result in results
+                       {'id': result['id']}) for result in results
         ]
+        # print(search_results)
+        search_results = [person for person in search_results if person is not None]
         ix.close()
         return {"query": query,
                 "total": len(search_results),

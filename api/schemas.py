@@ -51,6 +51,7 @@ class ThesaurusMeta(BaseMeta):
 class EventMeta(BaseMeta):
     """Schema with minimal information on an event that concerns a person."""
     date: Union[str, None] = Field(alias="date")
+    type: str = Field(alias="type")
     image_url: Union[str, None] = Field(alias="image_url")
     place_term: Union[ThesaurusMeta, None] = Field(alias="place_term")
     thesaurus_term_person: Union[ThesaurusMeta, None] = Field(alias="thesaurus_term_person")
@@ -79,7 +80,7 @@ class PersonOut(PersonMeta):
     first_mention_date: Union[str, None] = Field(alias="first_mention_date")
     last_mention_date: Union[str, None] = Field(alias="last_mention_date")
     is_canon: bool = Field(alias="is_canon")
-    kb_links: List[KbMeta] = Field(alias="related_to")
+    kb_links: Union[List[KbMeta], None] = Field(alias="related_to")
 
 
 class PersonEventsOut(PersonMeta):
@@ -99,7 +100,7 @@ class PersonSearchOut(BaseModel):
     query: str = Field(alias="query")
     total: int = Field(alias="total")
     type_query: str = Field(alias="type_query")
-    results: Union[List[PersonOut], None] = Field(alias="results")
+    results: Union[list[PersonOut], None] = Field(alias="results")
 
 
 class Message(BaseModel):

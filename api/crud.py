@@ -30,8 +30,7 @@ def get_person(db: Session, args: dict) \
     return db.query(Person).filter_by(**args).first()
 
 
-def get_persons(db: Session) \
-        -> list:
+def get_persons(db: Session):
     """Get all the persons from the database."""
     return db.query(Person).all()
 
@@ -43,7 +42,10 @@ def get_thesaurus_term(db: Session, model: str, args: dict) \
         "places": PlacesTerm,
         "persons_terms": ThesaurusTerm
     }
-    return db.query(model_classes[model]).filter_by(**args).first()
+    return db.query(
+        model_classes[model]
+        if isinstance(model, str)
+        else model).filter_by(**args).first()
 
 
 def get_thesaurus_terms(db: Session, model: str, condition: str = 'topic') \
@@ -53,7 +55,10 @@ def get_thesaurus_terms(db: Session, model: str, condition: str = 'topic') \
         "places": PlacesTerm,
         "persons_terms": ThesaurusTerm
     }
-    return db.query(model_classes[model]).order_by(condition).all()
+    return db.query(
+        model_classes[model]
+        if isinstance(model, str)
+        else model).order_by(condition).all()
 
 
 def get_events(db: Session,  args: dict) \
@@ -66,6 +71,7 @@ def get_events(db: Session,  args: dict) \
             'pref_label': person.pref_label,
             'events': [{
                 '_id_endp': event._id_endp,
+                'type': event.type,
                 'date': event.date,
                 'image_url': event.image_url,
                 'place_term': event.place_term,
