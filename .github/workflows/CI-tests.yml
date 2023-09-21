@@ -30,5 +30,3 @@ jobs:
           pytest
           pytest --cov
         shell: bash
-      - name: Coverage Badge
-        uses: tj-actions/coverage-badge-py@v2
