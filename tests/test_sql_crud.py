@@ -66,6 +66,23 @@ def test_read_an_unknown_person():
     assert person is None
 
 
+def test_create_a_new_person():
+    with local_session as session:
+        person = Person(
+            pref_label="Charles Marlan",
+            forename_alt_labels="Charles;Charle;Charl",
+            surname_alt_labels="Marlan;Marlant;Marlent",
+        )
+        session.add(person)
+        session.commit()
+    person = local_session.query(Person).filter(Person.pref_label == "Charles Marlan").first()
+    assert person is not None
+    assert person.pref_label == "Charles Marlan"
+    assert person.forename_alt_labels == "Charles;Charle;Charl"
+    assert person.surname_alt_labels == "Marlan;Marlant;Marlent"
+
+
+
 def test_update_an_existing_person():
     """update an existing person"""
     person = local_session.query(Person).first()

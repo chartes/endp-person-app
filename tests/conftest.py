@@ -5,18 +5,18 @@ File that pytest automatically looks for in any directory.
 import os
 
 from fastapi.testclient import TestClient
+from fastapi_pagination import add_pagination
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 
 from api.database import (BASE, get_db)
 from api.main import (app)
-from api.models import User, Person
+from api.models import User
 from api.database_utils import populate_db_process
 from api.config import BASE_DIR, settings
 from api.index_fts.index_utils import (create_index,
-                                       create_store,
-                                       populate_index)
+                                       create_store)
 from api.index_conf import st
 from api.index_fts.schemas import PersonIdxSchema
 
@@ -60,5 +60,5 @@ User.add_default_user(in_session=local_session)
 populate_db_process(in_session=local_session)
 # populate index
 # populate_index(session=local_session, index_=ix, model=Person)
-
+add_pagination(app)
 client = TestClient(app)

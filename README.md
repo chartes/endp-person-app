@@ -75,4 +75,6 @@ chmod +x linter.sh
 ./linter.sh
 # 2. lancer les tests unitaires
 pytest
+# 3. lancer la couverture de code
+pytest --cov
 ```
