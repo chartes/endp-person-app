@@ -6,6 +6,7 @@ The CLI application for common DB migrations.
 import sys
 import os
 
+import sqlite3
 import click
 
 from .models import User, Person
@@ -68,6 +69,29 @@ def make_cli():
             click.echo(f"Error: {e}")
             sys.exit(1)
 
+    @click.command("db_copy")
+    @click.argument('source_db', type=click.Path(exists=True), required=True)
+    @click.argument('target_db', type=click.Path(exists=True), required=True)
+    def copy_db(source_db, target_db):
+        """Copy the source database to the target database."""
+        if not os.path.exists(source_db):
+            click.echo(f"❌The source database {source_db} does not exist.")
+            sys.exit(1)
+        if not os.path.exists(target_db):
+            os.remove(target_db)
+
+
+        try:
+            with sqlite3.connect(source_db) as source:
+                with sqlite3.connect(target_db) as target:
+                    source.backup(target)
+
+            click.echo("✔️The database has been copied.")
+        except Exception as e:
+            click.echo("❌The database has not been copied.")
+            click.echo(f"Error: {e}")
+            sys.exit(1)
+
     @click.command("index-create")
     def index_create():
         """Create the index for full-text search. (Whoosh)"""
@@ -118,6 +142,7 @@ def make_cli():
     cli.add_command(db_create)
     cli.add_command(db_recreate)
     cli.add_command(db_populate)
+    cli.add_command(copy_db)
     cli.add_command(create_user)
     cli.add_command(index_create)
     cli.add_command(index_populate)

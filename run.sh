@@ -17,13 +17,15 @@
 ###################################################################################
 
 ENV="dev"
+DB="./db/endp.dev.sqlite"
+DB_BACKUP="./db/endp.backup.sqlite"
 
 # ajouter une commande help afficher l'aide
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   echo "run.sh - API main launch script"
   echo "Usage: ./run.sh <mode> [-db]"
   echo "  <mode> : dev | prod [REQ.]"
-  echo "  -db : Recreate and populate database with initial data [OPT.]"
+  echo "  -db-re | -db-back : Recreate and populate database with initial data (from ressources or from db backup) [OPT.]"
   exit 0
 fi
 
@@ -34,10 +36,12 @@ echo "Loading vars env in "$1" mode..."
 case "$1" in
   dev)
     ENV="dev"
+    DB="./db/endp.dev.sqlite"
     source .dev.env
     ;;
   prod)
     ENV="prod"
+    DB="./db/endp.prod.sqlite"
     source .prod.env
     ;;
   *)
@@ -49,13 +53,27 @@ esac
 export ENV=$ENV
 
 # Vérification de l'argument pour la base de données
-if [[ "$2" == "-db" ]]; then
+if [[ "$2" == "-db-re" ]]; then
+  echo "=*= Database recreate and populate from csv ressources =*="
   echo "> Prepare whoosh index dir..."
   python3 manage.py index-create
   echo "> Recreate database process:"
   python3 manage.py db-recreate
   echo "> Populate database process:"
   python3 manage.py db-populate
+  # whoosh index auto populate via sqlalchemy events
+fi
+
+if [[ "$2" == "-db-back" ]]; then
+  echo "=*= Database recreate and populate from db backup =*="
+  echo "> Prepare whoosh index dir..."
+  python3 manage.py index-create
+  echo "> Recreate database process:"
+  python3 manage.py db-recreate
+  echo "> copy database process from backup:"
+  python3 manage.py db_copy $DB_BACKUP $DB
+  echo "> populate index with copy:"
+  python3 manage.py index-populate
   # whoosh index auto populate via sqlalchemy events
 fi
 

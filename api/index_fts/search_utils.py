@@ -16,7 +16,8 @@ fuzzy_ratio = {
 def search_index(ix: index,
                  query_user: str,
                  search_type: str,
-                 fieldnames: list
+                 fieldnames: list,
+                 limit: int = 20,
                  ) -> list:
     with ix.searcher() as searcher:
         if search_type == "exact":
@@ -42,5 +43,5 @@ def search_index(ix: index,
             parsed_query = query.Or(term_objs)
             results = [{"id": result['id'],
                     "_id_endp": result['id_endp']}
-                   for result in searcher.search(parsed_query)]
+                   for result in searcher.search(parsed_query, limit=limit)]
     return results

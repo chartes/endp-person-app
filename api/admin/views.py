@@ -297,8 +297,9 @@ class PersonView(GlobalModelView):
                                "thesaurus_term_person": "Désignation",
                                "predecessor": "Prédécesseur",
                                "date": "Date",
-                               "image_url": "URL de l'image",
+                               "image_url": "Image",
                                "comment": "Commentaire"},
+                # form_overrides=dict(image_url=Select2ImagesWidget), # not implemented yet
                 form_args=dict(
                     date=dict(validators=[is_valid_date], description="Date de l'événement. "
                                                                       "Au format <b>AAAA-MM-JJ</b>, "

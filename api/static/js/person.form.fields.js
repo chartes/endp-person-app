@@ -65,6 +65,7 @@ $(document).ready(function () {
 
 });
 
+
 // Collections of KB URLs
 const KB_URL_MAP = {
         "Wikidata": "www.wikidata.org/entity/<ID>",
