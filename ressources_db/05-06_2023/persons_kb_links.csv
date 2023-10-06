@@ -1,5 +1,8 @@
 person_id,type_kb,url
 10,Studium Parisiense,http://studium-parisiense.univ-paris1.fr/individus/13574
+10,Wikidata,https://www.wikidata.org/wiki/Q318580
+10,VIAF,https://viaf.org/36947428
+10,DataBnF,https://data.bnf.fr/12102483
 13,Studium Parisiense,http://studium-parisiense.univ-paris1.fr/individus/21640
 38,Studium Parisiense,http://studium-parisiense.univ-paris1.fr/individus/21547
 47,Studium Parisiense,http://studium-parisiense.univ-paris1.fr/individus/18253
@@ -29,6 +32,8 @@ person_id,type_kb,url
 270,Collecta,https://www.collecta.fr/p/COL-IMG-10014
 270,Collecta,https://www.collecta.fr/p/COL-IMG-10204
 270,Collecta,https://www.collecta.fr/p/COL-IMG-10286
+270,Wikidata,https://www.wikidata.org/wiki/Q3525696
+270,VIAF,https://viaf.org/9405324/
 278,Studium Parisiense,http://studium-parisiense.univ-paris1.fr/individus/17496
 296,Studium Parisiense,http://studium-parisiense.univ-paris1.fr/individus/5590
 297,Studium Parisiense,http://studium-parisiense.univ-paris1.fr/individus/21573
