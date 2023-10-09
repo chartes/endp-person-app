@@ -47,7 +47,7 @@ Babel(flask_app)
 admin = Admin(flask_app,
               name='e-NDP DB Administration',
               template_mode='bootstrap3',
-              url="/admin",
+              url="/endp-person/admin",
               endpoint="admin",
               index_view=AdminView())
 login = LoginManager(flask_app)
