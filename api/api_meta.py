@@ -6,9 +6,9 @@ constant with API metadata.
 METADATA = {
     "title": "e-NDP - API",
     "version": "0.1.0",
-    "openapi_url": "/api/openapi.json",
-    "docs_url": "/api/docs",
-    "redoc_url": "/api/redoc",
+    "openapi_url": "/endp-person/api/openapi.json",
+    "docs_url": "/endp-person/api/docs",
+    "redoc_url": "/endp-person/api/redoc",
     "license_info": {
         "name": "MIT",
         "identifier": "MIT",

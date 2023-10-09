@@ -47,9 +47,9 @@ def create_app():
     # extensions
     add_pagination(_app)
     # Add routes
-    _app.include_router(api_router, prefix="/api")
+    _app.include_router(api_router, prefix="/endp-person/api")
     # Mount admin interface (flask app) into FastAPI app
-    _app.mount('/', WSGIMiddleware(flask_app))
+    _app.mount('/endp-person/', WSGIMiddleware(flask_app))
     return _app
 
 
