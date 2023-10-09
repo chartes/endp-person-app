@@ -9,8 +9,10 @@
 #                                                                                 #
 # Usage:                                                                          #
 #   ./run.sh <mode> [-db]                                                         #
-#   <mode> : dev | prod [REQ.]                                             #
-#   -db : Recreate and populate database with initial data [OPT.]                 #
+#   <mode> : dev | prod [REQ.]                                                    #
+#   -db-re | -db-back : Recreate and populate database with initial               #
+#   data (from ressources or from db backup) [OPT.]                               #
+#   instance : launch with uvicorn instance on ENC server (dev/prod) [OPT.]       #
 #                                                                                 #
 # Examples:                                                                       #
 #   ./run.sh dev -db                                                              #
@@ -19,6 +21,7 @@
 ENV="dev"
 DB="./db/endp.dev.sqlite"
 DB_BACKUP="./db/endp.backup.sqlite"
+INSTANCE="/srv/webapp/api/endp-person-app/venv/bin/uvicorn"
 
 # ajouter une commande help afficher l'aide
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
@@ -26,6 +29,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   echo "Usage: ./run.sh <mode> [-db]"
   echo "  <mode> : dev | prod [REQ.]"
   echo "  -db-re | -db-back : Recreate and populate database with initial data (from ressources or from db backup) [OPT.]"
+  echo " instance : launch with uvicorn instance on ENC server (dev/prod) [OPT.]"
   exit 0
 fi
 
@@ -42,6 +46,7 @@ case "$1" in
   prod)
     ENV="prod"
     DB="./db/endp.prod.sqlite"
+    INSTANCE="/srv/webapp/endp-person-app/venv/bin/uvicorn"
     source .prod.env
     ;;
   *)
@@ -80,10 +85,14 @@ fi
 
 # Lancer l'application en fonction du mode
 echo "Starting the application [in "$1" mode]..."
-if [[ "$1" == "dev" ]]; then
-  uvicorn api.main:app --host $HOST --port $PORT --reload
-elif [[ "$1" == "prod" ]]; then
-  uvicorn api.main:app --host $HOST --port $PORT --workers $WORKERS
+if [[ "$3" == "instance" || "$2" == "instance" ]]; then
+  $INSTANCE api.main:app --host $HOST --port $PORT --workers $WORKERS
+else
+  if [[ "$ENV" == "dev" ]]; then
+    uvicorn api.main:app --host $HOST --port $PORT --reload
+  elif [[ "$ENV" == "prod" ]]; then
+    uvicorn api.main:app --host $HOST --port $PORT --workers $WORKERS
+  fi
 fi
 
 

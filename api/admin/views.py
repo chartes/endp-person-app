@@ -117,6 +117,9 @@ class EventView(GlobalModelView):
         'place_term.term': 'Lieu',
         'thesaurus_term_person.term': 'Terme',
     }
+    column_formatters = {
+        'comment': _markup_interpret,
+    }
     column_sortable_list = ['id', 'type', 'date', 'image_url']
     column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url', '_id_endp']
     column_filters = ['type', 'date', 'person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'image_url']
