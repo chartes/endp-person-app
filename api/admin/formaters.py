@@ -39,12 +39,3 @@ def _create_tooltip(comment, place):
 
 def _format_label_form_with_tooltip(label, comment, place="bottom"):
     return Markup(f"{label} {_create_tooltip(comment, place)}")
-
-
-def _format_event_image_value(view, context, model, name):
-    current_value = getattr(model, name)
-    print(current_value)
-    if current_value is not None:
-        current_value = current_value.split(';')
-        if len(current_value) > 3:
-            return f"{current_value[0]};{current_value[1]}"

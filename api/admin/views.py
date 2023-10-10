@@ -30,15 +30,13 @@ from .formaters import (_markup_interpret,
                         _color_on_bool,
                         _dateformat,
                         _hyperlink_item_list,
-                        _format_label_form_with_tooltip,
-                        _format_event_image_value)
+                        _format_label_form_with_tooltip,)
 from .validators import (is_valid_date,
                          is_valid_kb_links,
                          is_term_already_exists,
                          is_family_link_circular,
                          is_family_link_valid,
-                         is_nakala_image_valid,
-                         is_nakala_image_exists)
+                         is_nakala_image_valid,)
 from .widgets import Select2DynamicWidget
 
 EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
@@ -381,7 +379,6 @@ class PersonView(GlobalModelView):
         is_valid_kb_links(model.kb_links)
         is_family_link_valid(model.family_links)
         is_family_link_circular(model.family_links)
-        is_nakala_image_exists(model, model.events)
         if model.__tablename__ == "persons":
             model._last_editor = current_user.username
 

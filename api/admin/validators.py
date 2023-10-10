@@ -53,7 +53,6 @@ def is_family_link_valid(result_db):
 
 def is_nakala_image_valid(_, field):
     """validate that the image is a nakala image"""
-    print(field.data)
     if not ';' in field.data:
         raise ValidationError(f"L'image de l'événement doit contenir un séparateur ';' entre la cote du registre et le nom de l'image.")
     test_value = field.data.split(';')
@@ -64,36 +63,3 @@ def is_nakala_image_valid(_, field):
     if not test_value[1].strip().startswith('FRAN'):
         raise ValidationError(f"Le nom de l'image doit commencer par 'FRAN_'.")
 
-
-def raise_image_error(image_name):
-    """Raises a validation error when an image doesn't exist."""
-    raise ValidationError(f"L'image {image_name} n'existe pas sur Nakala ou veuillez réessayer plus tard.")
-
-
-def is_nakala_image_exists(model, result_db):
-    """Check on Nakala API if the image exists."""
-    for result in result_db:
-        image_url_parts = result.image_url.split(';')
-        if len(image_url_parts) != 2:
-            continue
-
-        image_register, image_name = image_url_parts
-        image_register = image_register.strip()
-        image_name = image_name.strip()
-        url = f"https://api.nakala.fr/search?q=FRAN_{image_name}&size=1&order=relevance"
-
-        response = requests.get(url)
-        if response.status_code != 200:
-            raise ValidationError(f"Le serveur Nakala rencontre des difficultés."
-                                  f"Veuillez réessayer plus tard pour l'image de l'événement.")
-        data = response.json().get("datas", [])
-
-        if not data or "files" not in data[0]:
-            raise_image_error(image_name)
-        else:
-            for d in data[0]["files"]:
-                if d["name"] == image_name:
-                    result.image_url = f"{image_register};{image_name};{d['sha1']}"
-                    break
-            else:
-                raise_image_error(image_name)

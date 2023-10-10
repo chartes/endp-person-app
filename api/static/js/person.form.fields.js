@@ -63,37 +63,6 @@ $(document).ready(function () {
         fetchLabels(selectSurname, 'surname', pref_label);
     }
 
-    /**
-     * Function to format the value of the image_url field.
-     */
-
-    function format_image_value() {
-        let events = $('#events');
-        let image_urls = events.find('textarea[id$="-image_url"]');
-        image_urls.each(function () {
-            let value = $(this).val();
-            console.log(value);
-            if (value) {
-                let split_value = value.split(';');
-                // this.value = split_value[0] + ';' + split_value[1];
-                // block the textarea
-                $(this).attr('disabled', true);
-                // create a button to edit the value (clean the textarea)
-                let button = $('<button type="button" class="btn btn-primary btn-sm">Remplacer l\'image</button>');
-                $(this).after(button);
-                button.click(function () {
-                    confirm('Êtes-vous sûr de vouloir remplacer l\'image ? (l\'ancienne image sera supprimée)');
-                    $(this).prev().attr('disabled', false);
-                    // erase the value
-                    $(this).prev().val('');
-                    // remove the button
-                    $(this).remove();
-                });
-            }
-        });
-    }
-    format_image_value();
-
 });
 
 
