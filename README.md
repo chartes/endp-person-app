@@ -48,8 +48,8 @@ Pour lancer l'application seule (ignorer l'argument `-db`) :
 
 Pour contrôler le bon fonctionnement de l'application :
 
-- la documentation de l'API se trouve à l'adresse : http://localhost:8000/api/docs
-- l'interface d'administration se trouve à l'adresse : http://localhost:8000/admin/
+- la documentation de l'API se trouve à l'adresse : http://localhost:8888/endp-person/api/docs
+- l'interface d'administration se trouve à l'adresse : http://localhost:8888/endp-person/admin/
 
 Identifiants par défaut pour l'authentification à l'interface d'administration 
 pour le développement et les tests :
@@ -61,6 +61,12 @@ pour le développement et les tests :
 
 ```bash
    python3 manage.py create-user --username <username> --email <email> --password <password>
+```
+
+## Modifier un mot de passe
+
+```bash
+    python3 manage.py reset-password -u <username> -p <new_password>  
 ```
 
 ## Contrôle de la qualité du code et tests unitaires
