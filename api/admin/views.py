@@ -30,12 +30,15 @@ from .formaters import (_markup_interpret,
                         _color_on_bool,
                         _dateformat,
                         _hyperlink_item_list,
-                        _format_label_form_with_tooltip)
+                        _format_label_form_with_tooltip,
+                        _format_event_image_value)
 from .validators import (is_valid_date,
                          is_valid_kb_links,
                          is_term_already_exists,
                          is_family_link_circular,
-                         is_family_link_valid)
+                         is_family_link_valid,
+                         is_nakala_image_valid,
+                         is_nakala_image_exists)
 from .widgets import Select2DynamicWidget
 
 EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
@@ -310,6 +313,17 @@ class PersonView(GlobalModelView):
                                                                       "Ajouter le signe <b>~</b> devant "
                                                                       "pour indiquer une date approximative."),
                     comment=dict(label="Note"),
+                    image_url=dict(validators=[is_nakala_image_valid],
+                                   description="Ajouter la <u>cote d'archive du registre</u> suivi du <u>nom de l'image</u> (extension comprise) "
+                                               "en utilisant comme séparateur ';'.<br>Par exemple :"
+                                               "<b>'LL125 ; FRAN_0393_07935.tif'</b> ou "
+                                               "<b>LL127-LL128 ; FRAN_0393_13744.tif</b>."
+                                               "<br>Pour accéder aux images des registres rendez-vous sur "
+                                               "<a href='https://nakala.fr/collection/10.34847/nkl.03cbi521' "
+                                               "target='_blank'><img src='https://nakala.fr/build/images/nakala.png' "
+                                               "style='width: 24px; vertical-align: -8px; margin-right: -2px;'> "
+                                               "Nakala</a>.",
+                                   )
                 ),
             )
 
@@ -366,8 +380,8 @@ class PersonView(GlobalModelView):
         # Check if kb_links are valid
         is_valid_kb_links(model.kb_links)
         is_family_link_valid(model.family_links)
-
         is_family_link_circular(model.family_links)
+        is_nakala_image_exists(model, model.events)
         if model.__tablename__ == "persons":
             model._last_editor = current_user.username
 

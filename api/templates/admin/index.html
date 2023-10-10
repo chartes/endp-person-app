@@ -7,8 +7,8 @@
     <p class="heading1">Administration de la base de données personnes du projet e-NDP</p>
     <p class="heading2">Bienvenue {% if current_user.is_authenticated %}
         <span class="user-connect-home">{{ current_user.username }}</span>{% endif %} !</p>
-    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données des personnes du projet ANR
-        e-NDP: Notre-Dame et son cloître.</p>
+    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données des personnes du projet <a href="https://endp.hypotheses.org/">ANR
+        e-NDP: Notre-Dame et son cloître</a>.</p>
     {% if not current_user.is_authenticated %}
         <p class="heading3">
             <span class="glyphicon glyphicon-hand-right"></span> Pour accéder au système, <a
@@ -20,10 +20,11 @@
     <p class="normal-text"><a rel="license" class="license-img" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img
             alt="Licence Creative Commons"
             src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"/></a><br/>Le modèle de données ainsi que les
-        données du projet e-NDP présentes dans cette interface sont à disposition selon les termes de la <a
+        données du projet e-NDP présentes dans cette interface sont à disposition <br>selon les termes de la <a
                 rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Licence Creative
-            Commons Attribution - Partage dans les Mêmes Conditions 4.0 International</a>.</p>
+            Commons Attribution - Partage dans les Mêmes Conditions 4.0 International</a><br>et de l'ANR (20-CE27-0012) e-NDP.</p>
     <br>
     <img class="img-partner" src="{{ url_for('static', filename='images/banner-partners-home.png') }}">
+    <img class="img-partner" src="{{ url_for('static', filename='images/ANR-logo-C.jpg') }}" style="width: 180px !important; height: auto">
     </div>
 {% endblock body %}

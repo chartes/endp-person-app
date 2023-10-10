@@ -120,9 +120,9 @@ def make_cli():
             sys.exit(1)
 
     @click.command("create-user")
-    @click.option("--username", "-u", type=str, help="Username of the user.")
-    @click.option("--email", "-e", type=str, help="Email of the user.")
-    @click.option("--password", "-p", type=str, help="Password of the user.")
+    @click.option("--username", "-u", type=str, help="Username of the user.", required=True)
+    @click.option("--email", "-e", type=str, help="Email of the user.", required=True)
+    @click.option("--password", "-p", type=str, help="Password of the user.", required=True)
     def create_user(username, email, password):
         """Create a new user."""
         try:
@@ -139,6 +139,21 @@ def make_cli():
             click.echo(f"Error: {e}")
             sys.exit(1)
 
+    @click.command("reset-password")
+    @click.option("--username", "-u", type=str, help="Username of the user.", required=True)
+    @click.option("--new-password", "-p", type=str, help="New password of the user.", required=True)
+    def reset_password(username, new_password):
+        try:
+            user = session.query(User).filter_by(username=username).first()
+            user.set_password(new_password)
+            session.commit()
+            click.echo(f"✔️ User {username} has been updated.")
+        except Exception as e:
+            session.rollback()
+            click.echo(f"❌ User {username} not exist.")
+            click.echo(f"Error: {e}")
+            sys.exit(1)
+
     cli.add_command(db_create)
     cli.add_command(db_recreate)
     cli.add_command(db_populate)
@@ -146,5 +161,6 @@ def make_cli():
     cli.add_command(create_user)
     cli.add_command(index_create)
     cli.add_command(index_populate)
+    cli.add_command(reset_password)
 
     return cli

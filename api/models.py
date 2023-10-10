@@ -569,7 +569,7 @@ class Event(AbstractActions):
     type = Column(Enum(*_get_enum_values(EventTypeLabels)), nullable=False, unique=False)
     person_id = Column(Integer, ForeignKey("persons.id"), nullable=False, unique=False)
     date = Column(String(25), nullable=True, unique=False)
-    image_url = Column(String(25), nullable=True, unique=False)
+    image_url = Column(Text(), nullable=True, unique=False)
     place_term_id = Column(Integer, ForeignKey("places_thesaurus_terms.id", onupdate="CASCADE", ondelete="CASCADE"),
                            nullable=True, unique=False)
     person_thesaurus_term_id = Column(Integer,

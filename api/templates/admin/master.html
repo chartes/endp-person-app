@@ -2,7 +2,7 @@
 
 {% block head %}
     {{ super() }}
-    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="icon" href="http://www.chartes.psl.eu/favicon.ico">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"
             integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -10,11 +10,19 @@
 
 {% block access_control %}
     <div class="navbar-text btn-group pull-right">
-    <a href="/endp-person/api/docs" target="_blank" style="margin-right: 10px; text-decoration: none; vertical-align: 2px">
-    <img src="{{ url_for('static', filename='images/swagger-icon.png') }}" style="width: 24px; vertical-align: -8px; margin-right: -2px;">
-    <span style="vertical-align: middle;">API docs</span>
-</a>
-    {% if current_user.is_authenticated %}
+        <a href="/endp-person/api/docs" target="_blank"
+           style="margin-right: 10px; text-decoration: none; vertical-align: 2px">
+            <img src="{{ url_for('static', filename='images/swagger-icon.png') }}"
+                 style="width: 24px; vertical-align: -8px; margin-right: -2px;">
+            <span style="vertical-align: middle;">API</span>
+        </a>
+        <a href="https://nakala.fr/collection/10.34847/nkl.03cbi521" target="_blank"
+           style="margin-right: 10px; text-decoration: none; vertical-align: 2px">
+            <img src="{{ url_for('static', filename='images/nakala-square-icon.png') }}"
+                 style="width: 24px; vertical-align: -8px; margin-right: -2px;">
+            <span style="vertical-align: middle;">Nakala</span>
+        </a>
+        {% if current_user.is_authenticated %}
             <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                 <i class="glyphicon glyphicon-user"></i>
                 {{ current_user.username }}<span class="caret"></span>
@@ -22,9 +30,9 @@
             <ul class="dropdown-menu" role="menu">
                 <li><a href="{{ url_for('admin.logout') }}">Se déconnecter</a></li>
             </ul>
-    {% else %}
+        {% else %}
             <a href="{{ url_for('admin.login') }}"><i class="glyphicon glyphicon-log-in"></i> Se connecter</a></span>
-    {% endif %}
+        {% endif %}
     </div>
 
 
