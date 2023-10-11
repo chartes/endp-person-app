@@ -1,12 +1,41 @@
-/* css for quill editor */
+/* classes for quill editor */
 .ql-editor {
     font-size: 14px !important;
 }
-/* css for bootstrap tooltip */
+/* classes for bootstrap tooltip */
 .fa-info-circle {
     font-size: 20px !important;
 }
 .tooltip-inner {
     max-width: 300px !important;
     width: 300px !important;
+}
+/* classes for Nakala image preview */
+#iframeContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#imagePreview {
+    border: none;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#closePreview {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }

@@ -96,4 +96,5 @@ for view in [
 ]:
     admin.add_view(view)
 
+
 from .routes import reset_password, reset_password_request

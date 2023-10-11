@@ -37,10 +37,10 @@ from .validators import (is_valid_date,
                          is_family_link_circular,
                          is_family_link_valid,
                          is_nakala_image_valid,)
-from .widgets import Select2DynamicWidget
+from .widgets import Select2DynamicWidget, Select2NakalaChoicesWidget
+from .constants import NAKALA_IMAGES
 
 EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
-
 
 # VIEW BASED ON DB MODELS #
 
@@ -303,7 +303,7 @@ class PersonView(GlobalModelView):
                                "date": "Date",
                                "image_url": "Image",
                                "comment": "Commentaire"},
-                # form_overrides=dict(image_url=Select2ImagesWidget), # not implemented yet
+                form_overrides=dict(image_url=Select2NakalaChoicesWidget), # not implemented yet
                 form_args=dict(
                     date=dict(validators=[is_valid_date], description="Date de l'événement. "
                                                                       "Au format <b>AAAA-MM-JJ</b>, "
@@ -312,10 +312,7 @@ class PersonView(GlobalModelView):
                                                                       "pour indiquer une date approximative."),
                     comment=dict(label="Note"),
                     image_url=dict(validators=[is_nakala_image_valid],
-                                   description="Ajouter la <u>cote d'archive du registre</u> suivi du <u>nom de l'image</u> (extension comprise) "
-                                               "en utilisant comme séparateur ';'.<br>Par exemple :"
-                                               "<b>'LL125 ; FRAN_0393_07935.tif'</b> ou "
-                                               "<b>LL127-LL128 ; FRAN_0393_13744.tif</b>."
+                                   description="Rechercher et/ou sélectionner une image sur Nakala."
                                                "<br>Pour accéder aux images des registres rendez-vous sur "
                                                "<a href='https://nakala.fr/collection/10.34847/nkl.03cbi521' "
                                                "target='_blank'><img src='https://nakala.fr/build/images/nakala.png' "
@@ -372,6 +369,12 @@ class PersonView(GlobalModelView):
                 labels = person.surname_alt_labels
 
             return jsonify(labels.split(','))
+
+    @expose('/get_nakala_images/', methods=('GET', 'POST'))
+    def get_nakala_images(self):
+        """Return grouped list of images from Nakala. (Use by Select2NakalaChoicesWidget)"""
+        if request.method == 'POST' or request.method == 'GET':
+            return jsonify(NAKALA_IMAGES)
 
     def on_model_change(self, form, model, is_created):
         """Update model before saving it. Custom actions on model change."""

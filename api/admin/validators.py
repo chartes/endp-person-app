@@ -14,9 +14,12 @@ def is_valid_kb_links(kb_refs):
             raise ValidationError("Vous ne pouvez pas avoir plusieurs liens vers la même base "
                                   "de connaissance pour une personne "
                                   "(Wikidata, Biblissima, VIAF, DataBnF, Studium Parisiense).")
+
+
 def is_custom_date_format(value):
     pattern = r"^(?:~?\d{4}(?:-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|1\d|2\d|3[01]))?)?)$"
     return bool(re.match(pattern, value))
+
 
 def is_valid_date(_, field):
     """validate that the date is in the correct format"""
@@ -58,8 +61,6 @@ def is_nakala_image_valid(_, field):
     test_value = field.data.split(';')
     if len(test_value) != 2:
         raise ValidationError(f"L'image de l'événement doit exclusivement contenir la cote du registre et le nom de l'image, n'essayez pas d'ajouter le SHA1.")
-    if not test_value[0].strip().startswith('LL'):
-        raise ValidationError(f"La cote du registre doit commencer par 'LL'.")
-    if not test_value[1].strip().startswith('FRAN'):
-        raise ValidationError(f"Le nom de l'image doit commencer par 'FRAN_'.")
+    if not test_value[0].strip().startswith('FRAN_'):
+        raise ValidationError(f"La cote du registre doit commencer par 'FRAN_'.")
 

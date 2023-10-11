@@ -3,6 +3,7 @@
  * e-NDP DB administration
  * 2023 - L. Terriel (ENC)
  */
+
 $(document).ready(function () {
     // Select the elements with class 'input-select-tag-form-1' and 'input-select-tag-form-2'
     let selectForename = $('.input-select-tag-form-1');
@@ -56,24 +57,88 @@ $(document).ready(function () {
     configureSelect2(selectSurname);
 
 
-
     // Fetch the alternate labels for the select2 inputs if 'pref_label' is not empty.
     if (pref_label !== '') {
         fetchLabels(selectForename, 'forename', pref_label);
         fetchLabels(selectSurname, 'surname', pref_label);
     }
+    function openPreview(url) {
+        let iframe = $('#imagePreview');
+        console.log(iframe);
+        console.log(url);
+        iframe.attr({'src': url});
+        $('#iframeContainer').attr('style', 'display: flex');
+        $('#closePreview').on('click', function () {
+            $('#iframeContainer').attr('style', 'display: none');
+        });
+    }
 
+    /**
+     * Function to add a Select2 input to the event subform to select an image from Nakala.
+     */
+    function addSelect2Image() {
+        let idEventSelect = $('input[id^="events-"][id$="-image_url"]');
+        fetch('/endp-person/endp-person/admin/person/get_nakala_images/').then(response => response.json()).then(data => {
+            idEventSelect.each(function () {
+                $(this).select2({
+                    data: $.parseJSON(JSON.stringify(data)),
+                    placeholder: 'Choisir une image',
+                });
+                // add a button to clear the select2 input add a id based on idEventSelect
+                let idEventSelectClear = $(this).attr('id');
+                let idEventSelectClearBtn = idEventSelectClear + '-clear';
+                // if not exist add a button to clear the select2 input
+                if (!$('#' + idEventSelectClearBtn).length) {
+                    $(this).after('<br><button type="button" id="' + idEventSelectClearBtn + '" class="btn btn-danger btn-sm">Effacer l\'image</button><br>');
+                    // listener when click on the button to clear the select2 input
+                    $('#' + idEventSelectClearBtn).on('click', function () {
+                        $('#' + idEventSelectClear).val(null).trigger('change');
+                    });
+                    // add a listener when change the value of the select2 input
+                    $(this).on('change', function () {
+                        console.log('change');
+                    });
+                    // create a button with id based on idEventSelect to open a preview of the image "openPreview-<idEventSelect>"
+                    let idEventSelectPreviewBtn = 'openPreview-' + idEventSelectClear;
+                    $(this).after('<br><button type="button" id="' + idEventSelectPreviewBtn + '" class="btn btn-primary btn-sm">Aperçu de l\'image</button>');
+                    // listener when click on the button to open a preview of the image
+                    $('#' + idEventSelectPreviewBtn).on('click', function () {
+                       // get the value of the select2 input
+                       let idEventSelectPreview = $('#' + idEventSelectClear).val();
+                       console.log(idEventSelectPreview);
+                          // if not empty open a preview of the image
+                            if (idEventSelectPreview !== null) {
+                                // split in ";" and get the second part of the string
+                                let idEventSelectPreviewSplit = idEventSelectPreview.split(';');
+                                let idEventSelectPreviewSplit2 = idEventSelectPreviewSplit[1];
+                                let url = "https://api.nakala.fr/embed/10.34847/nkl.8bdfe89g/" + idEventSelectPreviewSplit2;
+                                openPreview(url);
+                                console.log(url);
+                            }
+                    });
+                }
+            });
+        });
+    }
+
+    // listener when open a event subform to add a new event
+    let idEventBtn = $('#events-button');
+    idEventBtn.on('click', function () {
+        addSelect2Image();
+    });
+
+    addSelect2Image();
 });
 
 
 // Collections of KB URLs
 const KB_URL_MAP = {
-        "Wikidata": "www.wikidata.org/entity/<ID>",
-        "Biblissima": "data.biblissima.fr/w/Item:<ID>",
-        "VIAF": "www.viaf.org/viaf/<ID>/",
-        "DataBnF": "data.bnf.fr/fr/<ID>/",
-        "Studium Parisiense": "studium-parisiense.univ-paris1.fr/individus/<ID>",
-        "Collecta": "www.collecta.fr/p/COL-IMG-<ID>",
+    "Wikidata": "www.wikidata.org/entity/<ID>",
+    "Biblissima": "data.biblissima.fr/w/Item:<ID>",
+    "VIAF": "www.viaf.org/viaf/<ID>/",
+    "DataBnF": "data.bnf.fr/fr/<ID>/",
+    "Studium Parisiense": "studium-parisiense.univ-paris1.fr/individus/<ID>",
+    "Collecta": "www.collecta.fr/p/COL-IMG-<ID>",
 };
 
 /**
@@ -92,3 +157,4 @@ function fetchCorrectUrlStringFromKbSelect(event) {
     // Set the value of the input with the correct URL
     $(formattedString).val(KB_URL_MAP[KbType]);
 }
+

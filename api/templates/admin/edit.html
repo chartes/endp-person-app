@@ -7,6 +7,14 @@
     <link href="{{ url_for('static', filename='deps/quill/quill.snow.css') }}" rel="stylesheet">
 {% endblock %}
 
+{% block body %}
+    {{ super() }}
+    <div id="iframeContainer" style="display: none;">
+        <button id="closePreview">Fermer</button>
+        <iframe id="imagePreview" width="800" height="900"></iframe>
+    </div>
+{% endblock %}
+
 {% block tail_js %}
     {{ super() }}
     <script type="text/javascript" src="{{ url_for('static', filename='deps/quill/quill.min.js') }}"></script>
