@@ -10,7 +10,7 @@
 {% block body %}
     {{ super() }}
     <div id="iframeContainer" style="display: none;">
-        <button id="closePreview">Fermer</button>
+        <button id="closePreview"><span class="glyphicon glyphicon-remove"></span> Fermer l'aperçu</button>
         <iframe id="imagePreview" width="800" height="900"></iframe>
     </div>
 {% endblock %}

@@ -53,14 +53,3 @@ def is_family_link_valid(result_db):
         if v > 1:
             raise ValidationError(f"Vous ne pouvez pas créer plusieurs liens familiaux entre la personne {k[2]} et la personne {k[3]}.")
 
-
-def is_nakala_image_valid(_, field):
-    """validate that the image is a nakala image"""
-    if not ';' in field.data:
-        raise ValidationError(f"L'image de l'événement doit contenir un séparateur ';' entre la cote du registre et le nom de l'image.")
-    test_value = field.data.split(';')
-    if len(test_value) != 2:
-        raise ValidationError(f"L'image de l'événement doit exclusivement contenir la cote du registre et le nom de l'image, n'essayez pas d'ajouter le SHA1.")
-    if not test_value[0].strip().startswith('FRAN_'):
-        raise ValidationError(f"La cote du registre doit commencer par 'FRAN_'.")
-

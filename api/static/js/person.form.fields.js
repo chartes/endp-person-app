@@ -5,6 +5,10 @@
  */
 
 $(document).ready(function () {
+    const BASE_URL = "/endp-person/endp-person/admin/person/";
+    const API_NAKALA_API = "https://api.nakala.fr/";
+
+
     // Select the elements with class 'input-select-tag-form-1' and 'input-select-tag-form-2'
     let selectForename = $('.input-select-tag-form-1');
     let selectSurname = $('.input-select-tag-form-2');
@@ -20,7 +24,7 @@ $(document).ready(function () {
      */
     function fetchLabels(selectElement, typeLabel, prefLabel) {
         $.ajax({
-            url: "/endp-person/endp-person/admin/person/get_persons_alt_labels/",
+            url: `${BASE_URL}get_persons_alt_labels/`,
             type: 'POST',
             data: {
                 type_label: typeLabel,
@@ -62,71 +66,112 @@ $(document).ready(function () {
         fetchLabels(selectForename, 'forename', pref_label);
         fetchLabels(selectSurname, 'surname', pref_label);
     }
+
+    /**
+     * Displays an image preview using an iframe.
+     * @param {string} url - The URL of the image to be previewed.
+     */
     function openPreview(url) {
-        let iframe = $('#imagePreview');
-        console.log(iframe);
-        console.log(url);
+        const iframe = $('#imagePreview');
         iframe.attr({'src': url});
         $('#iframeContainer').attr('style', 'display: flex');
         $('#closePreview').on('click', function () {
+            // Closes the preview on click.
             $('#iframeContainer').attr('style', 'display: none');
         });
     }
 
+
     /**
-     * Function to add a Select2 input to the event subform to select an image from Nakala.
+     * Adds a Select2 input to the event subform to select an image from Nakala.
+     * Fetches available images from Nakala and configures the Select2 input accordingly.
      */
-    function addSelect2Image() {
-        let idEventSelect = $('input[id^="events-"][id$="-image_url"]');
-        fetch('/endp-person/endp-person/admin/person/get_nakala_images/').then(response => response.json()).then(data => {
-            idEventSelect.each(function () {
-                $(this).select2({
-                    data: $.parseJSON(JSON.stringify(data)),
+    async function addSelect2Image() {
+        try {
+            const response = await fetch(`${BASE_URL}get_nakala_images/`);
+            const data = await response.json();
+            $('input[id^="events-"][id$="-image_url"]').each(function () {
+                const select = $(this);
+                select.select2({
+                    data: data,
                     placeholder: 'Choisir une image',
+                    formatSelection: selectData => selectData.text.split(';')[1],
+                    formatResult: selectData => {
+                        // Formats the result based on its content.
+                        return selectData.children ? selectData.text : selectData.text.split(';')[1];
+                    }
                 });
-                // add a button to clear the select2 input add a id based on idEventSelect
-                let idEventSelectClear = $(this).attr('id');
-                let idEventSelectClearBtn = idEventSelectClear + '-clear';
-                // if not exist add a button to clear the select2 input
-                if (!$('#' + idEventSelectClearBtn).length) {
-                    $(this).after('<br><button type="button" id="' + idEventSelectClearBtn + '" class="btn btn-danger btn-sm">Effacer l\'image</button><br>');
-                    // listener when click on the button to clear the select2 input
-                    $('#' + idEventSelectClearBtn).on('click', function () {
-                        $('#' + idEventSelectClear).val(null).trigger('change');
-                    });
-                    // add a listener when change the value of the select2 input
-                    $(this).on('change', function () {
-                        console.log('change');
-                    });
-                    // create a button with id based on idEventSelect to open a preview of the image "openPreview-<idEventSelect>"
-                    let idEventSelectPreviewBtn = 'openPreview-' + idEventSelectClear;
-                    $(this).after('<br><button type="button" id="' + idEventSelectPreviewBtn + '" class="btn btn-primary btn-sm">Aperçu de l\'image</button>');
-                    // listener when click on the button to open a preview of the image
-                    $('#' + idEventSelectPreviewBtn).on('click', function () {
-                       // get the value of the select2 input
-                       let idEventSelectPreview = $('#' + idEventSelectClear).val();
-                       console.log(idEventSelectPreview);
-                          // if not empty open a preview of the image
-                            if (idEventSelectPreview !== null) {
-                                // split in ";" and get the second part of the string
-                                let idEventSelectPreviewSplit = idEventSelectPreview.split(';');
-                                let idEventSelectPreviewSplit2 = idEventSelectPreviewSplit[1];
-                                let url = "https://api.nakala.fr/embed/10.34847/nkl.8bdfe89g/" + idEventSelectPreviewSplit2;
-                                openPreview(url);
-                                console.log(url);
-                            }
-                    });
-                }
+                // Adds clear and preview buttons next to the Select2 input.
+                createButtons(select);
             });
-        });
+        } catch (error) {
+            console.error(error);
+        }
     }
 
-    // listener when open a event subform to add a new event
-    let idEventBtn = $('#events-button');
-    idEventBtn.on('click', function () {
-        addSelect2Image();
-    });
+    /**
+     * Generates 'clear' and 'preview' buttons for a given Select2 input.
+     * @param {jQuery} selectElement - The jQuery object representing the select element.
+     */
+    function createButtons(selectElement) {
+    const idEventSelectClear = selectElement.attr('id');
+    const idEventSelectClearBtn = `${idEventSelectClear}-clear`;
+    const idEventSelectPreviewBtn = `openPreview-${idEventSelectClear}`;
 
+    // Ensures buttons are only created once.
+    if (!$(`#${idEventSelectClearBtn}`).length) {
+        selectElement.after(`
+            <br><button type="button" id="${idEventSelectClearBtn}" class="btn btn-danger btn-sm" style="margin-right: 10px !important;">Effacer l'image</button>
+            <button type="button" id="${idEventSelectPreviewBtn}" class="btn btn-primary btn-sm">Aperçu de l'image</button>
+        `);
+
+        // Hide buttons if the selectElement has no value.
+        if (!selectElement.val()) {
+            $(`#${idEventSelectClearBtn}`).hide();
+            $(`#${idEventSelectPreviewBtn}`).hide();
+        }
+
+        // Show/Hide buttons on selectElement change.
+        selectElement.on('change', function() {
+            if ($(this).val()) {
+                $(`#${idEventSelectClearBtn}`).show();
+                $(`#${idEventSelectPreviewBtn}`).show();
+            } else {
+                $(`#${idEventSelectClearBtn}`).hide();
+                $(`#${idEventSelectPreviewBtn}`).hide();
+            }
+        });
+
+        $(`#${idEventSelectClearBtn}`).on('click', function () {
+            // Clears the Select2 input when the 'clear' button is clicked.
+            $(`#${idEventSelectClear}`).val(null).trigger('change');
+        });
+
+        $(`#${idEventSelectPreviewBtn}`).on('click', async function () {
+            // Generates a preview when the 'preview' button is clicked.
+            const selectedValue = $(`#${idEventSelectClear}`).val();
+            if (selectedValue) {
+                const [register_identifier, , image_sha1] = selectedValue.split(';');
+                try {
+                    const response = await fetch(`${BASE_URL}get_nakala_data_identifiers/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ register_identifier })
+                    });
+                    const data = await response.json();
+                    const url = `${API_NAKALA_API}embed/${data.nakala_identifier}/${image_sha1}`;
+                    openPreview(url);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        });
+    }
+}
+
+
+    // listener when open a event subform to add a new event
+    $('#events-button').on('click', addSelect2Image);
     addSelect2Image();
 });
 

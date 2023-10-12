@@ -3,6 +3,8 @@ views.py
 
 Model views for the admin interface.
 """
+import json
+
 from flask import (redirect,
                    url_for,
                    flash,
@@ -35,10 +37,10 @@ from .validators import (is_valid_date,
                          is_valid_kb_links,
                          is_term_already_exists,
                          is_family_link_circular,
-                         is_family_link_valid,
-                         is_nakala_image_valid,)
+                         is_family_link_valid)
 from .widgets import Select2DynamicWidget, Select2NakalaChoicesWidget
-from .constants import NAKALA_IMAGES
+from .constants import (NAKALA_IMAGES,
+                        NAKALA_DATA_IDENTIFIERS)
 
 EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
 
@@ -311,8 +313,7 @@ class PersonView(GlobalModelView):
                                                                       "Ajouter le signe <b>~</b> devant "
                                                                       "pour indiquer une date approximative."),
                     comment=dict(label="Note"),
-                    image_url=dict(validators=[is_nakala_image_valid],
-                                   description="Rechercher et/ou sélectionner une image sur Nakala."
+                    image_url=dict(description="Rechercher et/ou sélectionner une image sur Nakala."
                                                "<br>Pour accéder aux images des registres rendez-vous sur "
                                                "<a href='https://nakala.fr/collection/10.34847/nkl.03cbi521' "
                                                "target='_blank'><img src='https://nakala.fr/build/images/nakala.png' "
@@ -369,6 +370,17 @@ class PersonView(GlobalModelView):
                 labels = person.surname_alt_labels
 
             return jsonify(labels.split(','))
+
+    @expose('/get_nakala_data_identifiers/', methods=('GET', 'POST'))
+    def get_nakala_data_identifiers(self):
+        """Return list of data identifiers from Nakala. (Use by Select2NakalaChoicesWidget)"""
+        if request.method == 'POST' or request.method == 'GET':
+            data = request.data.decode('utf-8')
+            register_identifier = json.loads(data)['register_identifier']
+            return jsonify({
+                'register_number': register_identifier,
+                'nakala_identifier' : NAKALA_DATA_IDENTIFIERS[register_identifier]
+            })
 
     @expose('/get_nakala_images/', methods=('GET', 'POST'))
     def get_nakala_images(self):
