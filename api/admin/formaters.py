@@ -14,16 +14,17 @@ def _thumbnail_interpret(self, context, model, name):
     if item is None:
         item = ""
     else:
-        value = item.split(";")
-        img_sha = value[2]
-        img_val = value[1]
-        register = value[0]
-        data_id = NAKALA_DATA_IDENTIFIERS[register]
-        item = f"""
-        <b>image</b> : {img_val} ({register})  <br>
-        <b>id</b> : {data_id} <br>
-        <a href="https://nakala.fr/{data_id}#{img_sha}" target="_blank">Visualiser dans Nakala</a>
-        """
+        try:
+            value = item.split(";")
+            img_sha = value[2]
+            register = value[0]
+            data_id = NAKALA_DATA_IDENTIFIERS[register]
+            item = f"""
+                <iframe src="https://api.nakala.fr/embed/{data_id}/{img_sha}?buttons=false" width="120px" height="150px"></iframe>
+            <a href="https://nakala.fr/{data_id}#{img_sha}" target="_blank">Visualiser</a>
+            """
+        except IndexError:
+            item = item
     return Markup(item)
 
 
