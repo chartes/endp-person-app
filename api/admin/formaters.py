@@ -20,7 +20,7 @@ def _thumbnail_interpret(self, context, model, name):
             register = value[0]
             data_id = NAKALA_DATA_IDENTIFIERS[register]
             item = f"""
-                <iframe src="https://api.nakala.fr/embed/{data_id}/{img_sha}?buttons=false" width="150px" height="200px"></iframe>
+                <iframe src="https://api.nakala.fr/embed/{data_id}/{img_sha}?buttons=false" width="300px" height="350px"></iframe>
             <a href="https://nakala.fr/{data_id}#{img_sha}" target="_blank">Visualiser</a>
             """
         except IndexError:
