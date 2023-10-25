@@ -1,0 +1,7 @@
+{% extends 'admin/about/about_main.html' %}
+
+{% block about_content %}
+    <iframe src="{{ url_for('static', filename='./build/index.html') }}" frameborder="0" width="100%"
+                            height="900vh"></iframe>
+{% endblock about_content %}
+

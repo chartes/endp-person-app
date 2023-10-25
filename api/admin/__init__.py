@@ -23,9 +23,8 @@ from .views import (PersonView,
                     PersonHasKbLinks,
                     ThesaurusTerm,
                     PlacesTerm,
-                    DatabaseDocumentationView,
+                    AboutView,
                     AdminView)
-
 
 # flask app #
 flask_app = Flask(__name__,
@@ -84,17 +83,21 @@ for view in [
     ReferentialView(ThesaurusTerm,
                     session,
                     name='Termes personnes',
-                    category="Thesauri"),
+                    category="Thesauri",
+                    menu_icon_type='glyph',
+                    menu_icon_value='glyphicon-book'),
     ReferentialView(PlacesTerm,
                     session,
                     name='Termes lieux',
-                    category="Thesauri"),
-    DatabaseDocumentationView(
-        name='Documentation de la base de données',
+                    category="Thesauri",
+                    menu_icon_type='glyph',
+                    menu_icon_value='glyphicon-book'
+                    ),
+    AboutView(
+        name='En savoir plus',
         menu_icon_type='glyph',
-        menu_icon_value='glyphicon-book')
+        menu_icon_value='glyphicon-info-sign')
 ]:
     admin.add_view(view)
-
 
 from .routes import reset_password, reset_password_request

@@ -121,8 +121,8 @@ $(document).ready(function () {
     // Ensures buttons are only created once.
     if (!$(`#${idEventSelectClearBtn}`).length) {
         selectElement.after(`
-            <br><button type="button" id="${idEventSelectClearBtn}" class="btn btn-danger btn-sm" style="margin-right: 10px !important;">Effacer l'image</button>
-            <button type="button" id="${idEventSelectPreviewBtn}" class="btn btn-primary btn-sm">Aperçu de l'image</button>
+            <button type="button" id="${idEventSelectClearBtn}" class="btn btn-danger btn-sm" style="margin-right: 10px !important; margin-top: 5px !important;">Effacer l'image</button>
+            <button type="button" id="${idEventSelectPreviewBtn}" class="btn btn-primary btn-sm" style=" margin-top: 5px !important;">Aperçu de l'image</button>
         `);
 
         // Hide buttons if the selectElement has no value.

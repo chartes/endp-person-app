@@ -7,24 +7,55 @@
     <p class="heading1">Administration de la base de données personnes du projet e-NDP</p>
     <p class="heading2">Bienvenue {% if current_user.is_authenticated %}
         <span class="user-connect-home">{{ current_user.username }}</span>{% endif %} !</p>
-    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données des personnes du projet <a href="https://endp.hypotheses.org/">ANR
-        e-NDP: Notre-Dame et son cloître</a>.</p>
+    <p class="heading3">Vous êtes actuellement sur la plateforme d'administration de la base de données des personnes du
+        projet <a href="https://endp.hypotheses.org/">ANR
+            e-NDP: Notre-Dame et son cloître</a>.</p>
     {% if not current_user.is_authenticated %}
         <p class="heading3">
-            <span class="glyphicon glyphicon-hand-right"></span> Pour accéder au système, <a
-                href="{{ url_for('admin.login') }}">authentifiez-vous</a>
+            <span class="glyphicon glyphicon-hand-right"></span> Vous êtes administrateur ? <a
+                href="{{ url_for('admin.login') }}"> authentifiez-vous</a>.
         </p>
     {% endif %}
-    <hr class="sep-index">
+    <!--<hr class="sep-index">-->
     <br>
-    <p class="normal-text"><a rel="license" class="license-img" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img
-            alt="Licence Creative Commons"
-            src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"/></a><br/>Le modèle de données ainsi que les
-        données du projet e-NDP présentes dans cette interface sont à disposition <br>selon les termes de la <a
-                rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Licence Creative
-            Commons Attribution - Partage dans les Mêmes Conditions 4.0 International</a><br>et de l'ANR (20-CE27-0012) e-NDP.</p>
-    <br>
-    <img class="img-partner" src="{{ url_for('static', filename='images/banner-partners-home.png') }}">
-    <img class="img-partner" src="{{ url_for('static', filename='images/ANR-logo-C.jpg') }}" style="width: 180px !important; height: auto">
     </div>
+    <br>
 {% endblock body %}
+
+{% block tail %}
+    {{ super() }}
+    <div class="container-fluid full-height text-center">
+        <div class="row">
+            <div class="col-md-2 col-sm-5 col-xs-6 image-column enc mb-3">
+                <a href="https://www.chartes.psl.eu/fr" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/enc.png') }}" alt="Ecole-nationale-chartes-logo">
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-5 col-xs-6 image-column lamop mb-3">
+                <a href="https://lamop.pantheonsorbonne.fr/laboratoire-medievistique-occidentale-paris" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/lamop.png') }}" alt="Lamop-logo">
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-5 col-xs-6 image-column an mb-3">
+                <a href="https://www.archives-nationales.culture.gouv.fr/" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/an.png') }}" alt="Archives-nationales-logo">
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-5 col-xs-6 image-column bnf mb-3">
+                <a href="https://www.bnf.fr/fr" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/bnf.png') }}" alt="BNF-logo">
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-5 col-xs-6 image-column mazarine mb-3">
+                <a href="https://www.bibliotheque-mazarine.fr/fr/" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/mazarine.png') }}" alt="Mazarine-logo">
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-5 col-xs-6 image-column anr mb-3">
+                <a href="https://anr.fr/Projet-ANR-20-CE27-0012" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/ANR-logo-C.jpg') }}" alt="ANR-logo">
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

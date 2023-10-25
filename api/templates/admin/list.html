@@ -1,0 +1,13 @@
+{% extends 'admin/model/list.html' %}
+{% import 'admin/lib.html' as lib with context %}
+
+    {{ super() }}
+    {% block model_menu_bar %}
+        {{ super() }}
+        {% if num_pages is not none %}
+    {{ lib.pager(page, num_pages, pager_url) }}
+    {% else %}
+    {{ lib.simple_pager(page, data|length == page_size, pager_url) }}
+    {% endif %}
+        <hr>
+    {% endblock %}

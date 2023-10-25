@@ -1,10 +1,27 @@
 from flask import Markup
+from .constants import NAKALA_DATA_IDENTIFIERS
 
 
 def _markup_interpret(self, context, model, name):
     item = getattr(model, name)
     if item is None:
         item = ""
+    return Markup(item)
+
+
+def _thumbnail_interpret(self, context, model, name):
+    item = getattr(model, name)
+    if item is None:
+        item = ""
+    else:
+        value = item.split(";")
+        img_sha = value[2]
+        register = value[0]
+        data_id = NAKALA_DATA_IDENTIFIERS[register]
+        item = f"""
+            <iframe src="https://api.nakala.fr/embed/{data_id}/{img_sha}?buttons=false" width="120px" height="150px"></iframe>
+        <a href="https://nakala.fr/{data_id}#{img_sha}" target="_blank">Visualiser</a>
+        """
     return Markup(item)
 
 

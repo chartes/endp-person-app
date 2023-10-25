@@ -32,7 +32,8 @@ from .formaters import (_markup_interpret,
                         _color_on_bool,
                         _dateformat,
                         _hyperlink_item_list,
-                        _format_label_form_with_tooltip,)
+                        _format_label_form_with_tooltip,
+                        _thumbnail_interpret,)
 from .validators import (is_valid_date,
                          is_valid_kb_links,
                          is_term_already_exists,
@@ -51,6 +52,8 @@ class GlobalModelView(ModelView):
     """Global & Shared parameters for the model views."""
     column_display_pk = True
     can_view_details = True
+    action_disallowed_list = ['delete']
+    list_template = 'admin/list.html'
 
     def is_accessible(self):
         if self.endpoint in EDIT_ENDPOINTS:
@@ -122,6 +125,7 @@ class EventView(GlobalModelView):
     }
     column_formatters = {
         'comment': _markup_interpret,
+        'image_url': _thumbnail_interpret,
     }
     column_sortable_list = ['id', 'type', 'date', 'image_url']
     column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url', '_id_endp']
@@ -314,11 +318,11 @@ class PersonView(GlobalModelView):
                                                                       "pour indiquer une date approximative."),
                     comment=dict(label="Note"),
                     image_url=dict(description="Rechercher et/ou sélectionner une image sur Nakala."
-                                               "<br>Pour accéder aux images des registres rendez-vous sur "
+                                               " Pour accéder aux images des registres rendez-vous sur "
                                                "<a href='https://nakala.fr/collection/10.34847/nkl.03cbi521' "
                                                "target='_blank'><img src='https://nakala.fr/build/images/nakala.png' "
                                                "style='width: 24px; vertical-align: -8px; margin-right: -2px;'> "
-                                               "Nakala</a>.",
+                                               "Nakala</a>",
                                    )
                 ),
             )
@@ -429,10 +433,25 @@ class AdminView(AdminIndexView):
         return redirect(url_for('admin.index'))
 
 
-class DatabaseDocumentationView(BaseView):
+class AboutView(BaseView):
     """Custom view for database documentation."""
 
     @expose('/')
     def index(self):
         """Renders automatic documentation of database in html view."""
-        return self.render('admin/documentation_db.html')
+        return self.render('admin/about/documentation_db.html')
+
+    @expose('/')
+    def database_documentation(self):
+        """Renders automatic documentation of database in html view."""
+        return self.render('admin/about/documentation_db.html')
+
+    @expose('/contacts')
+    def contacts(self):
+        """Renders contacts in html view."""
+        return self.render('admin/about/contacts.html')
+
+    @expose('/credits')
+    def credits(self):
+        """Renders credits in html view."""
+        return self.render('admin/about/credits.html')
