@@ -1,13 +1,56 @@
 {% extends 'admin/model/list.html' %}
 {% import 'admin/lib.html' as lib with context %}
 
+{{ super() }}
+
+{% block head %}
     {{ super() }}
-    {% block model_menu_bar %}
-        {{ super() }}
-        {% if num_pages is not none %}
-    {{ lib.pager(page, num_pages, pager_url) }}
+    <script type="text/javascript">
+        /*
+         * Add List view features on scroll event
+         */
+        document.addEventListener('DOMContentLoaded', function () {
+        var paginationMenuBar = document.querySelector('.pagination-menu-bar');
+        paginationMenuBar.style.display = 'none';
+        window.addEventListener('scroll', function () {
+            var nav = document.querySelector('.actions-nav');
+            var navOffsetTop = nav.offsetTop; // initial navigation position
+
+            if (window.scrollY > navOffsetTop) { // if scroll position is greater than initial navigation position
+                nav.classList.add('fixed-nav');
+                /* display pagination menu bar */
+                paginationMenuBar.style.display = 'block';
+
+            } else {
+                nav.classList.remove('fixed-nav');
+                /* hide pagination menu bar */
+                paginationMenuBar.style.display = 'none';
+            }
+        });
+        } );
+    </script>
+{% endblock head %}
+
+
+{% block list_row_actions_header %}
+    {{ super() }}
+    {% if num_pages is not none %}
+        {{ lib.pager(page, num_pages, pager_url) }}
     {% else %}
-    {{ lib.simple_pager(page, data|length == page_size, pager_url) }}
+        {{ lib.simple_pager(page, data|length == page_size, pager_url) }}
     {% endif %}
+    <hr>
+{% endblock list_row_actions_header %}
+
+
+{% block model_menu_bar_after_filters %}
+    {{ super() }}
+    <li class="pagination-menu-bar">
+        {% if num_pages is not none %}
+            {{ lib.pager(page, num_pages, pager_url) }}
+        {% else %}
+            {{ lib.simple_pager(page, data|length == page_size, pager_url) }}
+        {% endif %}
         <hr>
-    {% endblock %}
+    </li>
+{% endblock model_menu_bar_after_filters %}
