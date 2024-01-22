@@ -86,8 +86,9 @@ fi
 # Lancer l'application en fonction du mode
 echo "Starting the application [in "$1" mode]..."
 if [[ "$3" == "instance" || "$2" == "instance" ]]; then
-  # $INSTANCE api.main:app --host $HOST --port $PORT --workers $WORKERS
-  uvicorn api.main:app --host $HOST --port $PORT --workers $WORKERS
+  echo "> run with instance..."
+  $INSTANCE api.main:app --host $HOST --port $PORT --workers $WORKERS
+  #uvicorn api.main:app --host $HOST --port $PORT --workers $WORKERS
 else
   if [[ "$ENV" == "dev" ]]; then
     uvicorn api.main:app --host $HOST --port $PORT --reload
