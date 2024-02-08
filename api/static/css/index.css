@@ -6,6 +6,11 @@
 .img-partner {
     width: 400px;
     height: auto;
+    margin: 1rem;
+}
+
+.image-column {
+   margin: 1rem !important;
 }
 
 .license-img {
