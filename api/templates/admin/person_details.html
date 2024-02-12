@@ -1,0 +1,38 @@
+{% extends 'admin/model/details.html' %}
+
+{% macro render_unknown(prop) %}
+    {% if prop == None %}
+        Inconnue
+    {% else %}
+        {{ prop }}
+    {% endif %}
+{% endmacro %}
+
+{% block details_table %}
+    {{ super() }}
+    <h3><b>{{ events | length }}</b> Événement(s) associé(s)</h3>
+    <table class="table table-hover table-bordered searchable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Lieu</th>
+                <th>Terme</th>
+                <th>Prédécesseur</th>
+                <th>Détails</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for id, event in events %}
+            <tr>
+                <td>{{ render_unknown(event['date']) }}</td>
+                <td>{{ render_unknown(event['type']) }}</td>
+                <td>{{ render_unknown(event['place_term']) }}</td>
+                <td>{{ render_unknown(event['thesaurus_term_person']) }}</td>
+                <td>{{ render_unknown(event['predecessor']['pref_label'] if event['predecessor'] else None) }}</td>
+                <td><a href="{{ url_for('event.details_view', id=id) }}" target="_blank">Voir détails</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

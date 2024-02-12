@@ -25,7 +25,11 @@ from ..models import (Event,
                       PlacesTerm,
                       ThesaurusTerm)
 from ..database import session
-from ..crud import (get_person, get_thesaurus_term, get_thesaurus_terms, get_user)
+from ..crud import (get_person,
+                    get_thesaurus_term,
+                    get_thesaurus_terms,
+                    get_user,
+                    get_events)
 from .forms import LoginForm
 from .formaters import (_markup_interpret,
                         _bold_item_list,
@@ -39,7 +43,8 @@ from .validators import (is_valid_date,
                          is_term_already_exists,
                          is_family_link_circular,
                          is_family_link_valid)
-from .widgets import Select2DynamicWidget, Select2NakalaChoicesWidget
+from .widgets import (Select2DynamicWidget,
+                      Select2NakalaChoicesWidget)
 from .constants import (NAKALA_IMAGES,
                         NAKALA_DATA_IDENTIFIERS)
 
@@ -52,20 +57,15 @@ class GlobalModelView(ModelView):
     """Global & Shared parameters for the model views."""
     column_display_pk = True
     can_view_details = True
+    can_set_page_size = False
     action_disallowed_list = ['delete']
     list_template = 'admin/list.html'
 
     def is_accessible(self):
-        if self.endpoint in EDIT_ENDPOINTS:
-            self.can_edit = current_user.is_authenticated
-            self.can_delete = current_user.is_authenticated
-            self.can_create = current_user.is_authenticated
-            self.can_export = True
-        else:
-            self.can_edit = False
-            self.can_delete = False
-            self.can_create = False
-            self.can_export = True
+        self.can_edit = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
+        self.can_delete = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
+        self.can_create = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
+        self.can_export = True
         return True
 
 
@@ -174,6 +174,7 @@ class PersonView(GlobalModelView):
     """View for the person model."""
     edit_template = 'admin/edit.html'
     create_template = 'admin/edit.html'
+    details_template = 'admin/person_details.html'
     # Define column that will be displayed in list view
     column_list = ["id",
                    '_id_endp',
@@ -358,6 +359,15 @@ class PersonView(GlobalModelView):
 
     def render(self, template, **kwargs):
         """Render a template with the given context."""
+        if template == "admin/person_details.html":
+            events = get_events(session, {
+                'id':kwargs['model'].id
+            })['events']
+            id_events = [evt.id for evt in get_person(session, {'id':kwargs['model'].id}).events]
+            if len(events) == len(id_events):
+                return super(PersonView, self).render(template, **kwargs, events=list(zip(id_events, events)))
+            else:
+                return super(PersonView, self).render(template, **kwargs)
         return super(PersonView, self).render(template, **kwargs)
 
     @expose('/get_persons_alt_labels/', methods=('GET', 'POST'))

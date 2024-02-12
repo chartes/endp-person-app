@@ -52,7 +52,8 @@ $(document).ready(function () {
             separator: ';', // Use semicolon as the separator
         }).on('select2-open', function () {
             // Hide the results container when the select2 dropdown is opened.
-            $('.select2-results').css('display', 'none');
+            selectElement.data('select2').results.hide();
+            // $('.select2-results').css('display', 'none');
         })
     }
 
