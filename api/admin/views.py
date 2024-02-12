@@ -174,6 +174,7 @@ class PersonView(GlobalModelView):
     """View for the person model."""
     edit_template = 'admin/edit.html'
     create_template = 'admin/edit.html'
+    list_template = 'admin/person_list.html'
     details_template = 'admin/person_details.html'
     # Define column that will be displayed in list view
     column_list = ["id",

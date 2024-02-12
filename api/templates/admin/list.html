@@ -1,49 +1,12 @@
 {% extends 'admin/model/list.html' %}
 {% import 'admin/lib.html' as lib with context %}
-{% import 'admin/model/layout.html' as model_layout with context %}
 
 {{ super() }}
 
 {% block head %}
     {{ super() }}
-    <script type="text/javascript">
-        /*
-         * Add List view features on scroll event
-         */
-        document.addEventListener('DOMContentLoaded', function () {
-            var paginationMenuBar = document.querySelector('.pagination-menu-bar');
-            paginationMenuBar.style.display = 'none';
-            window.addEventListener('scroll', function () {
-                var nav = document.querySelector('.actions-nav');
-                var navOffsetTop = nav.offsetTop; // initial navigation position
-
-                if (window.scrollY > navOffsetTop) { // if scroll position is greater than initial navigation position
-                    nav.classList.add('fixed-nav');
-                    /* display pagination menu bar */
-                    paginationMenuBar.style.display = 'block';
-
-                } else {
-                    nav.classList.remove('fixed-nav');
-                    /* hide pagination menu bar */
-                    paginationMenuBar.style.display = 'none';
-                }
-            });
-        });
-    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/list.js') }}"></script>
 {% endblock head %}
-
-{% macro custom_page_size_form(generator, btn_class='dropdown-toggle') %}
-    <a class="{{ btn_class }}" data-toggle="dropdown" href="javascript:void(0)">
-        Afficher {{ page_size }} {{ _gettext('résultats') }} par page<b class="caret"></b>
-    </a>
-    <ul class="dropdown-menu">
-        <li><a href="{{ generator(20) }}">20 {{ _gettext('résultats') }}</a></li>
-        {% for i in range(1, 11) %}
-            {% set step_value = i * 50 %}
-            <li><a href="{{ generator(step_value) }}">{{ step_value }} {{ _gettext('résultats') }}</a></li>
-        {% endfor %}
-    </ul>
-{% endmacro %}
 
 {% block list_row_actions_header %}
     {{ super() }}
@@ -55,12 +18,6 @@
     <hr>
 {% endblock list_row_actions_header %}
 
-{% block model_menu_bar_before_filters %}
-    {{ super() }}
-    <li class="dropdown">
-        {{ custom_page_size_form(page_size_url) }}
-    </li>
-{% endblock model_menu_bar_before_filters %}
 
 {% block model_menu_bar_after_filters %}
     {{ super() }}
