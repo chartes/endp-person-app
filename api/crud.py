@@ -30,9 +30,10 @@ def get_person(db: Session, args: dict) \
     return db.query(Person).filter_by(**args).first()
 
 
-def get_persons(db: Session):
-    """Get all the persons from the database."""
-    return db.query(Person).all()
+def get_persons(db: Session, only_canon: bool = False):
+    """Get all the persons from the database.
+    If only_canon is True, only the canon persons are returned."""
+    return db.query(Person).filter_by(is_canon=True).all() if only_canon else db.query(Person).all()
 
 
 def get_thesaurus_term(db: Session, model: str, args: dict) \

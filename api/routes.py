@@ -75,7 +75,7 @@ def read_root():
                 tags=["persons"],
                 responses={500: {"model": Message}},
                 summary=METADATA_ROUTES["search"]["summary"])
-async def search(query: str, type_query: TYPE_SEARCH, db: Session = Depends(get_db)):
+async def search(query: str, type_query: TYPE_SEARCH, only_canon: bool = False, db: Session = Depends(get_db)):
     try:
         ix = st.open_index()
         search_results = search_index(
@@ -85,12 +85,13 @@ async def search(query: str, type_query: TYPE_SEARCH, db: Session = Depends(get_
             fieldnames=["pref_label", "forename_alt_labels", "surname_alt_labels"]
         )
         results = search_results
-        # print(results)
         search_results = [
             get_person(db,
                        {'id': result['id']}) for result in results
         ]
-        # print(search_results)
+        if only_canon:
+            search_results = [person for person in search_results if person.is_canon]
+
         search_results = [person for person in search_results if person is not None]
         ix.close()
         return {"query": query,
@@ -109,9 +110,10 @@ async def search(query: str, type_query: TYPE_SEARCH, db: Session = Depends(get_
                 responses={500: {"model": Message}},
                 tags=["persons"],
                 summary=METADATA_ROUTES["read_persons"]["summary"])
-async def read_persons(db: Session = Depends(get_db)):
+async def read_persons(only_canon: bool = False, db: Session = Depends(get_db)):
     try:
-        return paginate(get_persons(db))
+        persons = get_persons(db, only_canon=only_canon)
+        return paginate(persons)
     except Exception as e:
         return JSONResponse(status_code=500,
                             content={"message": "It seems the server have trouble: "
