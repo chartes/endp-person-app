@@ -12,7 +12,7 @@
             e-NDP: Notre-Dame et son cloître</a>.</p>
     {% if not current_user.is_authenticated %}
         <p class="heading3">
-            <span class="glyphicon glyphicon-hand-right"></span> Vous êtes administrateur ? <a
+            <span class="glyphicon glyphicon-hand-right"></span> Vous êtes administrateur ou contributeur ? <a
                 href="{{ url_for('admin.login') }}"> authentifiez-vous</a>.
         </p>
     {% endif %}
@@ -25,50 +25,55 @@
 {% block tail %}
     {{ super() }}
     <div class="container-fluid full-height text-center">
-        <div class="row">
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column enc mb-3">
+        <div class="row row-partners-logo">
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column enc mb-3">
+                <a href="https://www.chartes.psl.eu/recherche/le-centre-jean-mabillon" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/enc-cjm.png') }}" alt="Centre-Jean-Mabillon-Ecole-nationale-chartes-logo" style="width: 75%">
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column enc mb-3">
                 <a href="https://www.chartes.psl.eu/fr" target="_blank">
-                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/enc.png') }}" alt="Ecole-nationale-chartes-logo" style="width: 100%">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/enc.jpg') }}" alt="Ecole-nationale-chartes-logo" style="width: 100%">
                 </a>
             </div>
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column paris1 mb-3">
-                <a href="https://www.pantheonsorbonne.fr/" target="_blank">
-                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/paris1.png') }}" alt="paris1-logo" style="width: 60%;">
-                </a>
-            </div>
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column cnrs mb-3">
-                <a href="https://cnrs.fr/fr" target="_blank">
-                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/cnrs.svg.png') }}" alt="cnrs-logo" style="width: 35%;">
-                </a>
-            </div>
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column lamop mb-3">
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column lamop mb-3">
                 <a href="https://lamop.pantheonsorbonne.fr/laboratoire-medievistique-occidentale-paris" target="_blank">
                     <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/lamop.png') }}" alt="Lamop-logo">
                 </a>
             </div>
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column paris-cite mb-3">
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column paris1 mb-3">
+                <a href="https://www.pantheonsorbonne.fr/" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/paris1.png') }}" alt="paris1-logo" style="width: 55%;">
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column cnrs mb-3">
+                <a href="https://cnrs.fr/fr" target="_blank">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/cnrs.svg.png') }}" alt="cnrs-logo" style="width: 30%;">
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column paris-cite mb-3">
                 <a href="https://ict.u-paris.fr/" target="_blank">
-                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/pariscite.png') }}" alt="ANR-logo" style="width: 90%;">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/pariscite.png') }}" alt="paris-cite-logo" style="width: 85%;">
                 </a>
             </div>
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column an mb-3">
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column an mb-3">
                 <a href="https://www.archives-nationales.culture.gouv.fr/" target="_blank">
-                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/an.png') }}" alt="Archives-nationales-logo">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/an.png') }}" alt="Archives-nationales-logo" style="width: 85%;">
                 </a>
             </div>
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column bnf mb-3">
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column bnf mb-3">
                 <a href="https://www.bnf.fr/fr" target="_blank">
                     <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/bnf.png') }}" alt="BNF-logo">
                 </a>
             </div>
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column mazarine mb-3">
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column mazarine mb-3">
                 <a href="https://www.bibliotheque-mazarine.fr/fr/" target="_blank">
-                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/mazarine.png') }}" alt="Mazarine-logo">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/mazarine.png') }}" alt="Mazarine-logo" style="width: 50%;">
                 </a>
             </div>
-            <div class="col-md-2 col-sm-5 col-xs-6 image-column anr mb-3">
+            <div class="col-md-2 col-sm-7 col-xs-9 image-column anr mb-3">
                 <a href="https://anr.fr/Projet-ANR-20-CE27-0012" target="_blank">
-                    <img class="img-fluid" src="{{ url_for('static', filename='images/ANR-logo-C.jpg') }}" alt="ANR-logo">
+                    <img class="img-fluid" src="{{ url_for('static', filename='images/partners-logo/anr.jpg') }}" alt="ANR-logo" style="width: 90%;">
                 </a>
             </div>
         </div>

@@ -40,8 +40,8 @@ and the places associated with the people (cloister, courthouse, domain, chapel)
 These data are administered from the e-NDP people database and data are available at the end of the 
 [CC BY-SA 4.0 license](http://creativecommons.org/licenses/by-sa/4.0/).
         
-<img alt="partenaires e-NDP" src="../static/images/banner-partners-home.png" width="300px">
-<img alt="anr logo" src="../static/images/ANR-logo-C.jpg" width="120px">
+<!--<img alt="partenaires e-NDP" src="../static/images/banner-partners-home.png" width="300px">
+<img alt="anr logo" src="../static/images/ANR-logo-C.jpg" width="120px">-->
 
 ----
 """,
