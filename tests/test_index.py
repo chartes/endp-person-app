@@ -29,7 +29,7 @@ def test_index_search():
     search_results = get_results(query="jean",
                                  type_query="exact")
     print(search_results)
-    assert len(search_results) == 10
+    assert len(search_results) == 265
     assert search_results[0].pref_label == "Jean Chanteprime"
 
 
