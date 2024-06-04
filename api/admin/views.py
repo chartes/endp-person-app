@@ -17,6 +17,7 @@ from flask_admin import (BaseView,
 from flask_login import (current_user,
                          logout_user,
                          login_user)
+from sqlalchemy import and_, or_
 
 from ..models import (Event,
                       Person,
@@ -370,6 +371,38 @@ class PersonView(GlobalModelView):
             else:
                 return super(PersonView, self).render(template, **kwargs)
         return super(PersonView, self).render(template, **kwargs)
+
+    """
+    def get_query(self):
+        # Overload FTS in Model View.
+        query = super(PersonView, self).get_query()
+        search = request.args.get('search').lower().strip()
+        if search:
+            q = query.filter(
+                or_(
+                    self.model.pref_label.like(f"{search}%"),
+                    self.model.forename_alt_labels.like(f"%{search}%"),
+                    self.model.surname_alt_labels.like(f"%{search}%"),
+                )
+            )
+            return q
+        return query
+
+    def get_count_query(self):
+        # Overload FTS counter in Model View.
+        query = super(PersonView, self).get_count_query()
+        search = request.args.get('search').lower().strip()
+        if search:
+            return query.filter(
+                or_(
+                    self.model.pref_label.like(f"{search}%"),
+                    self.model.forename_alt_labels.like(f"%{search}%"),
+                    self.model.surname_alt_labels.like(f"%{search}%"),
+                )
+            )
+        return query.count()
+    """
+
 
     @expose('/get_persons_alt_labels/', methods=('GET', 'POST'))
     def get_alt_labels(self):

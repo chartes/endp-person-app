@@ -17,18 +17,20 @@ def search_index(ix: index,
                  query_user: str,
                  search_type: str,
                  fieldnames: list,
-                 limit: int = 20,
+                 limit: int = 100,
                  ) -> list:
     with ix.searcher() as searcher:
         if search_type == "exact":
             parser = qparser.MultifieldParser(
                 fieldnames,
-                schema=searcher.schema
+                schema=searcher.schema,
             )
-            parsed_query = parser.parse(query_user.lower().strip())
+            q_user = query_user.lower().strip()
+            parsed_query = parser.parse(q_user)
+            #parsed_query = qparser.QueryParser("pref_label", schema=searcher.schema).parse(q_user)
             results = [{"id": result['id'],
                         "_id_endp": result['id_endp']}
-                       for result in searcher.search(parsed_query)]
+                       for result in searcher.search(parsed_query, limit=None)]
         else:
             fuzzy_distance = fuzzy_ratio[search_type]
             term_objs = [

@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (sessionmaker,
                             scoped_session)
+
 from whoosh import index
 
 from .config import BASE_DIR, settings
@@ -29,7 +30,7 @@ engine = create_engine(
 )
 
 
-session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+session = scoped_session(sessionmaker(engine, autocommit=False, autoflush=False))
 BASE = declarative_base()
 
 # Dependency for FastAPI endpoints

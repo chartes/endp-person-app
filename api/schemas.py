@@ -56,6 +56,7 @@ class EventMeta(BaseMeta):
     place_term: Union[ThesaurusMeta, None] = Field(alias="place_term")
     thesaurus_term_person: Union[ThesaurusMeta, None] = Field(alias="thesaurus_term_person")
     predecessor: Union[PersonMeta, None] = Field(alias="predecessor")
+    comment: Union[str, None] = Field(alias="comment")
 
 
 class FamilyRelationshipsMeta(BaseMeta):

@@ -77,6 +77,7 @@ def get_events(db: Session,  args: dict) \
                 'image_url': event.image_url,
                 'place_term': event.place_term,
                 'thesaurus_term_person': event.thesaurus_term_person,
+                'comment': event.comment,
                 'predecessor': {
                     '_id_endp': event.predecessor._id_endp,
                     'pref_label': event.predecessor.pref_label

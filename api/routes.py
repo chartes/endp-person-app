@@ -57,7 +57,7 @@ async def get_meta_person(person_id: str, db: Session = Depends(get_db)):
 @api_router.get("/",
                 responses={500: {"model": Message}, 200: {"model": Message}},
                 summary=METADATA_ROUTES["read_root"]["summary"])
-def read_root():
+async def read_root():
     # try if the server is up
     try:
         return JSONResponse(status_code=200,
@@ -71,7 +71,7 @@ def read_root():
 
 
 @api_router.get('/persons/search',
-                response_model=PersonSearchOut,
+                response_model=Page[PersonOut],
                 tags=["persons"],
                 responses={500: {"model": Message}},
                 summary=METADATA_ROUTES["search"]["summary"])
@@ -86,7 +86,7 @@ async def search(query: str, type_query: TYPE_SEARCH, only_canon: bool = False, 
         )
         results = search_results
         search_results = [
-            get_person(db,
+               get_person(db,
                        {'id': result['id']}) for result in results
         ]
         if only_canon:
@@ -94,11 +94,12 @@ async def search(query: str, type_query: TYPE_SEARCH, only_canon: bool = False, 
 
         search_results = [person for person in search_results if person is not None]
         ix.close()
-        return {"query": query,
-                "total": len(search_results),
-                "type_query": type_query.value,
-                "results": search_results
-                }
+        #return {"query": query,
+        #        "total": len(search_results),
+        #        "type_query": type_query.value,
+        #        "results": search_results
+        #        }
+        return paginate(search_results)
     except Exception as e:
         return JSONResponse(status_code=500,
                             content={"message": "It seems the server have trouble: "
@@ -130,7 +131,7 @@ async def read_person(db: Session = Depends(get_db), _id_endp: str = ""):
         person = get_person(db, {"_id_endp": _id_endp})
         if person is None:
             return JSONResponse(status_code=404, content={"message": "Person not found."})
-        return get_person(db, {"_id_endp": _id_endp})
+        return person
     except Exception as e:
         return JSONResponse(status_code=500,
                             content={"message": "It seems the server have trouble: "
