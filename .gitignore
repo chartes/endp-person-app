@@ -177,3 +177,5 @@ infos.txt
 index_dir/
 index_endp/
 pwd_generator.py
+
+api/scripts
