@@ -17,9 +17,11 @@ from flask_admin import (BaseView,
 from flask_login import (current_user,
                          logout_user,
                          login_user)
+from wtforms.fields import PasswordField
 from sqlalchemy import and_, or_
 
 from ..models import (Event,
+                      User,
                       Person,
                       PersonHasKbLinks,
                       PersonHasFamilyRelationshipType,
@@ -50,6 +52,16 @@ from .constants import (NAKALA_IMAGES,
                         NAKALA_DATA_IDENTIFIERS)
 
 EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
+can_edit_roles = ['ADMIN', 'EDITOR', 'CONTRIBUTOR']
+can_delete_roles = ['ADMIN', 'EDITOR']
+can_create_roles = ['ADMIN', 'EDITOR', 'CONTRIBUTOR']
+
+
+roles_map = {
+    "Administrateur": "ADMIN",
+    "Éditeur": "EDITOR",
+    "Lecteur": "READER"
+}
 
 # VIEW BASED ON DB MODELS #
 
@@ -63,11 +75,104 @@ class GlobalModelView(ModelView):
     list_template = 'admin/list.html'
 
     def is_accessible(self):
-        self.can_edit = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
-        self.can_delete = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
-        self.can_create = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
+        if current_user.is_authenticated:
+            print(current_user.role)
+            role = roles_map[current_user.role.value]
+            self.can_edit = role in can_edit_roles
+            self.can_delete = role in can_delete_roles
+            self.can_create = role in can_create_roles
+        else:
+            self.can_edit = False
+            self.can_delete = False
+            self.can_create = False
         self.can_export = True
         return True
+
+class UserView(ModelView):
+    edit_template = 'admin/edit.user.html'
+    create_template = 'admin/edit.user.html'
+    list_template = 'admin/list.user.html'
+    column_list = ["id",
+                   "username",
+                   "email",
+                   "role",
+                   "created_at",
+                   "updated_at"]
+    column_labels = {
+        "id": "ID",
+        "username": "Nom d'utilisateur",
+        "role": "Rôle",
+        "email": "Adresse email",
+        "created_at": "Créé le",
+        "updated_at": "Modifié le"
+    }
+    column_searchable_list = ["username", "email"]
+    # hide the password hash in edit/create form
+    form_excluded_columns = ["password_hash",
+                             "created_at",
+                             "updated_at"]
+
+    form_columns = ["username",
+                    "email",
+                    "role",
+                    "new_password"]
+
+    form_extra_fields = {
+        "new_password": PasswordField("Nouveau mot de passe",
+                                      id="new_password_field"),
+
+    }
+
+    @expose("/generate_password/", methods=["GET", "POST"])
+    def new_password(self):
+        if request.method in ["GET", "POST"]:
+            password = User.generate_password()
+
+            return jsonify({"password": password}), 200
+        return jsonify({"error": "No password provided"}), 400
+
+    def on_model_change(self, form, model, is_created):
+        if form.new_password.data:
+            if model.id == 1:
+                if current_user.id != 1:
+                    flash("Vous ne pouvez pas modifier le mot de passe de ce compte administrateur.", "danger")
+                else:
+
+                    model.set_password(form.new_password.data)
+                    session.commit()
+                    return model
+            else:
+                model.set_password(form.new_password.data)
+                session.commit()
+                return model
+
+        if is_created:
+            model.set_password(form.new_password.data)
+            session.commit()
+            return model
+
+    def delete_model(self, model):
+        if model.id == current_user.id:
+            flash("Vous ne pouvez pas supprimer votre propre compte.", "danger")
+            return False
+        if model.id == 1:
+            flash("Vous ne pouvez pas supprimer ce compte administrateur.", "danger")
+            return False
+        if model.role == "Administrateur":
+            role = roles_map[model.role.value]
+            if role != "ADMIN":
+                flash("Vous ne pouvez pas supprimer un compte administrateur.", "danger")
+                return False
+
+        return super().delete_model(model)
+
+    def is_accessible(self):
+        access_view = ['ADMIN']
+        if current_user.is_authenticated:
+            role = roles_map[current_user.role.value]
+            return role in access_view
+        else:
+            return False
 
 
 class FamilyRelationshipView(GlobalModelView):
@@ -430,11 +535,29 @@ class PersonView(GlobalModelView):
                 'nakala_identifier' : NAKALA_DATA_IDENTIFIERS[register_identifier]
             })
 
-    @expose('/get_nakala_images/', methods=('GET', 'POST'))
+    @expose('/get_nakala_images/', methods=['GET'])
     def get_nakala_images(self):
-        """Return grouped list of images from Nakala. (Use by Select2NakalaChoicesWidget)"""
-        if request.method == 'POST' or request.method == 'GET':
-            return jsonify(NAKALA_IMAGES)
+        """Return filtered list of images from Nakala (grouped) for Select2."""
+        if request.method == 'GET':
+            query = request.args.get('q', '').lower()
+            print(query)
+
+            if not query:
+                return jsonify([])
+
+            filtered = []
+            for group in NAKALA_IMAGES["results"]:
+                matching_children = [
+                    child for child in group["children"]
+                    if query in child["text"].lower()
+                ]
+                if matching_children:
+                    filtered.append({
+                        "text": group["text"],
+                        "children": matching_children[:50]  # limite à 50 enfants par groupe
+                    })
+
+            return jsonify(filtered)
 
     def on_model_change(self, form, model, is_created):
         """Update model before saving it. Custom actions on model change."""

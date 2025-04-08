@@ -3,8 +3,10 @@ routes.py
 
 Api endpoints.
 """
+from typing import List
 from fastapi import (APIRouter,
-                     Depends)
+                     Depends,
+                     Query)
 from fastapi.responses import JSONResponse
 from fastapi_pagination import (Page,
                                 paginate)
@@ -70,41 +72,72 @@ async def read_root():
                                                 f"- {e}"})
 
 
+
+
 @api_router.get('/persons/search',
-                response_model=Page[PersonOut],
-                tags=["persons"],
-                responses={500: {"model": Message}},
-                summary=METADATA_ROUTES["search"]["summary"])
-async def search(query: str, type_query: TYPE_SEARCH, only_canon: bool = False, db: Session = Depends(get_db)):
+    response_model=Page[PersonOut],
+    tags=["persons"],
+    responses={500: {"model": Message}},
+    summary=METADATA_ROUTES["search"]["summary"])
+async def search(
+    query: str = Query(default=""),
+    type_query: TYPE_SEARCH = Query(default="exact"),
+    only_canon: bool = False,
+    place_ids: List[str] = Query(default=[]),
+    person_term_ids: List[str] = Query(default=[]),
+    db: Session = Depends(get_db)
+):
     try:
-        ix = st.open_index()
-        search_results = search_index(
+        if query == "":
+            persons = get_persons(db, only_canon=only_canon)
+        else:
+            ix = st.open_index()
+            search_results = search_index(
             ix=ix,
             query_user=query,
             search_type=type_query.value,
             fieldnames=["pref_label", "forename_alt_labels", "surname_alt_labels"]
         )
-        results = search_results
-        search_results = [
-               get_person(db,
-                       {'id': result['id']}) for result in results
-        ]
+            ix.close()
+
+            persons = [get_person(db, {'id': result['id']}) for result in search_results]
+            persons = [p for p in persons if p is not None]
+
         if only_canon:
-            search_results = [person for person in search_results if person.is_canon]
+            persons = [p for p in persons if p.is_canon]
 
-        search_results = [person for person in search_results if person is not None]
-        ix.close()
-        #return {"query": query,
-        #        "total": len(search_results),
-        #        "type_query": type_query.value,
-        #        "results": search_results
-        #        }
-        return paginate(search_results)
+        print(persons)
+
+        # -- Filtering helpers --
+
+        def person_has_all_places(person, required_place_ids):
+            person_place_ids = {
+                e.place_term._id_endp
+                for e in person.events if e.place_term is not None
+            }
+            return all(pid in person_place_ids for pid in required_place_ids)
+
+        def person_has_all_thesaurus_terms(person, required_term_ids):
+            person_term_ids = {
+                e.thesaurus_term_person._id_endp
+                for e in person.events if e.thesaurus_term_person is not None
+            }
+            return all(tid in person_term_ids for tid in required_term_ids)
+
+        # -- Faceted filtering (AND logic) --
+        if place_ids:
+            persons = [p for p in persons if person_has_all_places(p, place_ids)]
+
+        if person_term_ids:
+            persons = [p for p in persons if person_has_all_thesaurus_terms(p, person_term_ids)]
+
+        return paginate(persons)
+
     except Exception as e:
-        return JSONResponse(status_code=500,
-                            content={"message": "It seems the server have trouble: "
-                                                f"{e}"})
-
+        return JSONResponse(
+            status_code=500,
+            content={"message": f"It seems the server has trouble: {e}"}
+        )
 
 @api_router.get("/persons/",
                 response_model=Page[PersonOut],

@@ -18,13 +18,15 @@ from .views import (PersonView,
                     KbLinksView,
                     ReferentialView,
                     Person,
+                    User,
                     Event,
                     PersonHasFamilyRelationshipType,
                     PersonHasKbLinks,
                     ThesaurusTerm,
                     PlacesTerm,
                     AboutView,
-                    AdminView)
+                    AdminView,
+                    UserView)
 
 # flask app #
 flask_app = Flask(__name__,
@@ -93,6 +95,11 @@ for view in [
                     menu_icon_type='glyph',
                     menu_icon_value='glyphicon-book'
                     ),
+    UserView(User,
+             session,
+             name='Utilisateurs',
+             menu_icon_type='glyph',
+             menu_icon_value='glyphicon-cog'),
     AboutView(
         name='En savoir plus',
         menu_icon_type='glyph',

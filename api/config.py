@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     FLASK_ADMIN_MAIL = str(os.environ.get("FLASK_ADMIN_MAIL", ""))
     FLASK_ADMIN_ADMIN_PASSWORD = str(os.environ.get("FLASK_ADMIN_ADMIN_PASSWORD", ""))
 
+    # ~ PWD Generation settings ~
+    PWD_LENGTH: str = str(os.environ.get("PWD_LENGTH", "8,16"))
+    PWD_PREFIX: str = str(os.environ.get("PWD_PREFIX", "fa-"))
+    PWD_SUFFIX: str = str(os.environ.get("PWD_SUFFIX", "!,?"))
+
     # ~ Database settings ~
     DB_URI: str = str(os.environ.get("DB_URI", "db/endp.dev.sqlite"))
     DB_ECHO: bool = bool(os.environ.get("DB_ECHO", False))
