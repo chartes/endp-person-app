@@ -57,13 +57,25 @@ pour le développement et les tests :
 - username : `admin`
 - password : `admin`
 
-## Ajouter un utilisateur 
+> [!WARNING]  
+> Les identifiants par défaut ne sont pas sécurisés, il est recommandé de les modifier en dev ou en prod.
+
+## Gestion des utilisateurs
+
+- Ajouter ou supprimer un utilisateur 
+- Modifier un mot de passe
+
+Ces actions sont disponibles dans l'interface d'administration de l'application, si la connexion s'effectue
+avec un compte ayant les droits d'administration.
+
+#### Autre méthodes de gestion utilisateur (deprecated)
+
+- Ajouter des utilisateurs :
 
 ```bash
    python3 manage.py create-user --username <username> --email <email> --password <password>
 ```
-
-## Modifier un mot de passe
+- Modifier un mdp :
 
 ```bash
     python3 manage.py reset-password -u <username> -p <new_password>  
