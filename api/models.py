@@ -118,26 +118,161 @@ __mapping_prefix__ = {
 
 __split_name_on_tables__ = ["persons"]
 
-# ~~~~~~~~~~~~~~~~~~~ > Enum classes < ~~~~~~~~~~~~~~~~~~~
 
-
-class RoleUserLabels(enum.Enum):
-    """Liste contrôlée des rôles d'utilisateur.
-
-    :param ADMIN: Administrateur (all rights : can create, edit, delete, read and manage users)
-    :param EDITOR: Éditeur (can create, edit and delete, validate except manage users)
-    :param READER: Lecteur (can read only)
-    """
-    __order__ = "ADMIN EDITOR READER"
-    ADMIN = "Administrateur"
-    EDITOR = "Éditeur"
-    READER = "Lecteur"
+class User(UserMixin, BASE):
+    """User model"""
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(64), index=True, unique=True)
+    email = Column(String(120), index=True, unique=True)
+    password_hash = Column(String(128))
 
     def __repr__(self):
-        return self.value
+        return '<User {}>'.format(self.username)
 
-    def __str__(self):
-        return self.value
+    def set_password(self, password):
+        """Set a password hashed"""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Check if password is correct"""
+        return check_password_hash(self.password_hash, password)
+
+    def get_reset_password_token(self, expires_in=600):
+        """Generate a token for reset password"""
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            settings.FLASK_SECRET_KEY, algorithm='HS256'
+        )
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        """Verify if token is valid"""
+        try:
+            id_tok = jwt.decode(token,
+                                settings.FLASK_SECRET_KEY,
+                                algorithms=['HS256'])['reset_password']
+        except jwt.exceptions.InvalidTokenError:
+            return
+        return session.query(User).get(id_tok)
+
+    @staticmethod
+    def add_default_user(in_session):
+        """Add default user to database"""
+        admin = User()
+        admin.username = settings.FLASK_ADMIN_NAME
+        admin.email = settings.FLASK_ADMIN_MAIL
+        admin.password_hash = settings.FLASK_ADMIN_ADMIN_PASSWORD
+        in_session.add(admin)
+        in_session.commit()
+
+
+class AbstractActions(BASE):
+    __abstract__ = True
+    _id_endp = Column(String(25), nullable=False, unique=True)
+
+    @classmethod
+    def before_insert_create_id_ref(cls, mapper, connection, target):
+        """Generate a forge and random id for the new entry in reference table before insert"""
+        is_exist = True
+        new_id = None
+        try:
+            # thesaurus tables specific
+            prefix = __mapping_prefix__[target.topic]
+        except AttributeError:
+            # other tables
+            prefix = cls.__prefix__
+        # test if new id already exist (not really necessary but just in case)
+        if cls.__tablename__:
+            while is_exist:
+                new_id = generate_random_uuid(prefix=prefix, provider="endp")
+                try:
+                    if session.query(cls).filter(cls._id_endp == new_id).first() is None:
+                        is_exist = False
+                    else:
+                        print(f"ID already exist: {new_id} in {cls.__tablename__}, retrying...")
+                except Exception:
+                    is_exist = False
+            target._id_endp = new_id
+
+    @classmethod
+    def before_insert_get_form_first(cls, mapper, connection, target, separator=";"):
+        """Get the first string of a list (separator by default: ";") before insertion."""
+        if cls.__tablename__ in __split_name_on_tables__:
+            target.forename = target.forename_alt_labels.split(separator)[0]
+            target.surname = target.surname_alt_labels.split(separator)[0]
+
+    @classmethod
+    @handle_index
+    def update_person_fts_index_after_update(cls, mapper, connection, target, ix):
+        """Update the index after update a person"""
+        if cls.__tablename__ == "persons":
+            writer = ix.writer()
+            writer.update_document(
+                id=str(target.id).encode('utf-8').decode('utf-8'),
+                id_endp=str(target._id_endp).encode('utf-8').decode('utf-8'),
+                pref_label=str(target.pref_label).encode('utf-8').decode('utf-8'),
+                forename_alt_labels=str(target.forename_alt_labels).encode('utf-8').decode('utf-8'),
+                surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
+            )
+            writer.commit()
+            # print(f"Updating Person {target.id} in index")
+
+    @classmethod
+    @handle_index
+    def insert_person_fts_index_after_insert(cls, mapper, connection, target, ix):
+        """Insert a reference in the index"""
+        if cls.__tablename__ == "persons":
+            writer = ix.writer()
+            writer.add_document(
+                id=str(target.id).encode('utf-8').decode('utf-8'),
+                id_endp=str(target._id_endp).encode('utf-8').decode('utf-8'),
+                pref_label=str(target.pref_label).encode('utf-8').decode('utf-8'),
+                forename_alt_labels=str(target.forename_alt_labels).encode('utf-8').decode('utf-8'),
+                surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
+            )
+            writer.commit()
+            # print(f"Adding Person {target.id} to index")
+
+    @classmethod
+    @handle_index
+    def delete_person_fts_index_after_delete(cls, mapper, connection, target, ix):
+        """Delete a reference from the index"""
+        if cls.__tablename__ == "persons":
+            writer = ix.writer()
+            writer.delete_by_term('id', str(target.id))
+            writer.commit()
+            # print(f"Deleting Person {target.id} from index")
+
+
+# Attach event listeners to AbstractActions class for insert/update/delete events
+@event.listens_for(AbstractActions, "before_insert", propagate=True)
+def before_insert(mapper, connection, target):
+    """Methods called before insertion in database"""
+    target.before_insert_create_id_ref(mapper, connection, target)
+    target.before_insert_get_form_first(mapper, connection, target)
+
+
+@event.listens_for(AbstractActions, "after_insert", propagate=True)
+def after_insert(mapper, connection, target):
+    """Methods called after insertion in database"""
+    target.insert_person_fts_index_after_insert(mapper, connection, target)
+
+
+@event.listens_for(AbstractActions, "after_update", propagate=True)
+def after_update(mapper, connection, target):
+    """Methods called after update in database"""
+    target.update_person_fts_index_after_update(mapper, connection, target)
+
+
+@event.listens_for(AbstractActions, "after_delete", propagate=True)
+def after_delete(mapper, connection, target):
+    """Methods called after deletion in database"""
+    target.delete_person_fts_index_after_delete(mapper, connection, target)
+
+
+# ~~~~~~~~~~~~~~~~~~~ > Enum classes < ~~~~~~~~~~~~~~~~~~~
+
 
 class KnowledgeBaseLabels(enum.Enum):
     """Liste contrôlée des bases de connaissances.
@@ -282,164 +417,9 @@ def _get_enum_values(enum_class):
     return (item.value for item in enum_class)
 
 
-class AbstractActions(BASE):
-    __abstract__ = True
-    _id_endp = Column(String(25), nullable=False, unique=True)
-
-    @classmethod
-    def before_insert_create_id_ref(cls, mapper, connection, target):
-        """Generate a forge and random id for the new entry in reference table before insert"""
-        is_exist = True
-        new_id = None
-        try:
-            # thesaurus tables specific
-            prefix = __mapping_prefix__[target.topic]
-        except AttributeError:
-            # other tables
-            prefix = cls.__prefix__
-        # test if new id already exist (not really necessary but just in case)
-        if cls.__tablename__:
-            while is_exist:
-                new_id = generate_random_uuid(prefix=prefix, provider="endp")
-                try:
-                    if session.query(cls).filter(cls._id_endp == new_id).first() is None:
-                        is_exist = False
-                    else:
-                        print(f"ID already exist: {new_id} in {cls.__tablename__}, retrying...")
-                except Exception:
-                    is_exist = False
-            target._id_endp = new_id
-
-    @classmethod
-    def before_insert_get_form_first(cls, mapper, connection, target, separator=";"):
-        """Get the first string of a list (separator by default: ";") before insertion."""
-        if cls.__tablename__ in __split_name_on_tables__:
-            target.forename = target.forename_alt_labels.split(separator)[0]
-            target.surname = target.surname_alt_labels.split(separator)[0]
-
-    @classmethod
-    @handle_index
-    def update_person_fts_index_after_update(cls, mapper, connection, target, ix):
-        """Update the index after update a person"""
-        if cls.__tablename__ == "persons":
-            writer = ix.writer()
-            writer.update_document(
-                id=str(target.id).encode('utf-8').decode('utf-8'),
-                id_endp=str(target._id_endp).encode('utf-8').decode('utf-8'),
-                pref_label=str(target.pref_label).encode('utf-8').decode('utf-8'),
-                forename_alt_labels=str(target.forename_alt_labels).encode('utf-8').decode('utf-8'),
-                surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
-            )
-            writer.commit()
-            # print(f"Updating Person {target.id} in index")
-
-    @classmethod
-    @handle_index
-    def insert_person_fts_index_after_insert(cls, mapper, connection, target, ix):
-        """Insert a reference in the index"""
-        if cls.__tablename__ == "persons":
-            writer = ix.writer()
-            writer.add_document(
-                id=str(target.id).encode('utf-8').decode('utf-8'),
-                id_endp=str(target._id_endp).encode('utf-8').decode('utf-8'),
-                pref_label=str(target.pref_label).encode('utf-8').decode('utf-8'),
-                forename_alt_labels=str(target.forename_alt_labels).encode('utf-8').decode('utf-8'),
-                surname_alt_labels=str(target.surname_alt_labels).encode('utf-8').decode('utf-8'),
-            )
-            writer.commit()
-            # print(f"Adding Person {target.id} to index")
-
-    @classmethod
-    @handle_index
-    def delete_person_fts_index_after_delete(cls, mapper, connection, target, ix):
-        """Delete a reference from the index"""
-        if cls.__tablename__ == "persons":
-            writer = ix.writer()
-            writer.delete_by_term('id', str(target.id))
-            writer.commit()
-            # print(f"Deleting Person {target.id} from index")
-
-
-# Attach event listeners to AbstractActions class for insert/update/delete events
-@event.listens_for(AbstractActions, "before_insert", propagate=True)
-def before_insert(mapper, connection, target):
-    """Methods called before insertion in database"""
-    target.before_insert_create_id_ref(mapper, connection, target)
-    target.before_insert_get_form_first(mapper, connection, target)
-
-
-@event.listens_for(AbstractActions, "after_insert", propagate=True)
-def after_insert(mapper, connection, target):
-    """Methods called after insertion in database"""
-    target.insert_person_fts_index_after_insert(mapper, connection, target)
-
-
-@event.listens_for(AbstractActions, "after_update", propagate=True)
-def after_update(mapper, connection, target):
-    """Methods called after update in database"""
-    target.update_person_fts_index_after_update(mapper, connection, target)
-
-
-@event.listens_for(AbstractActions, "after_delete", propagate=True)
-def after_delete(mapper, connection, target):
-    """Methods called after deletion in database"""
-    target.delete_person_fts_index_after_delete(mapper, connection, target)
-
-
 ###########################################################
 # ~~~~~~~~~~~~~~~~~~~ > Main tables < ~~~~~~~~~~~~~~~~~~~
-class User(UserMixin, BASE):
-    """User model"""
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(64), index=True, unique=True)
-    email = Column(String(120), index=True, unique=True)
-    role = Column(Enum(RoleUserLabels, nullable=True, default="READER"))
-    password_hash = Column(String(128))
 
-    def __repr__(self):
-        return '<User {}>'.format(self.username)
-
-    @staticmethod
-    def generate_password():
-        from .models_utils import pwd_generator
-        return pwd_generator()
-
-    def set_password(self, password):
-        """Set a password hashed"""
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        """Check if password is correct"""
-        return check_password_hash(self.password_hash, password)
-
-    def get_reset_password_token(self, expires_in=600):
-        """Generate a token for reset password"""
-        return jwt.encode(
-            {'reset_password': self.id, 'exp': time() + expires_in},
-            settings.FLASK_SECRET_KEY, algorithm='HS256'
-        )
-
-    @staticmethod
-    def verify_reset_password_token(token):
-        """Verify if token is valid"""
-        try:
-            id_tok = jwt.decode(token,
-                                settings.FLASK_SECRET_KEY,
-                                algorithms=['HS256'])['reset_password']
-        except jwt.exceptions.InvalidTokenError:
-            return
-        return session.query(User).get(id_tok)
-
-    @staticmethod
-    def add_default_user(in_session):
-        """Add default user to database"""
-        admin = User()
-        admin.username = settings.FLASK_ADMIN_NAME
-        admin.email = settings.FLASK_ADMIN_MAIL
-        admin.password_hash = settings.FLASK_ADMIN_ADMIN_PASSWORD
-        in_session.add(admin)
-        in_session.commit()
 
 class Person(AbstractActions):
     """Personnes (chanoines & Cie) relevées et identifiées dans les registres de Notre-Dame de Paris.
@@ -700,6 +680,14 @@ class PlacesTerm(AbstractGenericThesaurusTerm):
     __display_name__ = "Thesaurus de lieux"
     # Clé de regroupement
     topic = Column(Enum(*_get_enum_values(ThesaurusPlacesTopicsLabels)), nullable=False, unique=False)
+
+    # Expérimentations avec données du map
+    map_chap_nomenclature_id = Column(String, nullable=False, unique=False)
+    map_chap_label_new = Column(String, nullable=False, unique=False)
+    map_chap_label_old = Column(String, nullable=False, unique=False)
+    map_chap_before_restore_url = Column(String, nullable=False, unique=False)
+    map_chap_after_restore_url = Column(String, nullable=False, unique=False)
+
 
 
 # ~~~~~~~~~~~~~~~~~~~ > Association tables < ~~~~~~~~~~~~~~~~~~~

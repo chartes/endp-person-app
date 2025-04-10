@@ -17,11 +17,9 @@ from flask_admin import (BaseView,
 from flask_login import (current_user,
                          logout_user,
                          login_user)
-from wtforms.fields import PasswordField
 from sqlalchemy import and_, or_
 
 from ..models import (Event,
-                      User,
                       Person,
                       PersonHasKbLinks,
                       PersonHasFamilyRelationshipType,
@@ -40,7 +38,7 @@ from .formaters import (_markup_interpret,
                         _dateformat,
                         _hyperlink_item_list,
                         _format_label_form_with_tooltip,
-                        _thumbnail_interpret,)
+                        _thumbnail_interpret, )
 from .validators import (is_valid_date,
                          is_valid_kb_links,
                          is_term_already_exists,
@@ -52,16 +50,7 @@ from .constants import (NAKALA_IMAGES,
                         NAKALA_DATA_IDENTIFIERS)
 
 EDIT_ENDPOINTS = ["person", "placesterm", "thesaurusterm"]
-can_edit_roles = ['ADMIN', 'EDITOR', 'CONTRIBUTOR']
-can_delete_roles = ['ADMIN', 'EDITOR']
-can_create_roles = ['ADMIN', 'EDITOR', 'CONTRIBUTOR']
 
-
-roles_map = {
-    "Administrateur": "ADMIN",
-    "Éditeur": "EDITOR",
-    "Lecteur": "READER"
-}
 
 # VIEW BASED ON DB MODELS #
 
@@ -75,104 +64,11 @@ class GlobalModelView(ModelView):
     list_template = 'admin/list.html'
 
     def is_accessible(self):
-        if current_user.is_authenticated:
-            print(current_user.role)
-            role = roles_map[current_user.role.value]
-            self.can_edit = role in can_edit_roles
-            self.can_delete = role in can_delete_roles
-            self.can_create = role in can_create_roles
-        else:
-            self.can_edit = False
-            self.can_delete = False
-            self.can_create = False
+        self.can_edit = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
+        self.can_delete = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
+        self.can_create = current_user.is_authenticated if self.endpoint in EDIT_ENDPOINTS else False
         self.can_export = True
         return True
-
-class UserView(ModelView):
-    edit_template = 'admin/edit.user.html'
-    create_template = 'admin/edit.user.html'
-    list_template = 'admin/list.user.html'
-    column_list = ["id",
-                   "username",
-                   "email",
-                   "role",
-                   "created_at",
-                   "updated_at"]
-    column_labels = {
-        "id": "ID",
-        "username": "Nom d'utilisateur",
-        "role": "Rôle",
-        "email": "Adresse email",
-        "created_at": "Créé le",
-        "updated_at": "Modifié le"
-    }
-    column_searchable_list = ["username", "email"]
-    # hide the password hash in edit/create form
-    form_excluded_columns = ["password_hash",
-                             "created_at",
-                             "updated_at"]
-
-    form_columns = ["username",
-                    "email",
-                    "role",
-                    "new_password"]
-
-    form_extra_fields = {
-        "new_password": PasswordField("Nouveau mot de passe",
-                                      id="new_password_field"),
-
-    }
-
-    @expose("/generate_password/", methods=["GET", "POST"])
-    def new_password(self):
-        if request.method in ["GET", "POST"]:
-            password = User.generate_password()
-
-            return jsonify({"password": password}), 200
-        return jsonify({"error": "No password provided"}), 400
-
-    def on_model_change(self, form, model, is_created):
-        if form.new_password.data:
-            if model.id == 1:
-                if current_user.id != 1:
-                    flash("Vous ne pouvez pas modifier le mot de passe de ce compte administrateur.", "danger")
-                else:
-
-                    model.set_password(form.new_password.data)
-                    session.commit()
-                    return model
-            else:
-                model.set_password(form.new_password.data)
-                session.commit()
-                return model
-
-        if is_created:
-            model.set_password(form.new_password.data)
-            session.commit()
-            return model
-
-    def delete_model(self, model):
-        if model.id == current_user.id:
-            flash("Vous ne pouvez pas supprimer votre propre compte.", "danger")
-            return False
-        if model.id == 1:
-            flash("Vous ne pouvez pas supprimer ce compte administrateur.", "danger")
-            return False
-        if model.role == "Administrateur":
-            role = roles_map[model.role.value]
-            if role != "ADMIN":
-                flash("Vous ne pouvez pas supprimer un compte administrateur.", "danger")
-                return False
-
-        return super().delete_model(model)
-
-    def is_accessible(self):
-        access_view = ['ADMIN']
-        if current_user.is_authenticated:
-            role = roles_map[current_user.role.value]
-            return role in access_view
-        else:
-            return False
 
 
 class FamilyRelationshipView(GlobalModelView):
@@ -234,7 +130,8 @@ class EventView(GlobalModelView):
         'image_url': _thumbnail_interpret,
     }
     column_sortable_list = ['id', 'type', 'date', 'image_url']
-    column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url', '_id_endp']
+    column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url',
+                              '_id_endp']
     column_filters = ['type', 'date', 'person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'image_url']
 
 
@@ -249,7 +146,7 @@ class ReferentialView(GlobalModelView):
                      "id": "ID",
                      "_id_endp": "ID e-NDP"}
     column_searchable_list = ["term", "term_fr"]
-    column_list = ["id", '_id_endp', "topic", "term", "term_fr", "term_definition"]
+    column_list = ["id", "_id_endp", "topic", "term", "term_fr", "term_definition"]
     form_excluded_columns = ['events', 'term_position']
     form_args = {
         "topic": {
@@ -274,6 +171,42 @@ class ReferentialView(GlobalModelView):
                 is_term_already_exists(find_term(PlacesTerm, model.term), model.term)
                 new_id = create_new_id(PlacesTerm, condition=PlacesTerm.id)
             model.id = new_id
+
+
+class PlacesTermView(ReferentialView):
+    """View for the places thesaurus model."""
+    column_labels = {"term": "Lieu",
+                     "term_fr": "Lieu (fr)",
+                     "term_definition": "Définition",
+                     "topic": "Topic",
+                     "id": "ID",
+                     "_id_endp": "ID e-NDP",
+                     "map_chap_nomenclature_id": "ID nomenclature chapelle (MAP)",
+                     "map_chap_label_new": "Nouveau label chapelle (MAP)",
+                     "map_chap_label_old": "Ancien label chapelle (MAP)",
+                     "map_chap_before_restore_url": "URL avant restauration chapelle (MAP)",
+                     "map_chap_after_restore_url": "URL après restauration chapelle (MAP)"
+                     }
+
+    column_list = ["id",
+                   "_id_endp",
+                   "topic",
+                   "term",
+                   "term_fr",
+                   "term_definition",
+                   "map_chap_nomenclature_id",
+                   "map_chap_label_new",
+                   "map_chap_label_old",
+                   "map_chap_before_restore_url",
+                   "map_chap_after_restore_url"
+                   ]
+    column_searchable_list = ["term", "term_fr"]
+    form_excluded_columns = ['events', 'term_position']
+    form_args = {
+        "topic": {
+            "label": _format_label_form_with_tooltip("Topic", "Topic dans le thesaurus")
+        }
+    }
 
 
 class PersonView(GlobalModelView):
@@ -409,7 +342,8 @@ class PersonView(GlobalModelView):
         ),
         (
             Event, dict(
-                form_columns=["id", "type", "place_term", "thesaurus_term_person", "predecessor", "date", "image_url", "comment"],
+                form_columns=["id", "type", "place_term", "thesaurus_term_person", "predecessor", "date", "image_url",
+                              "comment"],
                 column_labels={"type": "Type",
                                "place_term": "Lieu",
                                "thesaurus_term_person": "Désignation",
@@ -417,7 +351,7 @@ class PersonView(GlobalModelView):
                                "date": "Date",
                                "image_url": "Image",
                                "comment": "Commentaire"},
-                form_overrides=dict(image_url=Select2NakalaChoicesWidget), # not implemented yet
+                form_overrides=dict(image_url=Select2NakalaChoicesWidget),  # not implemented yet
                 form_args=dict(
                     date=dict(validators=[is_valid_date], description="Date de l'événement. "
                                                                       "Au format <b>AAAA-MM-JJ</b>, "
@@ -468,9 +402,9 @@ class PersonView(GlobalModelView):
         """Render a template with the given context."""
         if template == "admin/person_details.html":
             events = get_events(session, {
-                'id':kwargs['model'].id
+                'id': kwargs['model'].id
             })['events']
-            id_events = [evt.id for evt in get_person(session, {'id':kwargs['model'].id}).events]
+            id_events = [evt.id for evt in get_person(session, {'id': kwargs['model'].id}).events]
             if len(events) == len(id_events):
                 return super(PersonView, self).render(template, **kwargs, events=list(zip(id_events, events)))
             else:
@@ -508,7 +442,6 @@ class PersonView(GlobalModelView):
         return query.count()
     """
 
-
     @expose('/get_persons_alt_labels/', methods=('GET', 'POST'))
     def get_alt_labels(self):
         """Return list of alternative labels for a given person. (Use by Select2DynamicField)"""
@@ -532,32 +465,14 @@ class PersonView(GlobalModelView):
             register_identifier = json.loads(data)['register_identifier']
             return jsonify({
                 'register_number': register_identifier,
-                'nakala_identifier' : NAKALA_DATA_IDENTIFIERS[register_identifier]
+                'nakala_identifier': NAKALA_DATA_IDENTIFIERS[register_identifier]
             })
 
-    @expose('/get_nakala_images/', methods=['GET'])
+    @expose('/get_nakala_images/', methods=('GET', 'POST'))
     def get_nakala_images(self):
-        """Return filtered list of images from Nakala (grouped) for Select2."""
-        if request.method == 'GET':
-            query = request.args.get('q', '').lower()
-            print(query)
-
-            if not query:
-                return jsonify([])
-
-            filtered = []
-            for group in NAKALA_IMAGES["results"]:
-                matching_children = [
-                    child for child in group["children"]
-                    if query in child["text"].lower()
-                ]
-                if matching_children:
-                    filtered.append({
-                        "text": group["text"],
-                        "children": matching_children[:50]  # limite à 50 enfants par groupe
-                    })
-
-            return jsonify(filtered)
+        """Return grouped list of images from Nakala. (Use by Select2NakalaChoicesWidget)"""
+        if request.method == 'POST' or request.method == 'GET':
+            return jsonify(NAKALA_IMAGES)
 
     def on_model_change(self, form, model, is_created):
         """Update model before saving it. Custom actions on model change."""

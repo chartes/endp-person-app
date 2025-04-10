@@ -23,6 +23,24 @@ TYPE_THESAURUS = Enum("TYPE_THESAURUS", dict(
     persons_terms="persons_terms"
 ))
 
+TYPE_GROUP_BY = Enum("TYPE_GROUP_BY", dict(
+    person="person",
+    term="term"
+))
+
+TYPE_TOPIC_LABELS = Enum("TYPE_TOPIC_LABELS", dict(
+    STATUT="Statut",
+    DIGNITE="Dignité",
+    ORDRE_SACRE="Ordre sacré",
+    CHARGE_OFFICE="Charge et office",
+    CHOEUR="Chœur",
+    CLOITRE="Cloître",
+    PREVOTE="Prévôté",
+    DOMAINE="Domaine",
+    CHAPELLE="Chapelle"
+))
+
+
 # -- Meta schemas --
 
 
@@ -46,6 +64,11 @@ class ThesaurusMeta(BaseMeta):
     term: str = Field(alias="term_la")
     term_fr: Union[str, None] = Field(alias="term_fr")
     term_definition: Union[str, None] = Field(alias="definition")
+    map_chap_nomenclature_id: Union[str, None] = Field(alias="map_chap_nomenclature_id")
+    map_chap_label_new: Union[str, None] = Field(alias="map_chap_label_new")
+    map_chap_label_old: Union[str, None] = Field(alias="map_chap_label_old")
+    map_chap_before_restore_url: Union[str, None] = Field(alias="map_chap_before_restore_url")
+    map_chap_after_restore_url: Union[str, None] = Field(alias="map_chap_after_restore_url")
 
 
 class EventMeta(BaseMeta):

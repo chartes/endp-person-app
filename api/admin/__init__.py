@@ -17,16 +17,15 @@ from .views import (PersonView,
                     EventView,
                     KbLinksView,
                     ReferentialView,
+                    PlacesTermView,
                     Person,
-                    User,
                     Event,
                     PersonHasFamilyRelationshipType,
                     PersonHasKbLinks,
                     ThesaurusTerm,
                     PlacesTerm,
                     AboutView,
-                    AdminView,
-                    UserView)
+                    AdminView)
 
 # flask app #
 flask_app = Flask(__name__,
@@ -88,18 +87,13 @@ for view in [
                     category="Thesauri",
                     menu_icon_type='glyph',
                     menu_icon_value='glyphicon-book'),
-    ReferentialView(PlacesTerm,
+    PlacesTermView(PlacesTerm,
                     session,
                     name='Termes lieux',
                     category="Thesauri",
                     menu_icon_type='glyph',
                     menu_icon_value='glyphicon-book'
                     ),
-    UserView(User,
-             session,
-             name='Utilisateurs',
-             menu_icon_type='glyph',
-             menu_icon_value='glyphicon-cog'),
     AboutView(
         name='En savoir plus',
         menu_icon_type='glyph',
