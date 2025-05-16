@@ -40,7 +40,7 @@ from .formaters import (_markup_interpret,
                         _dateformat,
                         _hyperlink_item_list,
                         _format_label_form_with_tooltip,
-                        _thumbnail_interpret,)
+                        _thumbnail_interpret, )
 from .validators import (is_valid_date,
                          is_valid_kb_links,
                          is_term_already_exists,
@@ -56,12 +56,12 @@ can_edit_roles = ['ADMIN', 'EDITOR', 'CONTRIBUTOR']
 can_delete_roles = ['ADMIN', 'EDITOR']
 can_create_roles = ['ADMIN', 'EDITOR', 'CONTRIBUTOR']
 
-
 roles_map = {
     "Administrateur": "ADMIN",
     "Éditeur": "EDITOR",
     "Lecteur": "READER"
 }
+
 
 # VIEW BASED ON DB MODELS #
 
@@ -87,6 +87,7 @@ class GlobalModelView(ModelView):
             self.can_create = False
         self.can_export = True
         return True
+
 
 class UserView(ModelView):
     edit_template = 'admin/edit.user.html'
@@ -230,7 +231,8 @@ class EventView(GlobalModelView):
         'image_url': _thumbnail_interpret,
     }
     column_sortable_list = ['id', 'type', 'date', 'image_url']
-    column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url', '_id_endp']
+    column_searchable_list = ['person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'date', 'image_url',
+                              '_id_endp']
     column_filters = ['type', 'date', 'person.pref_label', 'place_term.term', 'thesaurus_term_person.term', 'image_url']
 
 
@@ -246,7 +248,15 @@ class ReferentialView(GlobalModelView):
                      "_id_endp": "ID e-NDP"}
     column_searchable_list = ["term", "term_fr"]
     column_list = ["id", '_id_endp', "topic", "term", "term_fr", "term_definition"]
-    form_excluded_columns = ['events', 'term_position']
+    form_excluded_columns = ['events',
+                             'term_position',
+                             'map_place_label_id',
+                             'map_place_label_new',
+                             'map_place_label_old',
+                             'map_place_before_restore_url',
+                             'map_place_after_restore_url',
+                             'map_place_ark'
+                             ]
     form_args = {
         "topic": {
             "label": _format_label_form_with_tooltip("Topic", "Topic dans le thesaurus")
@@ -405,7 +415,8 @@ class PersonView(GlobalModelView):
         ),
         (
             Event, dict(
-                form_columns=["id", "type", "place_term", "thesaurus_term_person", "predecessor", "date", "image_url", "comment"],
+                form_columns=["id", "type", "place_term", "thesaurus_term_person", "predecessor", "date", "image_url",
+                              "comment"],
                 column_labels={"type": "Type",
                                "place_term": "Lieu",
                                "thesaurus_term_person": "Désignation",
@@ -413,7 +424,7 @@ class PersonView(GlobalModelView):
                                "date": "Date",
                                "image_url": "Image",
                                "comment": "Commentaire"},
-                form_overrides=dict(image_url=Select2NakalaChoicesWidget), # not implemented yet
+                form_overrides=dict(image_url=Select2NakalaChoicesWidget),  # not implemented yet
                 form_args=dict(
                     date=dict(validators=[is_valid_date], description="Date de l'événement. "
                                                                       "Au format <b>AAAA-MM-JJ</b>, "
@@ -464,9 +475,9 @@ class PersonView(GlobalModelView):
         """Render a template with the given context."""
         if template == "admin/person_details.html":
             events = get_events(session, {
-                'id':kwargs['model'].id
+                'id': kwargs['model'].id
             })['events']
-            id_events = [evt.id for evt in get_person(session, {'id':kwargs['model'].id}).events]
+            id_events = [evt.id for evt in get_person(session, {'id': kwargs['model'].id}).events]
             if len(events) == len(id_events):
                 return super(PersonView, self).render(template, **kwargs, events=list(zip(id_events, events)))
             else:
@@ -504,7 +515,6 @@ class PersonView(GlobalModelView):
         return query.count()
     """
 
-
     @expose('/get_persons_alt_labels/', methods=('GET', 'POST'))
     def get_alt_labels(self):
         """Return list of alternative labels for a given person. (Use by Select2DynamicField)"""
@@ -528,7 +538,7 @@ class PersonView(GlobalModelView):
             register_identifier = json.loads(data)['register_identifier']
             return jsonify({
                 'register_number': register_identifier,
-                'nakala_identifier' : NAKALA_DATA_IDENTIFIERS[register_identifier]
+                'nakala_identifier': NAKALA_DATA_IDENTIFIERS[register_identifier]
             })
 
     @expose('/get_nakala_images/', methods=['GET'])
