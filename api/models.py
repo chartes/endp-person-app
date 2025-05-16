@@ -702,12 +702,12 @@ class PlacesTerm(AbstractGenericThesaurusTerm):
     topic = Column(Enum(*_get_enum_values(ThesaurusPlacesTopicsLabels)), nullable=False, unique=False)
 
     # MAP linking attributes
-    map_place_label_id = Column(String, nullable=False, unique=False) # temp: eg. CA27, CA28, CA29, CA30 (evolution in future)
-    map_place_label_new = Column(String, nullable=False, unique=False)
-    map_place_label_old = Column(String, nullable=False, unique=False)
-    map_place_before_restore_url = Column(String, nullable=False, unique=False)
-    map_place_after_restore_url = Column(String, nullable=False, unique=False)
-    map_place_ark = Column(String, nullable=False, unique=False)
+    map_place_label_id = Column(String, nullable=True, unique=False) # temp: eg. CA27, CA28, CA29, CA30 (evolution in future)
+    map_place_label_new = Column(String, nullable=True, unique=False)
+    map_place_label_old = Column(String, nullable=True, unique=False)
+    map_place_before_restore_url = Column(String, nullable=True, unique=False)
+    map_place_after_restore_url = Column(String, nullable=True, unique=False)
+    map_place_ark = Column(String, nullable=True, unique=False)
 
 
 # ~~~~~~~~~~~~~~~~~~~ > Association tables < ~~~~~~~~~~~~~~~~~~~
