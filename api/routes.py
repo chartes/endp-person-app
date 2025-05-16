@@ -32,6 +32,7 @@ from .schemas import (PersonOut,
 from .index_fts.search_utils import search_index
 from .index_conf import st
 from .api_meta import METADATA
+from .models import PlacesTerm
 
 api_router = APIRouter()
 
@@ -240,3 +241,70 @@ async def read_person_thesaurus_term(thesaurus_type: TYPE_THESAURUS, _id_endp: s
         return JSONResponse(status_code=500,
                             content={"message": "It seems the server have trouble."})
 
+
+
+@api_router.get("/places/map_places",
+                tags=["places"],
+                summary="Récupérer les lieux et les événements d'une personne associés à ce lieu.")
+async def get_map_places(
+    db: Session = Depends(get_db),
+    map_place_label_id: str = Query(default=None)
+):
+    """
+    Cette route est conçue pour les expérimentations avec le laboratoire MAP (CNRS).
+    Elle permet de récupérer les lieux et les événements associés à ce lieu.
+    Par défaut, la route renvoie tous les lieux et événements qui ont un id MAP.
+    Si un id MAP est fourni (exemple, `CA27`), la route renvoie uniquement les événements associés à ce lieu.
+    """
+    try:
+        query = db.query(PlacesTerm).filter(PlacesTerm.map_place_label_id != None)
+        if map_place_label_id:
+            query = query.filter(PlacesTerm.map_place_label_id == map_place_label_id)
+
+        places = query.all()
+
+        results = []
+        for place in places:
+            events = place.events
+            event_list = []
+            for e in events:
+                event_list.append({
+                    "id_endp": e._id_endp,
+                    "date": e.date,
+                    "type": e.type,
+                    "thesaurus_term_person": {
+                        "id_endp": e.thesaurus_term_person._id_endp,
+                        "term": e.thesaurus_term_person.term,
+                        "term_fr": e.thesaurus_term_person.term_fr
+                    } if e.thesaurus_term_person else None,
+                    "image_url": e.image_url,
+                    "comment": e.comment,
+                    "person": {
+                        "id_endp": e.person._id_endp,
+                        "pref_label": e.person.pref_label
+                    } if e.person else None,
+                    "facsimile_url": (
+                        f"https://dev.chartes.psl.eu/endp/facsimile/{e.image_url.split(';')[0]}/"
+                        f"{e.image_url.split(';')[0][2:] if e.image_url else ''}"
+                    ) if e.image_url and ';' in e.image_url else None
+                })
+
+            results.append({
+                "id_endp": place._id_endp,
+                "topic": place.topic,
+                "term": place.term,
+                "term_fr": place.term_fr,
+                "term_definition": place.term_definition,
+                "map_place_label_id": place.map_place_label_id,
+                "map_place_label_new": place.map_place_label_new,
+                "map_place_label_old": place.map_place_label_old,
+                "map_place_before_restore_url": place.map_place_before_restore_url,
+                "map_place_after_restore_url": place.map_place_after_restore_url,
+                "map_place_ark": place.map_place_ark,
+                "events": event_list
+            })
+
+        return {"items": results}
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"message": f"Erreur serveur : {str(e)}"})

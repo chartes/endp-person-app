@@ -95,16 +95,12 @@ class UserView(ModelView):
     column_list = ["id",
                    "username",
                    "email",
-                   "role",
-                   "created_at",
-                   "updated_at"]
+                   "role"]
     column_labels = {
         "id": "ID",
         "username": "Nom d'utilisateur",
         "role": "Rôle",
         "email": "Adresse email",
-        "created_at": "Créé le",
-        "updated_at": "Modifié le"
     }
     column_searchable_list = ["username", "email"]
     # hide the password hash in edit/create form

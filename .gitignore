@@ -179,3 +179,4 @@ index_endp/
 pwd_generator.py
 
 api/scripts
+db/test_cron/
