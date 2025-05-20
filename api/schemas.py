@@ -23,6 +23,20 @@ TYPE_THESAURUS = Enum("TYPE_THESAURUS", dict(
     persons_terms="persons_terms"
 ))
 
+"""
+CLOITRE = "Cloître"
+    PREVOTE = "Prévôté"
+    DOMAINE = "Domaine"
+    CHAPELLE = "Chapelle"
+"""
+
+PLACE_TOPIC = Enum("PLACE_TOPIC", dict(
+    cloitre="Cloître",
+    domaine="Domaine",
+    prevote="Prévôté",
+    chapelle="Chapelle"
+))
+
 # -- Meta schemas --
 
 
@@ -94,8 +108,6 @@ class PersonFamilyRelationshipsOut(PersonMeta):
     relatives: List[FamilyRelationshipsMeta] = Field(alias="relatives")
 
 # -- Specialized out schemas --
-
-
 class PersonSearchOut(BaseModel):
     """Schema for person search results."""
     query: str = Field(alias="query")
@@ -103,7 +115,17 @@ class PersonSearchOut(BaseModel):
     type_query: str = Field(alias="type_query")
     results: Union[List[PersonOut], None] = Field(alias="results")
 
-
 class Message(BaseModel):
     """Schema for generic messages."""
     message: str = Field(alias="message")
+
+class PlaceOut(BaseModel):
+    id_endp: Union[str, None] = Field(alias="_id_endp")
+    term: Union[str, None] = Field(alias="term_la")
+    term_fr: Union[str, None] = Field(alias="term_fr")
+    topic: Union[str, None] = Field(alias="topic")
+    map_place_label_id: Union[str, None] = Field(alias="map_place_label_id")
+
+    class Config:
+        orm_mode = True
+        allow_population_by_field_name = True

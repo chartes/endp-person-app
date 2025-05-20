@@ -11,9 +11,11 @@ from fastapi.responses import JSONResponse
 from fastapi_pagination import (Page,
                                 paginate)
 from fastapi_pagination.utils import disable_installed_extensions_check
+
 disable_installed_extensions_check()
 
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from .database import get_db
 from .crud import (get_person,
                    get_persons,
@@ -23,16 +25,18 @@ from .crud import (get_person,
                    get_family_relatives)
 from .schemas import (PersonOut,
                       Message,
-                      PersonSearchOut, 
+                      PersonSearchOut,
+                      PlaceOut,
                       ThesaurusMeta,
                       PersonEventsOut,
                       PersonFamilyRelationshipsOut,
                       TYPE_SEARCH,
-                      TYPE_THESAURUS)
+                      TYPE_THESAURUS,
+                      PLACE_TOPIC)
 from .index_fts.search_utils import search_index
 from .index_conf import st
 from .api_meta import METADATA
-from .models import PlacesTerm
+from .models import PlacesTerm, ThesaurusPlacesTopicsLabels
 
 api_router = APIRouter()
 
@@ -73,20 +77,18 @@ async def read_root():
                                                 f"- {e}"})
 
 
-
-
 @api_router.get('/persons/search',
-    response_model=Page[PersonOut],
-    tags=["persons"],
-    responses={500: {"model": Message}},
-    summary=METADATA_ROUTES["search"]["summary"])
+                response_model=Page[PersonOut],
+                tags=["persons"],
+                responses={500: {"model": Message}},
+                summary=METADATA_ROUTES["search"]["summary"])
 async def search(
-    query: str = Query(default=""),
-    type_query: TYPE_SEARCH = Query(default="exact"),
-    only_canon: bool = False,
-    place_ids: List[str] = Query(default=[]),
-    person_term_ids: List[str] = Query(default=[]),
-    db: Session = Depends(get_db)
+        query: str = Query(default=""),
+        type_query: TYPE_SEARCH = Query(default="exact"),
+        only_canon: bool = False,
+        place_ids: List[str] = Query(default=[]),
+        person_term_ids: List[str] = Query(default=[]),
+        db: Session = Depends(get_db)
 ):
     try:
         if query == "":
@@ -94,11 +96,11 @@ async def search(
         else:
             ix = st.open_index()
             search_results = search_index(
-            ix=ix,
-            query_user=query,
-            search_type=type_query.value,
-            fieldnames=["pref_label", "forename_alt_labels", "surname_alt_labels"]
-        )
+                ix=ix,
+                query_user=query,
+                search_type=type_query.value,
+                fieldnames=["pref_label", "forename_alt_labels", "surname_alt_labels"]
+            )
             ix.close()
 
             persons = [get_person(db, {'id': result['id']}) for result in search_results]
@@ -140,6 +142,7 @@ async def search(
             content={"message": f"It seems the server has trouble: {e}"}
         )
 
+
 @api_router.get("/persons/",
                 response_model=Page[PersonOut],
                 responses={500: {"model": Message}},
@@ -171,6 +174,7 @@ async def read_person(db: Session = Depends(get_db), _id_endp: str = ""):
                             content={"message": "It seems the server have trouble: "
                                                 f"{e}"})
 
+
 # ~ PERSONS RELATIONS ENDPOINTS (EVENTS / FAMILY RELATIONSHIPS) ~
 
 
@@ -183,7 +187,8 @@ async def read_person_events(db: Session = Depends(get_db), _id_endp: str = ""):
     try:
         events = get_events(db, {"_id_endp": _id_endp})
         if events is None:
-            return JSONResponse(status_code=404, content={"message": f"Events related to person with id '{_id_endp}' not found."})
+            return JSONResponse(status_code=404,
+                                content={"message": f"Events related to person with id '{_id_endp}' not found."})
         return events
     except Exception as e:
         return JSONResponse(status_code=500,
@@ -201,7 +206,8 @@ async def read_person_family_relationships(db: Session = Depends(get_db), _id_en
     try:
         relatives = get_family_relatives(db, {"_id_endp": _id_endp})
         if relatives is None:
-            return JSONResponse(status_code=404, content={"message": f"Family relationships related to person with id '{_id_endp}' not found."})
+            return JSONResponse(status_code=404, content={
+                "message": f"Family relationships related to person with id '{_id_endp}' not found."})
         return relatives
     except Exception as e:
         return JSONResponse(status_code=500,
@@ -236,19 +242,95 @@ async def read_person_thesaurus_term(thesaurus_type: TYPE_THESAURUS, _id_endp: s
         return thesaurus_term
     elif thesaurus_term is None:
         return JSONResponse(status_code=404,
-                            content={"message": f"Thesaurus term with _endp_id '{_id_endp}' not found in thesaurus '{thesaurus_type.value}'."})
+                            content={
+                                "message": f"Thesaurus term with _endp_id '{_id_endp}' not found in thesaurus '{thesaurus_type.value}'."})
     else:
         return JSONResponse(status_code=500,
                             content={"message": "It seems the server have trouble."})
 
+
+@api_router.get("/places",
+                response_model=Page[PlaceOut],
+                tags=["places"],
+                summary="Retrieve all places, filter by topic and/or search term.",)
+async def get_places(
+    db: Session = Depends(get_db),
+    topic: PLACE_TOPIC = Query(default=PLACE_TOPIC.chapelle),
+    query: str = Query(default="", description="Texte pour autocomplétion sur les champs 'term' et 'term_fr'")
+):
+    try:
+        q = db.query(PlacesTerm).filter(PlacesTerm.topic == topic.value)
+
+        if query:
+            q = q.filter(or_(
+                PlacesTerm.term.ilike(f"%{query}%"),
+                PlacesTerm.term_fr.ilike(f"%{query}%")
+            ))
+
+        return paginate(q.all())
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"message": f"Erreur serveur : {str(e)}"})
+
+@api_router.get("/places/place/{_id_endp}",
+                tags=["places"],
+                summary="Retrieve a place by its _endp_id and its events.",)
+async def get_place_with_events(_id_endp: str, db: Session = Depends(get_db)):
+    try:
+        place = db.query(PlacesTerm).filter(PlacesTerm._id_endp == _id_endp).first()
+
+        if not place:
+            return JSONResponse(status_code=404, content={"message": f"Lieu avec id_endp '{_id_endp}' non trouvé."})
+
+        event_list = []
+        for e in place.events:
+            event_list.append({
+                "id_endp": e._id_endp,
+                "date": e.date,
+                "type": e.type,
+                "thesaurus_term_person": {
+                    "id_endp": e.thesaurus_term_person._id_endp,
+                    "term": e.thesaurus_term_person.term,
+                    "term_fr": e.thesaurus_term_person.term_fr
+                } if e.thesaurus_term_person else None,
+                "image_url": e.image_url,
+                "comment": e.comment,
+                "person": {
+                    "id_endp": e.person._id_endp,
+                    "pref_label": e.person.pref_label
+                } if e.person else None,
+                "facsimile_url": (
+                    f"https://dev.chartes.psl.eu/endp/facsimile/{e.image_url.split(';')[0]}/"
+                    f"{e.image_url.split(';')[0][2:] if e.image_url else ''}"
+                ) if e.image_url and ';' in e.image_url else None
+            })
+
+        return {
+            "id_endp": place._id_endp,
+            "topic": place.topic,
+            "term": place.term,
+            "term_fr": place.term_fr,
+            "term_definition": place.term_definition,
+            "map_place_label_id": place.map_place_label_id,
+            "map_place_label_new": place.map_place_label_new,
+            "map_place_label_old": place.map_place_label_old,
+            "map_place_before_restore_url": place.map_place_before_restore_url,
+            "map_place_after_restore_url": place.map_place_after_restore_url,
+            "map_place_ark": place.map_place_ark,
+            "events": event_list,
+            "events_count": len(event_list)
+        }
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"message": f"Erreur serveur : {str(e)}"})
 
 
 @api_router.get("/places/map_places",
                 tags=["places"],
                 summary="Récupérer les lieux et les événements d'une personne associés à ce lieu.")
 async def get_map_places(
-    db: Session = Depends(get_db),
-    map_place_label_id: str = Query(default=None)
+        db: Session = Depends(get_db),
+        map_place_label_id: str = Query(default=None)
 ):
     """
     Cette route est conçue pour les expérimentations avec le laboratoire MAP (CNRS).
