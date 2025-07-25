@@ -241,16 +241,17 @@ class ReferentialView(GlobalModelView):
     edit_template = 'admin/edit_thesaurus.html'
     create_template = 'admin/edit_thesaurus.html'
     column_labels = {"term": "Terme",
+                     "map_place_label_id": "id (CNRS/MAP) du lieu",
                      "term_fr": "Terme (fr)",
                      "term_definition": "Définition",
                      "topic": "Topic",
                      "id": "ID",
                      "_id_endp": "ID e-NDP"}
     column_searchable_list = ["term", "term_fr"]
-    column_list = ["id", '_id_endp', "topic", "term", "term_fr", "term_definition"]
+    column_list = ["id", '_id_endp', "topic", "term", "term_fr", "term_definition", "map_place_label_id"]
     form_excluded_columns = ['events',
                              'term_position',
-                             'map_place_label_id',
+                             #'map_place_label_id',
                              'map_place_label_new',
                              'map_place_label_old',
                              'map_place_before_restore_url',
