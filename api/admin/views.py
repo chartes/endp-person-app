@@ -258,6 +258,8 @@ class ReferentialView(GlobalModelView):
                              'map_place_after_restore_url',
                              'map_place_ark'
                              ]
+    form_columns = ['topic', 'term', 'term_fr', 'term_definition']
+
     form_args = {
         "topic": {
             "label": _format_label_form_with_tooltip("Topic", "Topic dans le thesaurus")
