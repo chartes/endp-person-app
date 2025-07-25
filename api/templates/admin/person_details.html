@@ -19,6 +19,7 @@
                 <th>Lieu</th>
                 <th>Terme</th>
                 <th>Prédécesseur</th>
+                <th>Note</th>
                 <th>Détails</th>
             </tr>
         </thead>
@@ -30,6 +31,7 @@
                 <td>{{ render_unknown(event['place_term']) }}</td>
                 <td>{{ render_unknown(event['thesaurus_term_person']) }}</td>
                 <td>{{ render_unknown(event['predecessor']['pref_label'] if event['predecessor'] else None) }}</td>
+                <td>{{ render_unknown(event['comment']) }}</td>
                 <td><a href="{{ url_for('event.details_view', id=id) }}" target="_blank">Voir détails</a></td>
             </tr>
         {% endfor %}
