@@ -109,8 +109,6 @@ async def search(
         if only_canon:
             persons = [p for p in persons if p.is_canon]
 
-        print(persons)
-
         # -- Filtering helpers --
 
         def person_has_all_places(person, required_place_ids):
@@ -222,8 +220,19 @@ async def read_person_family_relationships(db: Session = Depends(get_db), _id_en
                 responses={500: {"model": Message}},
                 tags=["persons thesauri"],
                 summary=METADATA_ROUTES["read_person_thesauri_terms"]["summary"])
-async def read_person_thesauri_terms(thesaurus_type: TYPE_THESAURUS, db: Session = Depends(get_db)):
-    thesaurus_terms = get_thesaurus_terms(db=db, model=thesaurus_type.value)
+async def read_person_thesauri_terms(thesaurus_type: TYPE_THESAURUS,
+                                     place_endp_ids: List[str] = Query(default=[]),
+                                     person_term_endp_ids: List[str] = Query(default=[]),
+                                     db: Session = Depends(get_db)):
+
+
+    thesaurus_terms = get_thesaurus_terms(db=db,
+                                          model=thesaurus_type.value,
+                                          place_endp_ids=place_endp_ids,
+                                          person_term_endp_ids=person_term_endp_ids)
+
+
+
     if thesaurus_terms is not None:
         return paginate(thesaurus_terms)
     else:
