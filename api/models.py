@@ -520,7 +520,15 @@ class Person(AbstractActions):
     _last_editor = Column(String(25), nullable=True, unique=False)
 
     def __repr__(self):
-        return f"<Personne : {self.id} | {self.pref_label} (mort : {self.death_date})>"
+        text = f"""
+        <Personne : {self.id} {self.pref_label} (mort : {self.death_date if self.death_date else 'inconnue'})
+        | Nomen : {", ".join(self.forename_alt_labels.split(";"))} 
+        | Cognomen : {", ".join(self.surname_alt_labels.split(";"))}>
+        """
+        # just in case we want to add these info later:
+        # | Première mention : {self.first_mention_date if self.first_mention_date else 'inconnue'}
+        # | Dernière mention : {self.last_mention_date if self.last_mention_date else 'inconnue'}
+        return text
 
 
 ###########################################################
